@@ -30,16 +30,16 @@
     <string name="btn_ingresarlogin">INGRESAR</string>
 
     <!-- TODO: Botones y Modal -->
-    <string name="ope_libre">Libre</string>
-    <string name="ope_soles">Soles</string>
-    <string name="ope_galones">Galones</string>
-    <string name="ope_boleta">BOLETA</string>
-    <string name="ope_factura">FACTURA</string>
+    <string name="ope_libre">LIBRE   </string>
+    <string name="ope_soles">SOLES   </string>
+    <string name="ope_galones">GALONES </string>
+    <string name="ope_boleta">BOLETA  </string>
+    <string name="ope_factura">FACTURA </string>
     <string name="ope_NDespacho">N/DPCHO.</string>
     <string name="ope_NDespachoLargo">NOTA DE DESPACHO</string>
-    <string name="ope_serafin">SERAFÍN</string>
-    <string name="ope_puntos">PUNTOS</string>
-    <string name="ope_canje">CANJE</string>
+    <string name="ope_serafin">SERAFÍN </string>
+    <string name="ope_puntos">PUNTOS  </string>
+    <string name="ope_canje">CANJE   </string>
 
     <!-- TODO: Datos de Transacciones -->
     <string name="detalleV_Cara">LADO</string>
@@ -59,6 +59,7 @@
     <string name="detalleV_Efectivo">EFECTIVO</string>
     <string name="detalleV_SaldoCredito">SALDO CREDITO</string>
     <string name="detalleV_PtosDisponibles">PTOS. DISPONIBLES</string>
+    <string name="detalleV_NFC">NFC</string>
 
     <!-- TODO: Operaciones que realiza la Venta -->
     <string name="ope_cara">LADOS</string>

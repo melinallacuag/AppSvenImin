@@ -2,6 +2,7 @@ package com.anggastudio.sample;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -69,14 +70,13 @@ public class Login extends AppCompatActivity{
         });
 
         /**
-         * @OBTENER:Imei
+         *  @OBTENER:Imei
          */
         imeii.setText(ObtenerIMEI.getDeviceId(getApplicationContext()));
-      //  imeii.setText("A449E2AC2CD71D3A");
         GlobalInfo.getterminalImei10 = imeii.getText().toString();
 
         /**
-         * @INGRESAR:Login
+         *  @INGRESAR:Login
          */
         btniniciar.setOnClickListener(new View.OnClickListener() {
 
@@ -108,12 +108,12 @@ public class Login extends AppCompatActivity{
         });
 
         /**
-         * @LISTADO:SpinnerTipoPago
+         *  @LISTADO:SpinnerTipoPago
          */
         getTipoPago();
 
         /**
-         * @OBTENER_APISERVICE:Terminal
+         *  @OBTENER_APISERVICE:Terminal
          */
         findTerminal(GlobalInfo.getterminalImei10.toUpperCase());
 
@@ -297,7 +297,7 @@ public class Login extends AppCompatActivity{
 
             @Override
             public void onFailure(Call<List<Company>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Error de conexión APICORE - RED - WIFI", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Company - RED - WIFI", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -329,7 +329,7 @@ public class Login extends AppCompatActivity{
 
             @Override
             public void onFailure(Call<List<Lados>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Cara - RED - WIFI", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Caras - RED - WIFI", Toast.LENGTH_SHORT).show();
             }
         });
 
