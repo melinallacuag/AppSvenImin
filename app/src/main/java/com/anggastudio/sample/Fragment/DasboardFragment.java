@@ -134,10 +134,10 @@ public class DasboardFragment extends Fragment{
         modalAlertaIngreso.setCancelable(true);
 
         if (GlobalInfo.getterminalVentaPlaya10) {
-            ventas.setText("Grifo");
+            ventas.setText("GRIFO");
             imageee.setImageResource(R.drawable.icon_salefuel);
         } else if (GlobalInfo.getterminalVentaTienda10) {
-            ventas.setText("Tienda");
+            ventas.setText("TIENDA");
             imageee.setImageResource(R.drawable.iconcaja);
         }
         /**
