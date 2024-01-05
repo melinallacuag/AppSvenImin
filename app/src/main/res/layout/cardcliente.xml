@@ -1,0 +1,57 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardCliente"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="10dp"
+    android:layout_marginTop="5sp"
+    android:backgroundTint="@color/white"
+    android:background="@drawable/input_border">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="45sp"
+            android:elevation="1sp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/cliente_ID"
+                android:layout_width="70sp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nunito_extrabold"
+                android:gravity="center"
+                android:textColor="@color/blue"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/cliente_RUC"
+                android:layout_width="70sp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nunito_extrabold"
+                android:gravity="center"
+                android:textColor="@color/blue"
+                android:textSize="10sp"
+                android:visibility="gone"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/cliente_RZ"
+                android:layout_width="250sp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nunito_extrabold"
+                android:gravity="center"
+                android:textColor="@color/blue"
+                android:textSize="10sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/cliente_DR"
+                android:layout_width="80sp"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/nunito_extrabold"
+                android:gravity="center"
+                android:textColor="@color/blue"
+                android:textSize="7sp"
+                android:visibility="gone"
+                android:textStyle="bold" />
+        </LinearLayout>
+</androidx.cardview.widget.CardView>
