@@ -4,18 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="800sp"
         android:layout_height="wrap_content"
-        android:background="@drawable/cardmodal"
-        android:backgroundTint="@color/white"
-        android:minWidth="600sp"
+        android:padding="20sp"
         android:orientation="vertical"
-        android:paddingStart="20sp"
-        android:paddingTop="20sp"
-        android:paddingEnd="20sp"
-        android:paddingBottom="10sp"
+        android:backgroundTint="@color/white"
+        android:background="@drawable/cardmodal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -23,24 +18,25 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:fontFamily="@font/nunito_black"
             android:text="@string/ope_soles"
+            android:textSize="22sp"
             android:textColor="@color/blue"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:fontFamily="@font/nunito_black"
+            android:layout_gravity="center" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/alertSoles"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Monto Soles"
             app:boxBackgroundMode="outline"
+            android:hint="Monto Soles"
+            app:startIconDrawable="@drawable/icon_money"
+            app:endIconMode="clear_text"
             app:boxCornerRadiusBottomEnd="15dp"
             app:boxCornerRadiusTopEnd="15dp"
-            app:endIconMode="clear_text"
-            app:startIconDrawable="@drawable/icon_money">
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
+            app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error" >
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputMontoSoles"
@@ -48,14 +44,14 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/nunito_semibold"
                 android:inputType="number"
-                android:textSize="14sp" />
+                android:textSize="16sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal" >
 
             <Button
                 android:id="@+id/btnCancelarSoles"
@@ -67,10 +63,10 @@
                 android:backgroundTint="@color/colorDanger"
                 android:fontFamily="@font/nunito_extrabold"
                 android:text="@string/btn_cancelar"
-                android:textAllCaps="true"
                 android:textColor="@color/white"
-                android:textSize="10sp"
-                app:cornerRadius="10sp" />
+                android:textSize="14sp"
+                app:cornerRadius="10sp"
+                style="?android:attr/buttonBarButtonStyle" />
 
             <Button
                 android:id="@+id/btnAgregarSoles"
@@ -82,10 +78,11 @@
                 android:backgroundTint="@color/colorSuccess"
                 android:fontFamily="@font/nunito_extrabold"
                 android:text="@string/btn_agregar"
-                android:textAllCaps="true"
                 android:textColor="@color/white"
-                android:textSize="10sp"
-                app:cornerRadius="10sp" />
+                android:textSize="14sp"
+                app:cornerRadius="10sp"
+                style="?android:attr/buttonBarButtonStyle" />
+
         </LinearLayout>
 
     </LinearLayout>
