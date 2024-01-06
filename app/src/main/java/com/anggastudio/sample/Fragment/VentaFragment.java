@@ -626,6 +626,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                         btnCancelarLCliente   = modalClienteDNI.findViewById(R.id.btnCancelarLCliente);
                         btnBuscadorClienteRZ  = modalClienteDNI.findViewById(R.id.btnBuscadorClienteRZ);
 
+                        btnBuscadorClienteRZ.setIconifiedByDefault(false);
                         /**
                          * @BUSCAR:NombreClienteRZ
                          */
@@ -1120,6 +1121,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                         btnCancelarLCliente   = modalClienteRUC.findViewById(R.id.btnCancelarLCliente);
                         btnBuscadorClienteRZ  = modalClienteRUC.findViewById(R.id.btnBuscadorClienteRZ);
 
+                        btnBuscadorClienteRZ.setIconifiedByDefault(false);
+
                         /** Buscardor por Cliente Raz. Social */
                         btnBuscadorClienteRZ.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                             @Override
@@ -1483,6 +1486,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                         btnCancelarLCliente   = modalClienteCredito.findViewById(R.id.btnCancelarLClienteCredito);
                         btnBuscadorClienteRZ  = modalClienteCredito.findViewById(R.id.btnBuscadorClienteRZ);
 
+                        btnBuscadorClienteRZ.setIconifiedByDefault(false);
+
                         /** Buscardor por Cliente Raz. Social */
                         btnBuscadorClienteRZ.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                             @Override
@@ -1737,6 +1742,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                             BuscarRazonSocial     = modallistNFC.findViewById(R.id.btnBuscadorClienteRZ);
                             btnCancelarLCliente   = modallistNFC.findViewById(R.id.btnCancelarLCliente);
+
+                            BuscarRazonSocial.setIconifiedByDefault(false);
 
                             btnCancelarLCliente.setOnClickListener(new View.OnClickListener() {
                                 @Override

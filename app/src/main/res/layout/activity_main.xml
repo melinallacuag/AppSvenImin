@@ -51,7 +51,7 @@
                     android:gravity="center|start"
                     android:text="printer is not found"
                     android:textColor="@color/colorWhite"
-                    android:textSize="12sp" />
+                    android:textSize="14sp" />
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/btn_choose_printer"
@@ -88,7 +88,7 @@
                 android:gravity="center"
                 android:text="Test"
                 android:textColor="@color/colorWhite"
-                android:textSize="12sp" />
+                android:textSize="14sp" />
 
         </androidx.cardview.widget.CardView>
 
@@ -97,7 +97,10 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tamaño de papel"/>
+        android:text="Tamaño de papel"
+        android:fontFamily="@font/nunito_extrabold"
+        android:textColor="@color/black"
+        android:textSize="28sp"/>
 
     <RadioGroup
         android:id="@+id/radioFormaPago"
@@ -114,7 +117,7 @@
             android:text="80mm"
             android:fontFamily="@font/nunito_extrabold"
             android:textColor="@color/gris"
-            android:textSize="14sp" />
+            android:textSize="18sp" />
 
         <RadioButton
             android:id="@+id/papelsizetwo"
@@ -125,7 +128,7 @@
             android:text="58mm"
             android:fontFamily="@font/nunito_extrabold"
             android:textColor="@color/gris"
-            android:textSize="14sp" />
+            android:textSize="18sp" />
 
         <RadioButton
             android:id="@+id/papelsizetres"
@@ -136,7 +139,7 @@
             android:text="65mm"
             android:fontFamily="@font/nunito_extrabold"
             android:textColor="@color/gris"
-            android:textSize="14sp" />
+            android:textSize="18sp" />
 
     </RadioGroup>
 

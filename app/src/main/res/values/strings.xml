@@ -78,6 +78,7 @@
     <string name="alertd_diaC">No puedes realizar Inicio de Día. PORQUE YA SE GENERO</string>
     <string name="alerta_cambioturno_fechaactual">No puedes realizar Cambio de Turno. PORQUE ESTA FUERA DE HORA.</string>
     <string name="msg_libre">¿Desea activar el modo LIBRE?</string>
+    <string name="msg_serafin">¿Desea generar Serafín?</string>
 
 
 </resources>
