@@ -297,6 +297,9 @@ public class GlobalInfo {
     public static boolean getVentasProductos10;
     public static boolean getVentasContometros10;
 
+    public static boolean getTerminalNameCompany10;
+    public static Integer getTerminalImageW10;
+
     /**|
      * URL - APIService
      */

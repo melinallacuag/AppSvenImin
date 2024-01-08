@@ -218,6 +218,8 @@ public class Login extends AppCompatActivity{
                         GlobalInfo.getVentasTipoPago10          = terminal.getCierreX_VTipoPago();
                         GlobalInfo.getVentasProductos10         = terminal.getCierreX_VProducto();
                         GlobalInfo.getVentasContometros10       = terminal.getCierreX_VContometro();
+                        GlobalInfo.getTerminalNameCompany10     = terminal.getNameCompany();
+                        GlobalInfo.getTerminalImageW10          = terminal.getImageW();
 
 
                         /** Mostrar el listado de Datos*/

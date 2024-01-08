@@ -195,9 +195,12 @@ public class CierreXFragment extends Fragment {
 
         /** Datos de Cierre Parcial de Caja (X) */
 
-        /** @Activar:NombreCompania
-        textNombreEmpresa.setText(GlobalInfo.getNameCompany10);*/
-        textNombreEmpresa.setVisibility(View.GONE);
+        if(GlobalInfo.getTerminalNameCompany10){
+            textNombreEmpresa.setText(GlobalInfo.getNameCompany10);
+        }else {
+            textNombreEmpresa.setVisibility(View.GONE);
+        }
+
         textSucural.setText("SUCURSAL: " + GlobalInfo.getBranchCompany10);
         FechaHoraIni.setText(GlobalInfo.getterminalFechaHoraCierre10);
         FechaHoraFin.setText(FechaHoraImpresion);
@@ -906,10 +909,8 @@ public class CierreXFragment extends Fragment {
                 GranRVendedorTotal.append(linneeS);
                 break;
         }
-        /** @ActivarLogo:Cuadrado
-        int logoSize = (tipopapel.equals("80mm")) ? 200 : (tipopapel.equals("65mm") ? 200 : 400);*/
 
-        int logoSize = (tipopapel.equals("80mm")) ? 400 : (tipopapel.equals("65mm") ? 400 : 200);
+        int logoSize = (tipopapel.equals("80mm")) ? GlobalInfo.getTerminalImageW10 : (tipopapel.equals("65mm") ? GlobalInfo.getTerminalImageW10 : 400);
 
         /** Imprimir Cierre X**/
         Printama.with(getContext()).connect(printama -> {
@@ -924,9 +925,11 @@ public class CierreXFragment extends Fragment {
                     break;
             }
             printama.setSmallText();
-            /** @Activar:NombreCompania
-            printama.printTextlnBold(NameCompany, Printama.CENTER);*/
-            printama.printTextlnBold(" ");
+            if(GlobalInfo.getTerminalNameCompany10){
+                printama.printTextlnBold(NameCompany, Printama.CENTER);
+            }else {
+                printama.addNewLine();
+            }
             printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
             printama.printTextlnBold(Branch2, Printama.CENTER);
             printama.setSmallText();

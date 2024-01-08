@@ -509,10 +509,7 @@ public class ListaComprobantesFragment extends Fragment  {
 
                             String qrSven = qrSVEN.toString();
 
-                        /** @ActivarLogo:Cuadrado
-                        int logoSize = (tipopapel.equals("80mm")) ? 200 : (tipopapel.equals("65mm") ? 200 : 400);*/
-
-                        int logoSize = (tipopapel.equals("80mm")) ? 400 : (tipopapel.equals("65mm") ? 400 : 200);
+                        int logoSize = (tipopapel.equals("80mm")) ? GlobalInfo.getTerminalImageW10 : (tipopapel.equals("65mm") ? GlobalInfo.getTerminalImageW10 : 400);
 
                         Printama.with(getContext()).connect(printama -> {
 
@@ -522,7 +519,7 @@ public class ListaComprobantesFragment extends Fragment  {
                                         switch (tipopapel) {
                                             case "58mm":
                                             case "80mm":
-                                                printama.printTextln("                 ", Printama.CENTER);
+                                                printama.addNewLine();
                                                 printama.printImage(logoRobles, logoSize);
                                                 break;
                                             case "65mm":
@@ -530,9 +527,11 @@ public class ListaComprobantesFragment extends Fragment  {
                                                 break;
                                         }
                                         printama.setSmallText();
-                                        /** @Activar:NombreCompania
-                                        printama.printTextlnBold(NameCompany, Printama.CENTER);*/
-                                        printama.printTextlnBold(" ");
+                                        if(GlobalInfo.getTerminalNameCompany10){
+                                            printama.printTextlnBold(NameCompany, Printama.CENTER);
+                                        }else {
+                                            printama.printTextlnBold(" ");
+                                        }
                                         printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
                                         printama.printTextlnBold(Address2, Printama.CENTER);
                                         printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
@@ -544,7 +543,7 @@ public class ListaComprobantesFragment extends Fragment  {
                                         switch (tipopapel) {
                                             case "58mm":
                                             case "80mm":
-                                                printama.printTextln("                 ", Printama.CENTER);
+                                                printama.addNewLine();
                                                 printama.printImage(logoRobles, logoSize);
                                                 break;
                                             case "65mm":
@@ -552,9 +551,11 @@ public class ListaComprobantesFragment extends Fragment  {
                                                 break;
                                         }
                                         printama.setSmallText();
-                                        /** @Activar:NombreCompania
-                                        printama.printTextlnBold(NameCompany, Printama.CENTER);*/
-                                        printama.printTextlnBold(" ");
+                                        if(GlobalInfo.getTerminalNameCompany10){
+                                            printama.printTextlnBold(NameCompany, Printama.CENTER);
+                                        }else {
+                                            printama.addNewLine();
+                                        }
                                         printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
                                         printama.printTextlnBold(Branch2, Printama.CENTER);
                                         break;

@@ -3,6 +3,7 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,6 +27,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -324,6 +326,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
         modalSoles.setContentView(R.layout.fragment_soles);
         modalSoles.setCancelable(false);
 
+
+
         btnSoles.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -334,6 +338,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                 btnAgregarSoles       = modalSoles.findViewById(R.id.btnAgregarSoles);
                 inputMontoSoles       = modalSoles.findViewById(R.id.inputMontoSoles);
                 alertSoles            = modalSoles.findViewById(R.id.alertSoles);
+
+                inputMontoSoles.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
                 btnCancelarSoles.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -351,7 +357,6 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                 btnAgregarSoles.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         String MontoSoles = inputMontoSoles.getText().toString();
 
                         if (MontoSoles.isEmpty()) {
@@ -359,23 +364,42 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             return;
                         }
 
+                        boolean isDecimal = MontoSoles.contains(".");
+
                         Double DoubleMontoSoles = Double.parseDouble(MontoSoles);
 
-                        Integer NumIntSoles = Integer.parseInt(MontoSoles);
+                        try {
 
-                        if(NumIntSoles < 5 || NumIntSoles > 9999){
-                            alertSoles.setError("El valor debe ser mayor a 5 y menor que 9999");
-                            return;
+                            if(GlobalInfo.getsettingFuelName10 == null || GlobalInfo.getsettingFuelName10.isEmpty()) {
+
+                                if (isDecimal) {
+
+                                    if (DoubleMontoSoles < 5 || DoubleMontoSoles > 9999) {
+                                        alertSoles.setError("El valor debe ser mayor a 5 y menor que 9999");
+                                        return;
+                                    }
+                                }
+
+                            } else {
+                                int NumIntSoles = Integer.parseInt(MontoSoles);
+
+                                if (NumIntSoles < 5 || NumIntSoles > 9999) {
+                                    alertSoles.setError("El valor debe ser mayor a 5 y menor que 9999");
+                                    return;
+                                }
+                            }
+
+                            alertSoles.setErrorEnabled(false);
+
+                            guardar_montoSoles(GlobalInfo.getManguera10, Double.parseDouble(MontoSoles));
+
+                            Toast.makeText(getContext(), "SE AGREGO CORRECTAMENTE", Toast.LENGTH_SHORT).show();
+                            modalSoles.dismiss();
+                            inputMontoSoles.getText().clear();
+
+                        } catch (NumberFormatException e) {
+                            alertSoles.setError("El valor ingresado no es válido");
                         }
-
-                        alertSoles.setErrorEnabled(false);
-
-                        guardar_montoSoles(GlobalInfo.getManguera10,DoubleMontoSoles);
-
-                        Toast.makeText(getContext(), "SE AGREGO CORRECTAMENTE", Toast.LENGTH_SHORT).show();
-                        modalSoles.dismiss();
-
-                        inputMontoSoles.getText().clear();
 
                     }
                 });
@@ -3063,10 +3087,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
         String QRGenerado = qrSVEN.toString();
 
-        /** @ActivarLogo:Cuadrado
-        int logoSize = (tipopapel.equals("80mm")) ? 200 : (tipopapel.equals("65mm") ? 200 : 400);*/
-
-        int logoSize = (tipopapel.equals("80mm")) ? 400 : (tipopapel.equals("65mm") ? 400 : 200);
+        int logoSize = (tipopapel.equals("80mm")) ? GlobalInfo.getTerminalImageW10 : (tipopapel.equals("65mm") ? GlobalInfo.getTerminalImageW10 : 400);
 
         Printama.with(getContext()).connect(printama -> {
 
@@ -3076,7 +3097,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                     switch (tipopapel) {
                         case "58mm":
                         case "80mm":
-                            printama.printTextln("                 ", Printama.CENTER);
+                            printama.addNewLine();
                             printama.printImage(logoRobles, logoSize);
                             break;
                         case "65mm":
@@ -3084,9 +3105,11 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             break;
                     }
                     printama.setSmallText();
-                    /** @Activar:NombreCompania
-                    printama.printTextlnBold(NameCompany, Printama.CENTER);*/
-                    printama.printTextlnBold(" ");
+                    if(GlobalInfo.getTerminalNameCompany10){
+                        printama.printTextlnBold(NameCompany, Printama.CENTER);
+                    }else {
+                        printama.addNewLine();
+                    }
                     printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
                     printama.printTextlnBold(Address2, Printama.CENTER);
                     printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
@@ -3098,7 +3121,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                     switch (tipopapel) {
                         case "58mm":
                         case "80mm":
-                            printama.printTextln("                 ", Printama.CENTER);
+                            printama.addNewLine();
                             printama.printImage(logoRobles, logoSize);
                             break;
                         case "65mm":
@@ -3106,9 +3129,11 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             break;
                     }
                     printama.setSmallText();
-                    /** @Activar:NombreCompania
-                    printama.printTextlnBold(NameCompany, Printama.CENTER);*/
-                    printama.printTextlnBold(" ");
+                    if(GlobalInfo.getTerminalNameCompany10){
+                        printama.printTextlnBold(NameCompany, Printama.CENTER);
+                    }else {
+                        printama.printTextlnBold(" ");
+                    }
                     printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
                     printama.printTextlnBold(Branch2, Printama.CENTER);
                     break;
