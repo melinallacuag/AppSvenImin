@@ -36,6 +36,7 @@ public class Terminal {
     private Boolean cierreX_RVendedor;
     private Boolean nameCompany;
     private Integer imageW;
+    private String impresora;
 
     public String getTerminalID() {
         return terminalID;
@@ -307,5 +308,13 @@ public class Terminal {
 
     public void setImageW(Integer imageW) {
         this.imageW = imageW;
+    }
+
+    public String getImpresora() {
+        return impresora;
+    }
+
+    public void setImpresora(String impresora) {
+        this.impresora = impresora;
     }
 }

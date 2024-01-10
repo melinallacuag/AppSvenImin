@@ -220,7 +220,7 @@ public class Login extends AppCompatActivity{
                         GlobalInfo.getVentasContometros10       = terminal.getCierreX_VContometro();
                         GlobalInfo.getTerminalNameCompany10     = terminal.getNameCompany();
                         GlobalInfo.getTerminalImageW10          = terminal.getImageW();
-
+                        GlobalInfo.getTipoPapel10               = terminal.getImpresora();
 
                         /** Mostrar el listado de Datos*/
                         findCompany(GlobalInfo.getterminalCompanyID10);
