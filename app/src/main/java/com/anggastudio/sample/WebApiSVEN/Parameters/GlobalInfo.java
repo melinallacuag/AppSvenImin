@@ -117,6 +117,11 @@ public class GlobalInfo {
     public static Integer getterminalCompanyID10 = 1;
     public static Integer getterminalAlmacenID10;
     public static String  getterminalFechaHoraCierre10;
+    public static boolean getterminalVentaPlaya10;
+    public static boolean getterminalVentaTienda10;
+    public static boolean getTerminalNameCompany10;
+    public static Integer getTerminalImageW10;
+    public static boolean getterminalCvariosPrinter10;
 
     /**
      * Datos de la Setting
@@ -140,6 +145,11 @@ public class GlobalInfo {
     public static String  getsettingtimerAppVenta10;
     public static String  getsettingRutaLogo110;
     public static String  getsettingRutaLogo210;
+    public static boolean getReporteVendedor10;
+    public static boolean getReporteTarjetas10;
+    public static boolean getVentasTipoPago10;
+    public static boolean getVentasProductos10;
+    public static boolean getVentasContometros10;
 
     /**
      * Datos del Cliente RUC-DNI
@@ -264,16 +274,14 @@ public class GlobalInfo {
 
 
     /**
-     * Datos R. Anulados
+     * Datos Reporte Anulados
      */
 
     public static Integer  getrAnuladosCantidad10;
-    public static String  getrAnuladosSoles10;
-
+    public static String   getrAnuladosSoles10;
     public static Integer  getrDespachosCantidad10;
-    public static String  getrDespachosSoles10;
-
-    public static String getTotalRVenddorSoles10;
+    public static String   getrDespachosSoles10;
+    public static String   getTotalRVenddorSoles10;
 
     /**
      * Setting Turno
@@ -284,21 +292,7 @@ public class GlobalInfo {
     public static Integer  getSettingRango110;
     public static Integer  getSettingRango210;
 
-
     public static String getnfcId10 = String.valueOf(-1);
-
-
-    public static boolean getterminalVentaPlaya10;
-    public static boolean getterminalVentaTienda10;
-
-    public static boolean getReporteVendedor10;
-    public static boolean getReporteTarjetas10;
-    public static boolean getVentasTipoPago10;
-    public static boolean getVentasProductos10;
-    public static boolean getVentasContometros10;
-
-    public static boolean getTerminalNameCompany10;
-    public static Integer getTerminalImageW10;
 
     /**|
      * URL - APIService
