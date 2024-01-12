@@ -861,7 +861,7 @@ public class CierreXFragment extends Fragment {
         switch (tipopapel) {
             case "65mm":
             case "80mm":
-                String linesS = String.format(Locale.getDefault(), "%-36s  %10s", RTarjetaTotalC, TotalRTarjetasSoles);
+                String linesS = String.format(Locale.getDefault(), "%-35s  %10s", RTarjetaTotalC, TotalRTarjetasSoles);
                 RTarjetaTotal.append(linesS);
                 break;
             case "58mm":
@@ -901,7 +901,7 @@ public class CierreXFragment extends Fragment {
         switch (tipopapel) {
             case "65mm":
             case "80mm":
-                String linneesS = String.format(Locale.getDefault(),"%-36s %11s", GranRVendedorTotalC, TotalSolesC);
+                String linneesS = String.format(Locale.getDefault(),"%-35s %11s", GranRVendedorTotalC, TotalSolesC);
                 GranRVendedorTotal.append(linneesS);
                 break;
             case "58mm":
@@ -1119,7 +1119,7 @@ public class CierreXFragment extends Fragment {
                         printama.setSmallText();
                         printama.printTextlnBold("REPORTE POR TARJETAS",Printama.CENTER);
                         printama.addNewLine(1);
-                        printama.printTextlnBold("NRO DOCUMENTO     "+"TIPO         "+"REF.      "+"  MONTO",Printama.RIGHT);
+                        printama.printTextlnBold("NRO DOCUMENTO    "+"TIPO         "+"REF.      "+"  MONTO",Printama.RIGHT);
                         printama.printTextlnBold( ReporteTarjetasBuilder.toString() + "---------", Printama.RIGHT);
                         printama.printTextlnBold(RTarjetaTotal.toString(),Printama.RIGHT);
 
@@ -1133,7 +1133,7 @@ public class CierreXFragment extends Fragment {
                         printama.setSmallText();
                         printama.printTextlnBold("REPORTE POR VENDEDOR",Printama.CENTER);
                         printama.addNewLine(1);
-                        printama.printTextlnBold("NOMBRES             " + "NRO DESPACHOS         " + " SOLES", Printama.RIGHT);
+                        printama.printTextlnBold("NOMBRES            " + "NRO DESPACHOS         " + " SOLES", Printama.RIGHT);
                         printama.printTextlnBold(ReporteVendedorBuilder.toString() + "---------", Printama.RIGHT);
                         printama.printTextlnBold(GranRVendedorTotal.toString(), Printama.RIGHT);
 

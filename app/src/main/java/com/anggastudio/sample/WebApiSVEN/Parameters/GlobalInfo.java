@@ -102,6 +102,15 @@ public class GlobalInfo {
     public static Boolean getuserCancelAnular10;
 
     /**
+     * Datos del Usuario Forzas Cambio
+     */
+
+    public static String getuserIDFE10;
+    public static String getuserNameFE10;
+    public static String getuserPassFE10;
+    public static Boolean getuserCancelFE10;
+
+    /**
      * Datos de los Lados y Mangueras
      */
     public static String getCara10;
@@ -121,7 +130,7 @@ public class GlobalInfo {
     public static boolean getterminalVentaTienda10;
     public static boolean getTerminalNameCompany10;
     public static Integer getTerminalImageW10;
-    public static boolean getterminalCvariosPrinter10;
+    public static boolean getterminalCvariosPrinter10 = true;
 
     /**
      * Datos de la Setting
