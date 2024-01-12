@@ -17,7 +17,7 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:fontFamily="@font/nunito_black"
@@ -37,6 +37,21 @@
             android:textAlignment="center"
             android:textColor="@color/gris"
             android:textSize="22sp" />
+
+        <Button
+            android:id="@+id/btnIngresarIDFEntrada"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:backgroundTint="@color/colorSuccess"
+            android:text="Forzar Entrada"
+            android:layout_margin="5sp"
+            android:fontFamily="@font/nunito_extrabold"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:cornerRadius="10sp" />
 
     </LinearLayout>
 
