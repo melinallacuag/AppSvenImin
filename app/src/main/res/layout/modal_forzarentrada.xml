@@ -5,13 +5,12 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="800sp"
         android:layout_height="wrap_content"
         android:background="@drawable/cardmodal"
         android:backgroundTint="#FFFFFF"
         android:orientation="vertical"
         android:padding="20sp"
-        android:minWidth="600sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -25,13 +24,12 @@
             android:text="USUARIO AUTORIZADO"
             android:layout_marginBottom="15sp"
             android:textColor="@color/blue"
-            android:textSize="20sp"
+            android:textSize="26sp"
             android:textAlignment="center"
             android:textStyle="bold" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/alertUserFEntrada"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -41,7 +39,11 @@
             app:boxBackgroundMode="outline"
             app:boxCornerRadiusBottomEnd="15dp"
             app:boxCornerRadiusTopEnd="15dp"
-            app:endIconMode="clear_text">
+            app:endIconMode="clear_text"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
+            app:counterTextAppearance="@style/AppTheme.TextInputLayout.Counter"
+            app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputUserFEntrada"
@@ -50,12 +52,11 @@
                 android:maxLength="10"
                 android:inputType="number"
                 android:fontFamily="@font/nunito_semibold"
-                android:textSize="12sp" />
+                android:textSize="16sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/alertContraseñaFEntrada"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -65,7 +66,11 @@
             app:endIconMode="password_toggle"
             app:boxBackgroundMode="outline"
             app:boxCornerRadiusBottomEnd="15dp"
-            app:boxCornerRadiusTopEnd="15dp">
+            app:boxCornerRadiusTopEnd="15dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
+            app:counterTextAppearance="@style/AppTheme.TextInputLayout.Counter"
+            app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputContraseñaFEntrada"
@@ -74,7 +79,7 @@
                 android:inputType="numberPassword"
                 android:maxLength="6"
                 android:fontFamily="@font/nunito_semibold"
-                android:textSize="12sp" />
+                android:textSize="16sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -97,7 +102,7 @@
                 android:text="cancelar"
                 android:textAllCaps="true"
                 android:textColor="#fff"
-                android:textSize="10sp"
+                android:textSize="14sp"
                 app:cornerRadius="10sp" />
 
             <Button
@@ -112,7 +117,7 @@
                 android:textAllCaps="true"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/colorSuccess"
-                android:textSize="10sp"
+                android:textSize="14sp"
                 app:cornerRadius="10sp" />
 
         </LinearLayout>
