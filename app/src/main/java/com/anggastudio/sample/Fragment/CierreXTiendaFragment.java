@@ -59,7 +59,7 @@ public class CierreXTiendaFragment extends Fragment {
             TotalSolesproducto,TotalMontoPago,TotalMtogalones,TotalDescuento,totalPagoBruto,
             TotalDescuento2,TotalIncremento,GranTotal;
 
-    String RAnuladosSoles10,RDespachosSoles10,SProductosTotalGLL,SProductosTotalSoles,SProductosTotalDesc,
+    String RAnuladosSoles10,RDespachosSoles10,SProductosTotalGLL,SProductosTotalSoles,SProductosTotalDesc, SProductosTotalIncremento,
             TotalPagosSoles,MontoBruto,TotalRTarjetasSoles;
 
     Button imprimirCierreX;
@@ -81,7 +81,7 @@ public class CierreXTiendaFragment extends Fragment {
 
     ImageView logoCierreX;
 
-    Double AnuladosSoles10,DespachosSoles10, RContometrosTotalGLL, RProductosTotalGLL, RProductosTotalSoles, RProductosTotalDesc, RPagosTotalSoles,RTarjetasTotal,RVendedorTotal;
+    Double AnuladosSoles10,DespachosSoles10, RContometrosTotalGLL, RProductosTotalGLL, RProductosTotalSoles, RProductosTotalDesc, RProductosTotalIncremento, RPagosTotalSoles,RTarjetasTotal,RVendedorTotal;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -176,6 +176,7 @@ public class CierreXTiendaFragment extends Fragment {
         RProductosTotalGLL   = 0.00;
         RProductosTotalSoles = 0.00;
         RProductosTotalDesc  = 0.00;
+        RProductosTotalIncremento = 0.00;
         RPagosTotalSoles     = 0.00;
         RTarjetasTotal       = 0.00;
         RVendedorTotal       = 0.00;
@@ -328,10 +329,12 @@ public class CierreXTiendaFragment extends Fragment {
                     SProductosTotalDesc = String.format(Locale.getDefault(), "%,.2f" ,RProductosTotalDesc);
                     GlobalInfo.getTSProductosTotalDesc10 = SProductosTotalDesc;
                     TotalDescuento.setText(SProductosTotalDesc);
-
-                    /** Descuntos y Incrementos */
                     TotalDescuento2.setText(SProductosTotalDesc);
-                    TotalIncremento.setText("0.00");
+
+                    /** Ventas Por Productos - Incremento */
+                    SProductosTotalIncremento = String.format(Locale.getDefault(), "%,.2f" ,RProductosTotalIncremento);
+                    GlobalInfo.getTSProductosTotalIncremento10 = SProductosTotalIncremento;
+                    TotalIncremento.setText(SProductosTotalIncremento);
 
                     /** Pago Bruto - Suma TotalPagosSoles,TotalDesc y TotalIncremento */
                     MontoBruto = String.format(Locale.getDefault(), "%,.2f" ,RProductosTotalSoles + RProductosTotalDesc);
@@ -656,7 +659,23 @@ public class CierreXTiendaFragment extends Fragment {
                 break;
         }
 
+        /** Total de Incremento*/
+        StringBuilder IncrementoTotal = new StringBuilder();
 
+        String IncrementoTotalC       = "Total Incremento";
+        String TSProductosTotalIncrementos  = GlobalInfo.getTSProductosTotalIncremento10;
+
+        switch (tipopapel) {
+            case "65mm":
+            case "80mm":
+                String linees = String.format(Locale.getDefault(), "%-35s  %10s", IncrementoTotalC, TSProductosTotalIncrementos);
+                IncrementoTotal.append(linees);
+                break;
+            case "58mm":
+                String linNees = String.format(Locale.getDefault(), "%-20s  %10s", IncrementoTotalC, TSProductosTotalIncrementos);
+                IncrementoTotal.append(linNees);
+                break;
+        }
 
         /** Monto BRUTO */
         StringBuilder MontoBrutoTotal = new StringBuilder();
@@ -761,7 +780,7 @@ public class CierreXTiendaFragment extends Fragment {
                         printama.addNewLine(1);
                         printama.setSmallText();
                         printama.printTextlnBold(DescuentosTotal.toString(),Printama.RIGHT);
-                        printama.printTextlnBold("Total Incremento          "+"  0.00",Printama.RIGHT);
+                        printama.printTextlnBold(IncrementoTotal.toString(),Printama.RIGHT);
                         printama.printTextlnBold("---------",Printama.RIGHT);
                         printama.printTextlnBold(MontoBrutoTotal.toString(),Printama.RIGHT);
 
@@ -843,7 +862,7 @@ public class CierreXTiendaFragment extends Fragment {
                         printama.addNewLine(1);
                         printama.setSmallText();
                         printama.printTextlnBold(DescuentosTotal.toString(),Printama.RIGHT);
-                        printama.printTextlnBold("Total Incremento                         "+"  0.00",Printama.RIGHT);
+                        printama.printTextlnBold(IncrementoTotal.toString(),Printama.RIGHT);
                         printama.printTextlnBold("---------",Printama.RIGHT);
                         printama.printTextlnBold(MontoBrutoTotal.toString(),Printama.RIGHT);
 
@@ -924,7 +943,7 @@ public class CierreXTiendaFragment extends Fragment {
                         printama.addNewLine(1);
                         printama.setSmallText();
                         printama.printTextln(DescuentosTotal.toString(),Printama.RIGHT);
-                        printama.printTextln("Total Incremento                         "+"  0.00",Printama.RIGHT);
+                        printama.printTextln(IncrementoTotal.toString(),Printama.RIGHT);
                         printama.printTextlnBold("---------",Printama.RIGHT);
                         printama.printTextln(MontoBrutoTotal.toString(),Printama.RIGHT);
 
