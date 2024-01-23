@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="800sp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingTop="10sp"
         android:paddingBottom="10sp"
         android:paddingStart="20sp"
         android:paddingEnd="20sp"
-        android:minWidth="600sp"
         android:background="@drawable/cardmodal"
         android:backgroundTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
@@ -22,26 +20,24 @@
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:text="@string/ope_libre"
                 android:textColor="@color/blue"
-                android:textSize="20sp"
+                android:textSize="24sp"
                 android:textAlignment="center"
-                android:fontFamily="@font/nunito_black"
-                android:textStyle="bold" />
+                android:fontFamily="@font/nunito_black" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15sp"
-                android:text="¿Desea activar el modo LIBRE?"
+                android:text="@string/msg_libre"
                 android:textAlignment="center"
                 android:textColor="@color/gris"
-                android:textSize="20sp"
+                android:textSize="22sp"
                 android:fontFamily="@font/nunito_extrabold"
-                android:textStyle="bold"
                 android:gravity="center_horizontal" />
 
             <LinearLayout
@@ -61,8 +57,9 @@
                     android:fontFamily="@font/nunito_extrabold"
                     android:textAllCaps="true"
                     android:textColor="@color/white"
-                    android:textSize="10sp"
-                    app:cornerRadius="10sp"/>
+                    android:textSize="14sp"
+                    app:cornerRadius="10sp"
+                    style="?android:attr/buttonBarButtonStyle" />
 
                 <Button
                     android:id="@+id/btnAceptarLibre"
@@ -76,8 +73,9 @@
                     android:fontFamily="@font/nunito_extrabold"
                     android:textAllCaps="true"
                     android:textColor="@color/white"
-                    android:textSize="10sp"
-                    app:cornerRadius="10sp" />
+                    android:textSize="14sp"
+                    app:cornerRadius="10sp"
+                    style="?android:attr/buttonBarButtonStyle" />
 
             </LinearLayout>
 

@@ -3,6 +3,7 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,6 +27,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -335,6 +337,12 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                 inputMontoSoles       = modalSoles.findViewById(R.id.inputMontoSoles);
                 alertSoles            = modalSoles.findViewById(R.id.alertSoles);
 
+                if(GlobalInfo.getsettingFuelName10 == null || GlobalInfo.getsettingFuelName10.isEmpty()) {
+                    inputMontoSoles.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                }else{
+                    inputMontoSoles.setInputType(InputType.TYPE_CLASS_NUMBER);
+                }
+
                 btnCancelarSoles.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -351,7 +359,6 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                 btnAgregarSoles.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         String MontoSoles = inputMontoSoles.getText().toString();
 
                         if (MontoSoles.isEmpty()) {
@@ -359,22 +366,47 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             return;
                         }
 
-                        Double DoubleMontoSoles = Double.parseDouble(MontoSoles);
+                        boolean isDecimal  = MontoSoles.contains(".");
 
-                        Integer NumIntSoles = Integer.parseInt(MontoSoles);
+                        if(GlobalInfo.getsettingFuelName10 == null || GlobalInfo.getsettingFuelName10.isEmpty()) {
 
-                        if(NumIntSoles < 5 || NumIntSoles > 9999){
-                            alertSoles.setError("El valor debe ser mayor a 5 y menor que 9999");
-                            return;
+                            if (isDecimal) {
+
+                                Double DoubleMontoSoles = Double.parseDouble(MontoSoles);
+
+                                if (DoubleMontoSoles < 2.0 || DoubleMontoSoles > 9999.0) {
+                                    alertSoles.setError("El valor debe ser mayor a 2.0 y menor que 9999");
+                                    return;
+                                }
+
+                            } else {
+
+                                int NumIntSoles = Integer.parseInt(MontoSoles);
+
+                                if (NumIntSoles < 2 || NumIntSoles > 9999) {
+                                    alertSoles.setError("El valor debe ser mayor a 2 y menor que 9999");
+                                    return;
+                                }
+
+                            }
+
+                        }else {
+
+                            int NumIntSoles = Integer.parseInt(MontoSoles);
+
+                            if (NumIntSoles < 5 || NumIntSoles > 9999) {
+                                alertSoles.setError("El valor debe ser mayors a 5 y menor que 9999");
+                                return;
+                            }
+
                         }
 
                         alertSoles.setErrorEnabled(false);
 
-                        guardar_montoSoles(GlobalInfo.getManguera10,DoubleMontoSoles);
+                        guardar_montoSoles(GlobalInfo.getManguera10, Double.parseDouble(MontoSoles));
 
                         Toast.makeText(getContext(), "SE AGREGO CORRECTAMENTE", Toast.LENGTH_SHORT).show();
                         modalSoles.dismiss();
-
                         inputMontoSoles.getText().clear();
 
                     }
@@ -626,6 +658,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                         btnCancelarLCliente   = modalClienteDNI.findViewById(R.id.btnCancelarLCliente);
                         btnBuscadorClienteRZ  = modalClienteDNI.findViewById(R.id.btnBuscadorClienteRZ);
 
+                        btnBuscadorClienteRZ.setIconifiedByDefault(false);
                         /**
                          * @BUSCAR:NombreClienteRZ
                          */
@@ -843,7 +876,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                                         alertOperacion.setError("* El campo Nro Operación es obligatorio");
                                         return;
                                     } else if (campoOperacion.length() < 4) {
-                                        alertOperacion.setError("* El  Nro Operación debe tener 4 dígitos");
+                                        alertOperacion.setError("* El  Nro Operación debe tener mayor a 4 dígitos");
                                         return;
                                     } else if (campoPEfectivo.isEmpty()) {
                                         alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
@@ -1120,6 +1153,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                         btnCancelarLCliente   = modalClienteRUC.findViewById(R.id.btnCancelarLCliente);
                         btnBuscadorClienteRZ  = modalClienteRUC.findViewById(R.id.btnBuscadorClienteRZ);
 
+                        btnBuscadorClienteRZ.setIconifiedByDefault(false);
+
                         /** Buscardor por Cliente Raz. Social */
                         btnBuscadorClienteRZ.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                             @Override
@@ -1307,9 +1342,9 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                                     alertRazSocial.setError("* La Razon Social es obligatorio");
                                     return;
-                                }  else if (campoRazSocial.length() < 4 ) {
+                                }  else if (campoRazSocial.length() < 11 ) {
 
-                                    alertRazSocial.setError("* La Razon Social debe tener mínino 4 dígitos");
+                                    alertRazSocial.setError("* La Razon Social debe tener mínino 11 dígitos");
                                     return;
                                 }else if (checkedRadioButtonId == radioTarjeta.getId()) {
 
@@ -1319,7 +1354,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                                         return;
                                     } else if (campoOperacion.length() < 4) {
 
-                                        alertOperacion.setError("* El  Nro Operación debe tener 4 dígitos");
+                                        alertOperacion.setError("* El  Nro Operación debe tener mayor a 4 dígitos");
                                         return;
                                     } else if (campoPEfectivo.isEmpty()) {
 
@@ -1482,6 +1517,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                         btnCancelarLCliente   = modalClienteCredito.findViewById(R.id.btnCancelarLClienteCredito);
                         btnBuscadorClienteRZ  = modalClienteCredito.findViewById(R.id.btnBuscadorClienteRZ);
+
+                        btnBuscadorClienteRZ.setIconifiedByDefault(false);
 
                         /** Buscardor por Cliente Raz. Social */
                         btnBuscadorClienteRZ.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -1737,6 +1774,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                             BuscarRazonSocial     = modallistNFC.findViewById(R.id.btnBuscadorClienteRZ);
                             btnCancelarLCliente   = modallistNFC.findViewById(R.id.btnCancelarLCliente);
+
+                            BuscarRazonSocial.setIconifiedByDefault(false);
 
                             btnCancelarLCliente.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -2612,6 +2651,22 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                         String mnobservacionPag = "CONTADO";
                         String mnTipoDocumento = "";
 
+                        /** 11-01-2024**/
+                        /** 3.- MONTOS MENORES A 0.10 QUE SE GENERE NOTA DE DESPACHO **/
+
+                        if (GlobalInfo.getoptranSoles10 < GlobalInfo.getsettingFuelMontoMinimo10) {
+                            mnTipoPago = "C";
+                            mnClienteID = "11111111";
+                            mnClienteRUC = "";
+                            mnClienteRS = "CLIENTE VARIOS";
+                            mnCliernteDR = "";
+                            mnNroPlaca = "000-0000";
+                            mnTarjND = "70100";
+                            mnTarjetaCredito = "0";
+                            mnOperacionREF = "";
+                            mnMontoSoles = 0.00;
+                        }
+
                         switch (mnTipoPago) {
                             case "E" :
                                 if (mnClienteRUC.length() == 11) {
@@ -2668,19 +2723,49 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             mnNroPlaca = "000-0000";
                         }
 
+                        /** 4.- VALIDAR BOLETA MAYORES A 700 SOLES **/
+
+                        if (mnClienteID.equals(GlobalInfo.getsettingClienteID10)  && GlobalInfo.getoptranSoles10 >= GlobalInfo.getsettingDNIMontoMinimo10 && mnTipoDocumento.equals("03")) {
+                            Toast.makeText(getContext(), "Por montos mayores a 700.00 soles debe ingresar el DNI del cliente", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        /**11-01-2024**/
+                        /** 1.- NOTAS DE DESPACHO A CLIENTES VARIOS ====> DEBE SER CONTADO **/
+                        if (mnClienteID.equals(GlobalInfo.getsettingClienteID10)  && mnTipoDocumento.equals("99")) {
+                            mnobservacionPag = "CONTADO";
+                        }
+
                         /** Generamos correlativo para grabar **/
 
                         GlobalInfo.getcorrelativoMDescuento = 0.00;
 
-                        findCorrelativoCPE(GlobalInfo.getterminalImei10, mnTipoDocumento, mnClienteID,
-                                           mnClienteRUC, mnClienteRS, mnCliernteDR,
-                                           mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion,
-                                           mnTarjND, mnTarjetaPuntos, mnPtosDisponibles,
-                                           mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
-                                           mnobservacionPag, GlobalInfo.getoptranOperador10,
-                                           mnImpuesto, mnMontoSoles, mnMtoSaldoCredito, mnRFID,
-                                           GlobalInfo.getoptranSoles10, GlobalInfo.getoptranArticuloID10,
-                                           GlobalInfo.getoptranGalones10, String.valueOf(GlobalInfo.getoptranTranID10));
+                        if (mnRFID.equals("1")) {
+
+                            findCorrelativoSINRFID(GlobalInfo.getterminalImei10, mnTipoDocumento, mnClienteID,
+                                    mnClienteRUC, mnClienteRS, mnCliernteDR,
+                                    mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion,
+                                    mnTarjND, mnTarjetaPuntos, mnPtosDisponibles,
+                                    mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
+                                    mnobservacionPag, GlobalInfo.getoptranOperador10,
+                                    mnImpuesto, mnMontoSoles, mnMtoSaldoCredito, mnRFID,
+                                    GlobalInfo.getoptranSoles10, GlobalInfo.getoptranArticuloID10,
+                                    GlobalInfo.getoptranGalones10, String.valueOf(GlobalInfo.getoptranTranID10));
+
+
+                        } else {
+
+                            findCorrelativoCPE(GlobalInfo.getterminalImei10, mnTipoDocumento, mnClienteID,
+                                    mnClienteRUC, mnClienteRS, mnCliernteDR,
+                                    mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion,
+                                    mnTarjND, mnTarjetaPuntos, mnPtosDisponibles,
+                                    mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
+                                    mnobservacionPag, GlobalInfo.getoptranOperador10,
+                                    mnImpuesto, mnMontoSoles, mnMtoSaldoCredito, mnRFID,
+                                    GlobalInfo.getoptranSoles10, GlobalInfo.getoptranArticuloID10,
+                                    GlobalInfo.getoptranGalones10, String.valueOf(GlobalInfo.getoptranTranID10));
+
+                        }
 
                         for (DetalleVenta detalleVenta : GlobalInfo.getdetalleVentaList10) {
 
@@ -2727,6 +2812,241 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
     }
 
     /**
+     * @APISERVICE:GenerarCorrelativoComprobante Sin RFID
+     */
+    private void findCorrelativoSINRFID(String imei, String mnTipoDocumento, String mnClienteID, String mnClienteRUC, String mnClienteRS, String mnCliernteDR,
+                                        String mnNroPlaca, String mnKilometraje, String mnTipoVenta, String mnObservacion,
+                                        String mnTarjND, String mnTarjetaPuntos, Double mnPtosDisponibles,
+                                        Integer mnPagoID, Integer mnTarjetaCreditoID, String mnOperacionREF,
+                                        String mnobservacionPag, String mnOperador, Double mnImpuesto,
+                                        Double mnMontoSoles, Double mnMtoSaldoCredito, String mnRFID,
+                                        Double mnMtoTotal, String mnArticuloID, Double mnCantidad, String mnTranID) {
+
+        Call<List<Correlativo>> call = mAPIService.findCorrelativosinrfid(imei, mnTipoDocumento, mnClienteID, mnArticuloID, mnTranID);
+
+        call.enqueue(new Callback<List<Correlativo>>() {
+            @Override
+            public void onResponse(Call<List<Correlativo>> call, Response<List<Correlativo>> response) {
+
+                try {
+
+                    if(!response.isSuccessful()){
+                        Toast.makeText(getContext(), "Codigo de error Correlativo: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    List<Correlativo> correlativoList = response.body();
+
+                    for(Correlativo correlativo: correlativoList) {
+                        GlobalInfo.getcorrelativoFecha      = String.valueOf(correlativo.getFechaProceso());
+                        GlobalInfo.getcorrelativoSerie      = String.valueOf(correlativo.getSerie());
+                        GlobalInfo.getcorrelativoNumero     = String.valueOf(correlativo.getNumero());
+                        GlobalInfo.getcorrelativoMDescuento = correlativo.getMontoDescuento();
+                        GlobalInfo.getcorrelativoDocumentoVenta = correlativo.getDocumentoVenta();
+                        GlobalInfo.getcorrelativoTipoDesc       = correlativo.getTipoDescuento();
+                    }
+
+                    if(!GlobalInfo.getcorrelativoDocumentoVenta.isEmpty()){
+                        return;
+                    }
+
+                    /** Consultando datos del DOCUMENTO-SERIE-CORRELATIVO*/
+
+                    String GRFecProceso = GlobalInfo.getcorrelativoFecha;
+                    String GRNumeroSerie = GlobalInfo.getcorrelativoSerie;
+                    String GRNumeroDocumento = GlobalInfo.getcorrelativoNumero;
+
+                    String NroComprobante = GlobalInfo.getcorrelativoSerie + "-" + GlobalInfo.getcorrelativoNumero;
+
+                    /** Fecha de Impresión */
+                    Calendar calendarprint       = Calendar.getInstance(TimeZone.getTimeZone("America/Lima"));
+                    SimpleDateFormat formatdate  = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                    String xFechaHoraImpresion   = formatdate.format(calendarprint.getTime());
+                    String xFechaDocumento       = xFechaHoraImpresion.substring(6,10) + xFechaHoraImpresion.substring(3,5) + xFechaHoraImpresion.substring(0,2) + " " + xFechaHoraImpresion.substring(11,19);
+                    String xFechaDocumentoQR     = xFechaHoraImpresion.substring(6,10) + "-" + xFechaHoraImpresion.substring(3,5) + "-" + xFechaHoraImpresion.substring(0,2);
+
+                    /** FIN Consultando datos del DOCUMENTO-SERIE-CORRELATIVO*/
+
+                    /** Calculando los totales **/
+
+                    Double mnPrecioOrig = 0.00;
+                    Double mnMtoPagar = 0.00;
+                    Double mnMtoCanje = 0.00;
+                    Double mnmtoPagoUSD = 0.00;
+                    Double mnPtosGanados = 0.00;
+
+                    Double mnMtoDescuento0 = 0.00;
+                    Double mnMtoDescuento1 = 0.00;
+                    String mnMtoDescuento2 = "";
+
+                    Double mnMtoIncremento0 = 0.00;
+                    Double mnMtoIncremento1 = 0.00;
+                    String mnMtoIncremento2 = "";
+
+                    Double mnMtoSubTotal0 = 0.00;
+                    Double mnMtoSubTotal1 = 0.00;
+                    String mnMtoSubTotal2 = "";
+
+                    Double mnMtoImpuesto0 = 0.00;
+                    Double mnMtoImpuesto1 = 0.00;
+                    String mnMtoImpuesto2 = "";
+
+                    Integer mnItem = 1;
+                    Double mnFise = 0.00;
+                    String mnobservacionDet = "";
+                    String mnReferencia = "";
+
+                    mnPrecioOrig = GlobalInfo.getoptranPrecio10;
+
+                    mnMtoCanje = mnMtoTotal;
+                    mnMtoPagar = mnMtoTotal;
+
+                    mnMtoSubTotal0 = mnMtoTotal / 1.18;
+                    mnMtoSubTotal1 = Math.round(mnMtoSubTotal0*100.0)/100.0;
+
+                    mnMtoImpuesto0 = mnMtoTotal - mnMtoSubTotal1;
+                    mnMtoImpuesto1 = Math.round(mnMtoImpuesto0*100.0)/100.0;
+
+                    Double mnMtoDescuentoUnitario = GlobalInfo.getcorrelativoMDescuento;
+
+                    if (mnMtoDescuentoUnitario != 0 && mnCantidad >= 1) {
+
+                        /* MONTO DESCUENTO POR GALON (DES) */
+                        if (GlobalInfo.getcorrelativoTipoDesc.equals("DES")) {
+                            mnMtoDescuento0 = mnMtoDescuentoUnitario * mnCantidad;
+                            mnMtoDescuento1 = Math.round(mnMtoDescuento0*100.0)/100.0;
+                            mnMtoPagar = mnMtoTotal - mnMtoDescuento1;
+                        } else {
+                            /* PRECIO FIJO POR GALON (PRE) */
+
+                            if (mnMtoDescuentoUnitario > mnPrecioOrig) {
+                                /* PRECIO CON INCREMENTO */
+                                GlobalInfo.getoptranPrecio10 = mnMtoDescuentoUnitario;
+                                mnMtoDescuento0 = mnMtoDescuentoUnitario * mnCantidad;
+                                mnMtoDescuento1 = Math.round(mnMtoDescuento0*100.0)/100.0;
+                                mnMtoPagar = mnMtoDescuento1;
+                                mnMtoDescuento1 = 0.00;
+
+                                mnMtoIncremento0 = mnMtoPagar - mnMtoTotal;
+                                mnMtoIncremento1 = Math.round(mnMtoIncremento0*100.0)/100.0;
+
+                            } else if (mnMtoDescuentoUnitario < mnPrecioOrig) {
+                                /* PRECIO CON DESCUENTO */
+                                mnMtoDescuentoUnitario = mnPrecioOrig - mnMtoDescuentoUnitario;
+                                mnMtoDescuento0 = mnMtoDescuentoUnitario * mnCantidad;
+                                mnMtoDescuento1 = Math.round(mnMtoDescuento0*100.0)/100.0;
+                                mnMtoPagar = mnMtoTotal - mnMtoDescuento1;
+                            }
+
+                        }
+
+                        mnMtoSubTotal0 = mnMtoPagar / 1.18;
+                        mnMtoSubTotal1 = Math.round(mnMtoSubTotal0*100.0)/100.0;
+                        mnMtoImpuesto0 = mnMtoPagar - mnMtoSubTotal1;
+                        mnMtoImpuesto1 = Math.round(mnMtoImpuesto0*100.0)/100.0;
+
+                    }
+
+                    /** FIN Calculando los totales **/
+
+                    /** GRABAR VENTA EN BASE DE DATOS **/
+
+                    grabarVentaCA(GlobalInfo.getterminalCompanyID10, mnTipoDocumento, GRNumeroSerie, GRNumeroDocumento,
+                            GlobalInfo.getterminalID10, mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR,
+                            GlobalInfo.getterminalTurno10, GlobalInfo.getcorrelativoFecha, xFechaDocumento,
+                            GlobalInfo.getoptranFechaTran10,
+                            mnMtoDescuento1, mnMtoSubTotal1, mnMtoImpuesto1, mnMtoPagar,
+                            mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion, mnReferencia,
+                            mnTarjND, mnTarjetaPuntos, mnPtosGanados, mnPtosDisponibles,
+                            mnMtoCanje, GlobalInfo.getuserID10,
+                            mnItem, mnArticuloID, GlobalInfo.getoptranProductoDs10, GlobalInfo.getoptranUniMed10, GlobalInfo.getterminalAlmacenID10,
+                            GlobalInfo.getsettingImpuestoID110, GlobalInfo.getsettingImpuestoValor110, GlobalInfo.getoptranPrecio10, mnPrecioOrig, mnCantidad,
+                            mnFise, GlobalInfo.getoptranTranID10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranManguera10,
+                            mnobservacionDet,
+                            mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoPagar, mnMontoSoles, mnobservacionPag,
+                            mnOperador, mnMtoIncremento1);
+
+                    /** FIN GRABAR VENTA EN BASE DE DATOS **/
+
+                    /** IMPRESION DEL COMPROBANTE **/
+
+                    /** 11-01-2024**/
+                    /** 2.- PARAMETRO PARA IMPRIMIR COMPROBANTES A CLIENTES VARIOS (TRUE O FALSE) **/
+
+                    boolean flagprinter = true;
+
+                    if (mnClienteID.equals(GlobalInfo.getsettingClienteID10) && GlobalInfo.getterminalCvariosPrinter10 == false) {
+                        flagprinter = false;
+                    }
+
+                    if (flagprinter == true) {
+
+                        if (mnPagoID == 2) {
+
+                            /** @IMPRESION01 */
+                            imprimirGR10(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
+                                    GlobalInfo.getuserName10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranProductoDs10,
+                                    GlobalInfo.getoptranUniMed10, GlobalInfo.getoptranPrecio10, mnCantidad,
+                                    mnMtoPagar, mnMtoSubTotal1, mnMtoImpuesto1,
+                                    mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                    mnKilometraje, mnObservacion, mnTarjND, xFechaDocumentoQR,
+                                    mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoCanje, mnMtoDescuento1, mnMontoSoles);
+
+
+                            Double finalMnMtoPagar1 = mnMtoPagar;
+                            Double finalMnMtoSubTotal1 = mnMtoSubTotal1;
+                            Double finalMnMtoImpuesto1 = mnMtoImpuesto1;
+                            Double finalMnMtoCanje1 = mnMtoCanje;
+                            Double finalMnMtoDescuento1 = mnMtoDescuento1;
+
+                            Timer timerS = new Timer();
+                            /** @IMPRESION02 */
+                            timerS.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    imprimirGR10(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
+                                            GlobalInfo.getuserName10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranProductoDs10,
+                                            GlobalInfo.getoptranUniMed10, GlobalInfo.getoptranPrecio10, mnCantidad,
+                                            finalMnMtoPagar1, finalMnMtoSubTotal1, finalMnMtoImpuesto1,
+                                            mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                            mnKilometraje, mnObservacion, mnTarjND, xFechaDocumentoQR,
+                                            mnPagoID, mnTarjetaCreditoID, mnOperacionREF, finalMnMtoCanje1, finalMnMtoDescuento1, mnMontoSoles);
+
+                                    timerS.cancel();
+                                }
+                            }, 3000);
+
+                        } else {
+
+                            imprimirGR10(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
+                                    GlobalInfo.getuserName10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranProductoDs10,
+                                    GlobalInfo.getoptranUniMed10, GlobalInfo.getoptranPrecio10, mnCantidad,
+                                    mnMtoPagar, mnMtoSubTotal1, mnMtoImpuesto1,
+                                    mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                    mnKilometraje, mnObservacion, mnTarjND, xFechaDocumentoQR,
+                                    mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoCanje, mnMtoDescuento1, mnMontoSoles);
+
+                        }
+
+                    }
+
+                    /** FIN IMPRESION DEL COMPROBANTE*/
+
+                }catch (Exception ex){
+                    Toast.makeText(getActivity(),ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Correlativo>> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de conexión APICORE Correlativo - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+
+    /**
      * @APISERVICE:GenerarCorrelativoComprobante
      */
     private void findCorrelativoCPE(String imei, String mnTipoDocumento, String mnClienteID, String mnClienteRUC, String mnClienteRS, String mnCliernteDR,
@@ -2759,6 +3079,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                         GlobalInfo.getcorrelativoNumero     = String.valueOf(correlativo.getNumero());
                         GlobalInfo.getcorrelativoMDescuento = correlativo.getMontoDescuento();
                         GlobalInfo.getcorrelativoDocumentoVenta = correlativo.getDocumentoVenta();
+                        GlobalInfo.getcorrelativoTipoDesc       = correlativo.getTipoDescuento();
                     }
 
                     if(!GlobalInfo.getcorrelativoDocumentoVenta.isEmpty()){
@@ -2784,6 +3105,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                     /** Calculando los totales **/
 
+                    Double mnPrecioOrig = 0.00;
                     Double mnMtoPagar = 0.00;
                     Double mnMtoCanje = 0.00;
                     Double mnmtoPagoUSD = 0.00;
@@ -2792,6 +3114,10 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                     Double mnMtoDescuento0 = 0.00;
                     Double mnMtoDescuento1 = 0.00;
                     String mnMtoDescuento2 = "";
+
+                    Double mnMtoIncremento0 = 0.00;
+                    Double mnMtoIncremento1 = 0.00;
+                    String mnMtoIncremento2 = "";
 
                     Double mnMtoSubTotal0 = 0.00;
                     Double mnMtoSubTotal1 = 0.00;
@@ -2806,7 +3132,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                     String mnobservacionDet = "";
                     String mnReferencia = "";
 
-                    /**mnMtoTotal = GlobalInfo.getoptranSoles10;**/
+                    mnPrecioOrig = GlobalInfo.getoptranPrecio10;
 
                     mnMtoCanje = mnMtoTotal;
                     mnMtoPagar = mnMtoTotal;
@@ -2821,14 +3147,37 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                     if (mnMtoDescuentoUnitario != 0 && mnCantidad >= 1) {
 
-                        mnMtoDescuento0 = mnMtoDescuentoUnitario * mnCantidad;
-                        mnMtoDescuento1 = Math.round(mnMtoDescuento0*100.0)/100.0;
+                        /* MONTO DESCUENTO POR GALON (DES) */
+                        if (GlobalInfo.getcorrelativoTipoDesc.equals("DES")) {
+                            mnMtoDescuento0 = mnMtoDescuentoUnitario * mnCantidad;
+                            mnMtoDescuento1 = Math.round(mnMtoDescuento0*100.0)/100.0;
+                            mnMtoPagar = mnMtoTotal - mnMtoDescuento1;
+                        } else {
+                            /* PRECIO FIJO POR GALON (PRE) */
 
-                        mnMtoPagar = mnMtoTotal - mnMtoDescuento1;
+                            if (mnMtoDescuentoUnitario > mnPrecioOrig) {
+                                /* PRECIO CON INCREMENTO */
+                                GlobalInfo.getoptranPrecio10 = mnMtoDescuentoUnitario;
+                                mnMtoDescuento0 = mnMtoDescuentoUnitario * mnCantidad;
+                                mnMtoDescuento1 = Math.round(mnMtoDescuento0*100.0)/100.0;
+                                mnMtoPagar = mnMtoDescuento1;
+                                mnMtoDescuento1 = 0.00;
+
+                                mnMtoIncremento0 = mnMtoPagar - mnMtoTotal;
+                                mnMtoIncremento1 = Math.round(mnMtoIncremento0*100.0)/100.0;
+
+                            } else if (mnMtoDescuentoUnitario < mnPrecioOrig) {
+                                /* PRECIO CON DESCUENTO */
+                                mnMtoDescuentoUnitario = mnPrecioOrig - mnMtoDescuentoUnitario;
+                                mnMtoDescuento0 = mnMtoDescuentoUnitario * mnCantidad;
+                                mnMtoDescuento1 = Math.round(mnMtoDescuento0*100.0)/100.0;
+                                mnMtoPagar = mnMtoTotal - mnMtoDescuento1;
+                            }
+
+                        }
 
                         mnMtoSubTotal0 = mnMtoPagar / 1.18;
                         mnMtoSubTotal1 = Math.round(mnMtoSubTotal0*100.0)/100.0;
-
                         mnMtoImpuesto0 = mnMtoPagar - mnMtoSubTotal1;
                         mnMtoImpuesto1 = Math.round(mnMtoImpuesto0*100.0)/100.0;
 
@@ -2837,71 +3186,82 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                     /** FIN Calculando los totales **/
 
                     /** GRABAR VENTA EN BASE DE DATOS **/
-
                     grabarVentaCA(GlobalInfo.getterminalCompanyID10, mnTipoDocumento, GRNumeroSerie, GRNumeroDocumento,
-                                  GlobalInfo.getterminalID10, mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR,
-                                  GlobalInfo.getterminalTurno10, GlobalInfo.getcorrelativoFecha, xFechaDocumento,
-                                  GlobalInfo.getoptranFechaTran10,
-                                  mnMtoDescuento1, mnMtoSubTotal1, mnMtoImpuesto1, mnMtoPagar,
-                                  mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion, mnReferencia,
-                                  mnTarjND, mnTarjetaPuntos, mnPtosGanados, mnPtosDisponibles,
-                                  mnMtoCanje, GlobalInfo.getuserID10,
-                                  mnItem, mnArticuloID, GlobalInfo.getoptranProductoDs10, GlobalInfo.getoptranUniMed10, GlobalInfo.getterminalAlmacenID10,
-                                  GlobalInfo.getsettingImpuestoID110, GlobalInfo.getsettingImpuestoValor110, GlobalInfo.getoptranPrecio10, GlobalInfo.getoptranPrecio10, mnCantidad,
-                                  mnFise, GlobalInfo.getoptranTranID10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranManguera10,
-                                  mnobservacionDet,
-                                  mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoPagar, mnMontoSoles, mnobservacionPag,
-                                  mnOperador);
+                            GlobalInfo.getterminalID10, mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR,
+                            GlobalInfo.getterminalTurno10, GlobalInfo.getcorrelativoFecha, xFechaDocumento,
+                            GlobalInfo.getoptranFechaTran10,
+                            mnMtoDescuento1, mnMtoSubTotal1, mnMtoImpuesto1, mnMtoPagar,
+                            mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion, mnReferencia,
+                            mnTarjND, mnTarjetaPuntos, mnPtosGanados, mnPtosDisponibles,
+                            mnMtoCanje, GlobalInfo.getuserID10,
+                            mnItem, mnArticuloID, GlobalInfo.getoptranProductoDs10, GlobalInfo.getoptranUniMed10, GlobalInfo.getterminalAlmacenID10,
+                            GlobalInfo.getsettingImpuestoID110, GlobalInfo.getsettingImpuestoValor110, GlobalInfo.getoptranPrecio10, mnPrecioOrig, mnCantidad,
+                            mnFise, GlobalInfo.getoptranTranID10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranManguera10,
+                            mnobservacionDet,
+                            mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoPagar, mnMontoSoles, mnobservacionPag,
+                            mnOperador, mnMtoIncremento1);
 
                     /** FIN GRABAR VENTA EN BASE DE DATOS **/
 
                     /** IMPRESION DEL COMPROBANTE **/
 
+                    /** 11-01-2024**/
+                    /** 2.- PARAMETRO PARA IMPRIMIR COMPROBANTES A CLIENTES VARIOS (TRUE O FALSE) **/
 
-                    if (mnPagoID == 2) {
+                    boolean flagprinter = true;
 
-                        /** @IMPRESION01 */
-                        imprimirGR10(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
-                                GlobalInfo.getuserName10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranProductoDs10,
-                                GlobalInfo.getoptranUniMed10, GlobalInfo.getoptranPrecio10, mnCantidad,
-                                mnMtoPagar, mnMtoSubTotal1, mnMtoImpuesto1,
-                                mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR, mnNroPlaca,
-                                mnKilometraje, mnObservacion, mnTarjND, xFechaDocumentoQR,
-                                mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoCanje, mnMtoDescuento1, mnMontoSoles);
+                    if (mnClienteID.equals(GlobalInfo.getsettingClienteID10) && GlobalInfo.getterminalCvariosPrinter10 == false) {
+                        flagprinter = false;
+                    }
+
+                    if (flagprinter == true) {
+
+                        if (mnPagoID == 2) {
+
+                            /** @IMPRESION01 */
+                            imprimirGR10(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
+                                    GlobalInfo.getuserName10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranProductoDs10,
+                                    GlobalInfo.getoptranUniMed10, GlobalInfo.getoptranPrecio10, mnCantidad,
+                                    mnMtoPagar, mnMtoSubTotal1, mnMtoImpuesto1,
+                                    mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                    mnKilometraje, mnObservacion, mnTarjND, xFechaDocumentoQR,
+                                    mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoCanje, mnMtoDescuento1, mnMontoSoles);
 
 
-                        Double finalMnMtoPagar1 = mnMtoPagar;
-                        Double finalMnMtoSubTotal1 = mnMtoSubTotal1;
-                        Double finalMnMtoImpuesto1 = mnMtoImpuesto1;
-                        Double finalMnMtoCanje1 = mnMtoCanje;
-                        Double finalMnMtoDescuento1 = mnMtoDescuento1;
+                            Double finalMnMtoPagar1 = mnMtoPagar;
+                            Double finalMnMtoSubTotal1 = mnMtoSubTotal1;
+                            Double finalMnMtoImpuesto1 = mnMtoImpuesto1;
+                            Double finalMnMtoCanje1 = mnMtoCanje;
+                            Double finalMnMtoDescuento1 = mnMtoDescuento1;
 
-                        Timer timerS = new Timer();
-                        /** @IMPRESION02 */
-                        timerS.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                imprimirGR10(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
-                                        GlobalInfo.getuserName10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranProductoDs10,
-                                        GlobalInfo.getoptranUniMed10, GlobalInfo.getoptranPrecio10, mnCantidad,
-                                        finalMnMtoPagar1, finalMnMtoSubTotal1, finalMnMtoImpuesto1,
-                                        mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR, mnNroPlaca,
-                                        mnKilometraje, mnObservacion, mnTarjND, xFechaDocumentoQR,
-                                        mnPagoID, mnTarjetaCreditoID, mnOperacionREF, finalMnMtoCanje1, finalMnMtoDescuento1, mnMontoSoles);
+                            Timer timerS = new Timer();
+                            /** @IMPRESION02 */
+                            timerS.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    imprimirGR10(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
+                                            GlobalInfo.getuserName10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranProductoDs10,
+                                            GlobalInfo.getoptranUniMed10, GlobalInfo.getoptranPrecio10, mnCantidad,
+                                            finalMnMtoPagar1, finalMnMtoSubTotal1, finalMnMtoImpuesto1,
+                                            mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                            mnKilometraje, mnObservacion, mnTarjND, xFechaDocumentoQR,
+                                            mnPagoID, mnTarjetaCreditoID, mnOperacionREF, finalMnMtoCanje1, finalMnMtoDescuento1, mnMontoSoles);
 
-                                timerS.cancel();
-                            }
-                        }, 3000);
+                                    timerS.cancel();
+                                }
+                            }, 3000);
 
-                    } else {
+                        } else {
 
-                        imprimirGR10(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
-                                GlobalInfo.getuserName10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranProductoDs10,
-                                GlobalInfo.getoptranUniMed10, GlobalInfo.getoptranPrecio10, mnCantidad,
-                                mnMtoPagar, mnMtoSubTotal1, mnMtoImpuesto1,
-                                mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR, mnNroPlaca,
-                                mnKilometraje, mnObservacion, mnTarjND, xFechaDocumentoQR,
-                                mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoCanje, mnMtoDescuento1, mnMontoSoles);
+                            imprimirGR10(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
+                                    GlobalInfo.getuserName10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranProductoDs10,
+                                    GlobalInfo.getoptranUniMed10, GlobalInfo.getoptranPrecio10, mnCantidad,
+                                    mnMtoPagar, mnMtoSubTotal1, mnMtoImpuesto1,
+                                    mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                    mnKilometraje, mnObservacion, mnTarjND, xFechaDocumentoQR,
+                                    mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoCanje, mnMtoDescuento1, mnMontoSoles);
+
+                        }
 
                     }
 
@@ -2937,7 +3297,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                                Double _fise, Integer _tranID, String _nroLado, String _manguera,
                                String _observacionDet,
                                Integer _pagoID, Integer _tarjetaID, String _TarjetaDS, Double _mtoPagoPEN, Double _mtoPagoUSD,
-                               String _observacionPag, String _Operador
+                               String _observacionPag, String _Operador, Double _mtoIncremento
     ){
 
         String xtranID = _tranID.toString();
@@ -2954,7 +3314,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                 _fise, xtranID, _nroLado, _manguera,
                 _observacionDet,
                 _pagoID, _tarjetaID, _TarjetaDS, _mtoPagoPEN, _mtoPagoUSD,
-                _observacionPag);
+                _observacionPag,_mtoIncremento);
 
         Call<VentaCA> call = mAPIService.postVentaCA(ventaCA);
 
@@ -3056,431 +3416,1106 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
         String QRGenerado = qrSVEN.toString();
 
-        /** @ActivarLogo:Cuadrado
-        int logoSize = (tipopapel.equals("80mm")) ? 200 : (tipopapel.equals("65mm") ? 200 : 400);*/
-
-        int logoSize = (tipopapel.equals("80mm")) ? 400 : (tipopapel.equals("65mm") ? 400 : 200);
+        int logoSize = (tipopapel.equals("80mm")) ? GlobalInfo.getTerminalImageW10 : (tipopapel.equals("65mm") ? GlobalInfo.getTerminalImageW10 : 400);
 
         Printama.with(getContext()).connect(printama -> {
 
-            switch (_TipoDocumento) {
-                case "01" :
-                case "03" :
-                    switch (tipopapel) {
-                        case "58mm":
-                        case "80mm":
-                            printama.printTextln("                 ", Printama.CENTER);
-                            printama.printImage(logoRobles, logoSize);
-                            break;
-                        case "65mm":
-                            printama.printImage(Printama.RIGHT,logoRobles, logoSize);
-                            break;
-                    }
-                    printama.setSmallText();
-                    /** @Activar:NombreCompania
-                    printama.printTextlnBold(NameCompany, Printama.CENTER);*/
-                    printama.printTextlnBold(" ");
-                    printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
-                    printama.printTextlnBold(Address2, Printama.CENTER);
-                    printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                    printama.printTextlnBold(Branch2, Printama.CENTER);
-                    printama.printTextlnBold("RUC: " + RUCCompany, Printama.CENTER);
-                    break;
-                case "98" :
-                case "99" :
-                    switch (tipopapel) {
-                        case "58mm":
-                        case "80mm":
-                            printama.printTextln("                 ", Printama.CENTER);
-                            printama.printImage(logoRobles, logoSize);
-                            break;
-                        case "65mm":
-                            printama.printImage(Printama.RIGHT,logoRobles, logoSize);
-                            break;
-                    }
-                    printama.setSmallText();
-                    /** @Activar:NombreCompania
-                    printama.printTextlnBold(NameCompany, Printama.CENTER);*/
-                    printama.printTextlnBold(" ");
-                    printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                    printama.printTextlnBold(Branch2, Printama.CENTER);
-                    break;
-            }
-
-            switch (_TipoDocumento) {
-                case "01" :
-                    printama.printTextlnBold("FACTURA DE VENTA ELECTRONICA", Printama.CENTER);
-                    break;
-                case "03" :
-                    printama.printTextlnBold("BOLETA DE VENTA ELECTRONICA", Printama.CENTER);
-                    break;
-                case "98" :
-                    printama.printTextlnBold("TICKET SERAFIN", Printama.CENTER);
-                    break;
-                case "99" :
-                    printama.printTextlnBold("NOTA DE DESPACHO", Printama.CENTER);
-                    break;
-            }
-
-            printama.printTextlnBold(_NroDocumento,Printama.CENTER);
-            printama.setSmallText();
-            printSeparatorLine(printama, tipopapel);
-            printama.addNewLine(1);
-            printama.setSmallText();
             switch (tipopapel) {
-                case "65mm":
-                case "80mm":
-                    printama.printTextln("Fecha - Hora : " + _FechaDocumento + "  Turno: " + _Turno, Printama.LEFT);
-                    break;
+
                 case "58mm":
+
+                    switch (_TipoDocumento) {
+
+                        case "01" :
+                        case "03" :
+                            printama.printTextln("                 ", Printama.CENTER);
+                            printama.printImage(logoRobles, logoSize);
+                            printama.setSmallText();
+                            if(GlobalInfo.getTerminalNameCompany10){
+                                printama.printTextlnBold(NameCompany, Printama.CENTER);
+                            }else {
+                                printama.printTextlnBold(" ");
+                            }
+                            printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
+                            printama.printTextlnBold(Address2, Printama.CENTER);
+                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                            printama.printTextlnBold(Branch2, Printama.CENTER);
+                            printama.printTextlnBold("RUC: " + RUCCompany, Printama.CENTER);
+
+                            break;
+
+                        case "98" :
+                        case "99" :
+                            printama.printTextln("                 ", Printama.CENTER);
+                            printama.printImage(logoRobles, logoSize);
+                            printama.setSmallText();
+                            if(GlobalInfo.getTerminalNameCompany10){
+                                printama.printTextlnBold(NameCompany, Printama.CENTER);
+                            }else {
+                                printama.printTextlnBold(" ");
+                            }
+                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                            printama.printTextlnBold(Branch2, Printama.CENTER);
+                            break;
+                    }
+
+                    switch (_TipoDocumento) {
+                        case "01" :
+                            printama.printTextlnBold("FACTURA DE VENTA ELECTRONICA", Printama.CENTER);
+                            break;
+                        case "03" :
+                            printama.printTextlnBold("BOLETA DE VENTA ELECTRONICA", Printama.CENTER);
+                            break;
+                        case "98" :
+                            printama.printTextlnBold("TICKET SERAFIN", Printama.CENTER);
+                            break;
+                        case "99" :
+                            printama.printTextlnBold("NOTA DE DESPACHO", Printama.CENTER);
+                            break;
+                    }
+
+                    printama.printTextlnBold(_NroDocumento,Printama.CENTER);
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
                     printama.printTextln("Fecha-Hora : " + _FechaDocumento, Printama.LEFT);
                     printama.printTextln("Turno        : " + _Turno, Printama.LEFT);
-                    break;
-            }
-            printama.printTextln("Cajero       : "+ _Cajero , Printama.LEFT);
-            printama.printTextln("Lado         : "+ _nroLado, Printama.LEFT);
+                    printama.printTextln("Cajero       : "+ _Cajero , Printama.LEFT);
+                    printama.printTextln("Lado         : "+ _nroLado, Printama.LEFT);
 
-            if (!_NroPlaca.isEmpty()) {
-                printama.printTextln("Nro. PLaca   : "+ _NroPlaca, Printama.LEFT);
-            }
-
-            switch (_TipoDocumento) {
-                case "01" :
-                    printama.printTextln("RUC          : "+ _ClienteID , Printama.LEFT);
-                    printama.printTextln("Razon Social : "+ _ClienteRZ, Printama.LEFT);
-
-                    if (!_ClienteDR.isEmpty()) {
-                        printama.printTextln("Dirección    : "+ _ClienteDR, Printama.LEFT);
-                    }
-                    if (!_Obervacion.isEmpty()) {
-                        printama.printTextln("Observación  : "+ _Obervacion, Printama.LEFT);
+                    if (!_NroPlaca.isEmpty()) {
+                        printama.printTextln("Nro. PLaca   : "+ _NroPlaca, Printama.LEFT);
                     }
 
-                    break;
-                case "03" :
+                    switch (_TipoDocumento) {
+                        case "01" :
+                            printama.printTextln("RUC          : "+ _ClienteID , Printama.LEFT);
+                            printama.printTextln("Razon Social : "+ _ClienteRZ, Printama.LEFT);
 
-                    if (CVarios.equals(_ClienteID)){
+                            if (!_ClienteDR.isEmpty()) {
+                                printama.printTextln("Dirección    : "+ _ClienteDR, Printama.LEFT);
+                            }
+                            if (!_Obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : "+ _Obervacion, Printama.LEFT);
+                            }
 
-                    }else {
-                        printama.printTextln("DNI          : "+ _ClienteID , Printama.LEFT);
-                        printama.printTextln("Nombres      : "+ _ClienteRZ, Printama.LEFT);
+                            break;
+                        case "03" :
 
-                        if (!_ClienteDR.isEmpty()) {
-                            printama.printTextln("Dirección    : "+ _ClienteDR, Printama.LEFT);
-                        }
+                            if (CVarios.equals(_ClienteID)){
 
-                        if (!_Obervacion.isEmpty()) {
-                            printama.printTextln("Observación  : "+ _Obervacion, Printama.LEFT);
-                        }
+                            }else {
+                                printama.printTextln("DNI          : "+ _ClienteID , Printama.LEFT);
+                                printama.printTextln("Nombres      : "+ _ClienteRZ, Printama.LEFT);
 
+                                if (!_ClienteDR.isEmpty()) {
+                                    printama.printTextln("Dirección    : "+ _ClienteDR, Printama.LEFT);
+                                }
+
+                                if (!_Obervacion.isEmpty()) {
+                                    printama.printTextln("Observación  : "+ _Obervacion, Printama.LEFT);
+                                }
+
+                            }
+                            break;
+                        case "99" :
+                            if (!_Kilometraje.isEmpty()) {
+                                printama.printTextln("Kilometraje  : " + _Kilometraje, Printama.LEFT);
+                            }
+
+                            if (!_Obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : " + _Obervacion, Printama.LEFT);
+                            }
+                            printama.printTextln("RUC/DNI      : " + _ClienteID, Printama.LEFT);
+                            printama.printTextln("Cliente      : " + _ClienteRZ, Printama.LEFT);
+                            printama.printTextln("#Contrato    : " + _NTarjND , Printama.LEFT);
+
+                            break;
                     }
-                    break;
-                case "99" :
-                    if (!_Kilometraje.isEmpty()) {
-                        printama.printTextln("Kilometraje  : " + _Kilometraje, Printama.LEFT);
-                    }
 
-                    if (!_Obervacion.isEmpty()) {
-                        printama.printTextln("Observación  : " + _Obervacion, Printama.LEFT);
-                    }
-                        printama.printTextln("RUC/DNI      : " + _ClienteID, Printama.LEFT);
-                        printama.printTextln("Cliente      : " + _ClienteRZ, Printama.LEFT);
-                        printama.printTextln("#Contrato    : " + _NTarjND , Printama.LEFT);
-
-                    break;
-            }
-
-            printama.setSmallText();
-            printSeparatorLine(printama, tipopapel);
-            printama.addNewLine(1);
-            switch (tipopapel) {
-                case "80mm":
-                case "65mm":
                     printama.setSmallText();
-                    printama.printTextlnBold("PRODUCTO     " + "U/MED   " + "PRECIO   " + "CANTIDAD  " + "IMPORTE", Printama.RIGHT);
-                    printama.setSmallText();
-                    printama.printTextln(_ArticuloDS,Printama.LEFT);
-
-                    if (_mtoDescuento == 0.00) {
-                        printama.printTextln(_ArticuloUMED+"    " + PrecioFF + "      " + CantidadFF +"     "+ MtoTotalFF,Printama.RIGHT);
-                    } else {
-                        printama.printTextln(_ArticuloUMED+"    " + PrecioFF + "      " + CantidadFF +"     "+ MtoCanjeado,Printama.RIGHT);
-                    }
-                    break;
-
-                case "58mm":
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
                     printama.setSmallText();
                     printama.printTextlnBold("PROD. " + "U/MED " + "PRE.  " + "CANT.  " + "IMPORTE", Printama.LEFT);
                     printama.setSmallText();
                     printama.printTextln(_ArticuloDS,Printama.LEFT);
-
                     if (_mtoDescuento == 0.00) {
                         printama.printTextln(_ArticuloUMED+" " + PrecioFF + "  " + CantidadFF +"    "+ MtoTotalFF,Printama.RIGHT);
                     } else {
                         printama.printTextln(_ArticuloUMED+" " + PrecioFF + "  " + CantidadFF +"    "+ MtoCanjeado,Printama.RIGHT);
                     }
-                    break;
-            }
-
-            printama.setSmallText();
-            printSeparatorLine(printama, tipopapel);
-            printama.addNewLine(1);
-            printama.setSmallText();
-
-            switch (_TipoDocumento) {
-                case "01" :
-
-                    if (_mtoDescuento > 0) {
-                        printama.printTextln("DESCUENTO: S/ " + MtoDescuento, Printama.RIGHT);
-                    }
-
-                    printama.printTextln("OP. GRAVADAS: S/ " + MtoSubTotalFF, Printama.RIGHT);
-                    printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
-                    printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
-
                     printama.setSmallText();
                     printSeparatorLine(printama, tipopapel);
                     printama.addNewLine(1);
                     printama.setSmallText();
 
-                    switch (_PagoID) {
-                        case 1 :
-                            printama.printTextlnBold("CONDICION DE PAGO:", Printama.LEFT);
-                            printama.printTextlnBold("CONTADO: S/ " + MtoTotalFF, Printama.RIGHT);
-                            break;
-                        case 2 :
+                    switch (_TipoDocumento) {
+                        case "01" :
 
-                            printama.printTextlnBold("CONDICION DE PAGO: CONTADO", Printama.LEFT);
+                            if (_mtoDescuento > 0) {
+                                printama.printTextln("DESCUENTO: S/ " + MtoDescuento, Printama.RIGHT);
+                            }
 
-                            switch (_TarjetaCreditoID) {
+                            printama.printTextln("OP. GRAVADAS: S/ " + MtoSubTotalFF, Printama.RIGHT);
+                            printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
+                            printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+
+                            switch (_PagoID) {
                                 case 1 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
-                                    }
-                                    printama.printTextlnBold("VISA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                    printama.printTextlnBold("CONDICION DE PAGO:", Printama.LEFT);
+                                    printama.printTextlnBold("CONTADO: S/ " + MtoTotalFF, Printama.RIGHT);
                                     break;
                                 case 2 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+
+                                    printama.printTextlnBold("CONDICION DE PAGO: CONTADO", Printama.LEFT);
+
+                                    switch (_TarjetaCreditoID) {
+                                        case 1 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("VISA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 2 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("MASTERCARD: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 3 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("DINERS: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 4 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("YAPE: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 5 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("AMERICAN EXPRES: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 6 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
                                     }
-                                    printama.printTextlnBold("MASTERCARD: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+
                                     break;
-                                case 3 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
-                                    }
-                                    printama.printTextlnBold("DINERS: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
-                                    break;
+
                                 case 4 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
-                                    }
-                                    printama.printTextlnBold("YAPE: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
-                                    break;
-                                case 5 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
-                                    }
-                                    printama.printTextlnBold("AMERICAN EXPRES: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
-                                    break;
-                                case 6 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
-                                    }
-                                    printama.printTextlnBold("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                    printama.printTextlnBold("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
                                     break;
                             }
 
-                            break;
-
-                        case 4 :
-                            printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
-                            printama.printTextlnBold("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
-                            break;
-                    }
-
-                    printama.setSmallText();
-                    printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
-                    printama.setSmallText();
-                    printama.printTextln("                 ", Printama.CENTER);
-                    QRCodeWriter writer = new QRCodeWriter();
-                    BitMatrix bitMatrix;
-                    try {
-                        bitMatrix = writer.encode(QRGenerado, BarcodeFormat.QR_CODE, 200, 200);
-                        int width = bitMatrix.getWidth();
-                        int height = bitMatrix.getHeight();
-                        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-                        for (int x = 0; x < width; x++) {
-                            for (int y = 0; y < height; y++) {
-                                int color = Color.WHITE;
-                                if (bitMatrix.get(x, y)) color = Color.BLACK;
-                                bitmap.setPixel(x, y, color);
-                            }
-                        }
-                        if (bitmap != null) {
-
-                            switch (tipopapel) {
-                                case "58mm":
-                                case "80mm":
+                            printama.setSmallText();
+                            printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
+                            printama.printTextln("                 ", Printama.CENTER);
+                            QRCodeWriter writer = new QRCodeWriter();
+                            BitMatrix bitMatrix;
+                            try {
+                                bitMatrix = writer.encode(QRGenerado, BarcodeFormat.QR_CODE, 200, 200);
+                                int width = bitMatrix.getWidth();
+                                int height = bitMatrix.getHeight();
+                                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+                                for (int x = 0; x < width; x++) {
+                                    for (int y = 0; y < height; y++) {
+                                        int color = Color.WHITE;
+                                        if (bitMatrix.get(x, y)) color = Color.BLACK;
+                                        bitmap.setPixel(x, y, color);
+                                    }
+                                }
+                                if (bitmap != null) {
                                     printama.printImage(bitmap);
+                                }
+                            } catch (WriterException e) {
+                                e.printStackTrace();
+                            }
+                            printama.setSmallText();
+                            printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
+                            break;
+                        case "03" :
+
+                            if (_mtoDescuento > 0) {
+                                printama.printTextln("DESCUENTO: S/ " + MtoDescuento, Printama.RIGHT);
+                            }
+
+                            printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+
+                            switch (_PagoID) {
+                                case 1 :
+                                    printama.printTextlnBold("CONDICION DE PAGO:", Printama.LEFT);
+                                    printama.printTextlnBold("CONTADO: S/ " + MtoTotalFF, Printama.RIGHT);
                                     break;
-                                case "65mm":
-                                    printama.printImageS(bitmap,Printama.RIGHT);
+                                case 2 :
+
+                                    printama.printTextlnBold("CONDICION DE PAGO: CONTADO", Printama.LEFT);
+
+                                    switch (_TarjetaCreditoID) {
+                                        case 1 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("VISA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 2 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("MASTERCARD: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 3 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("DINERS: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 4 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("YAPE: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 5 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("AMERICAN EXPRES: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 6 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                    }
+
+                                    break;
+
+                                case 4 :
+                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                    printama.printTextlnBold("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
                                     break;
                             }
 
-                        }
-                    } catch (WriterException e) {
-                        e.printStackTrace();
+                            printama.setSmallText();
+                            printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
+                            printama.printTextln("                 ", Printama.CENTER);
+                            QRCodeWriter writerB = new QRCodeWriter();
+                            BitMatrix bitMatrixB;
+                            try {
+                                bitMatrixB = writerB.encode(QRGenerado, BarcodeFormat.QR_CODE, 200, 200);
+                                int width = bitMatrixB.getWidth();
+                                int height = bitMatrixB.getHeight();
+                                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+                                for (int x = 0; x < width; x++) {
+                                    for (int y = 0; y < height; y++) {
+                                        int color = Color.WHITE;
+                                        if (bitMatrixB.get(x, y)) color = Color.BLACK;
+                                        bitmap.setPixel(x, y, color);
+                                    }
+                                }
+                                if (bitmap != null) {
+                                    printama.printImage(bitmap);
+                                }
+                            } catch (WriterException e) {
+                                e.printStackTrace();
+                            }
+                            printama.setSmallText();
+                            printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
+                            break;
+                        case "98" :
+                            printama.printTextlnBold("TOTAL VENTA: S/ "+ MtoTotalFF , Printama.RIGHT);
+                            break;
+                        case "99" :
+                            printama.printTextlnBold("TOTAL VENTA: S/ "+ MtoTotalFF , Printama.RIGHT);
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.printTextlnBold("NOMBRE :" , Printama.LEFT);
+                            printama.printTextlnBold("DNI    :" , Printama.LEFT);
+                            printama.printTextlnBold("FIRMA  :" , Printama.LEFT);
+                            printama.addNewLine(1);
+                            break;
                     }
-                    printama.setSmallText();
-                    printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
+
                     break;
-                case "03" :
 
-                    if (_mtoDescuento > 0) {
-                        printama.printTextln("DESCUENTO: S/ " + MtoDescuento, Printama.RIGHT);
+                case "80mm":
+
+                    switch (_TipoDocumento) {
+
+                        case "01" :
+                        case "03" :
+                            printama.printTextln("                 ", Printama.CENTER);
+                            printama.printImage(logoRobles, logoSize);
+                            printama.setSmallText();
+                            if(GlobalInfo.getTerminalNameCompany10){
+                                printama.printTextlnBold(NameCompany, Printama.CENTER);
+                            }else {
+                                printama.printTextlnBold(" ");
+                            }
+                            printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
+                            printama.printTextlnBold(Address2, Printama.CENTER);
+                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                            printama.printTextlnBold(Branch2, Printama.CENTER);
+                            printama.printTextlnBold("RUC: " + RUCCompany, Printama.CENTER);
+
+                            break;
+
+                        case "98" :
+                        case "99" :
+                            printama.printTextln("                 ", Printama.CENTER);
+                            printama.printImage(logoRobles, logoSize);
+                            printama.setSmallText();
+                            if(GlobalInfo.getTerminalNameCompany10){
+                                printama.printTextlnBold(NameCompany, Printama.CENTER);
+                            }else {
+                                printama.printTextlnBold(" ");
+                            }
+                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                            printama.printTextlnBold(Branch2, Printama.CENTER);
+                            break;
                     }
 
-                    printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+                    switch (_TipoDocumento) {
+                        case "01" :
+                            printama.printTextlnBold("FACTURA DE VENTA ELECTRONICA", Printama.CENTER);
+                            break;
+                        case "03" :
+                            printama.printTextlnBold("BOLETA DE VENTA ELECTRONICA", Printama.CENTER);
+                            break;
+                        case "98" :
+                            printama.printTextlnBold("TICKET SERAFIN", Printama.CENTER);
+                            break;
+                        case "99" :
+                            printama.printTextlnBold("NOTA DE DESPACHO", Printama.CENTER);
+                            break;
+                    }
+
+                    printama.printTextlnBold(_NroDocumento,Printama.CENTER);
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
+                    printama.printTextln("Fecha - Hora : " + _FechaDocumento + "  Turno: " + _Turno, Printama.LEFT);
+                    printama.printTextln("Cajero       : "+ _Cajero , Printama.LEFT);
+                    printama.printTextln("Lado         : "+ _nroLado, Printama.LEFT);
+
+                    if (!_NroPlaca.isEmpty()) {
+                        printama.printTextln("Nro. PLaca   : "+ _NroPlaca, Printama.LEFT);
+                    }
+
+                    switch (_TipoDocumento) {
+                        case "01" :
+                            printama.printTextln("RUC          : "+ _ClienteID , Printama.LEFT);
+                            printama.printTextln("Razon Social : "+ _ClienteRZ, Printama.LEFT);
+
+                            if (!_ClienteDR.isEmpty()) {
+                                printama.printTextln("Dirección    : "+ _ClienteDR, Printama.LEFT);
+                            }
+                            if (!_Obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : "+ _Obervacion, Printama.LEFT);
+                            }
+
+                            break;
+                        case "03" :
+
+                            if (CVarios.equals(_ClienteID)){
+
+                            }else {
+                                printama.printTextln("DNI          : "+ _ClienteID , Printama.LEFT);
+                                printama.printTextln("Nombres      : "+ _ClienteRZ, Printama.LEFT);
+
+                                if (!_ClienteDR.isEmpty()) {
+                                    printama.printTextln("Dirección    : "+ _ClienteDR, Printama.LEFT);
+                                }
+
+                                if (!_Obervacion.isEmpty()) {
+                                    printama.printTextln("Observación  : "+ _Obervacion, Printama.LEFT);
+                                }
+
+                            }
+                            break;
+                        case "99" :
+                            if (!_Kilometraje.isEmpty()) {
+                                printama.printTextln("Kilometraje  : " + _Kilometraje, Printama.LEFT);
+                            }
+
+                            if (!_Obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : " + _Obervacion, Printama.LEFT);
+                            }
+                            printama.printTextln("RUC/DNI      : " + _ClienteID, Printama.LEFT);
+                            printama.printTextln("Cliente      : " + _ClienteRZ, Printama.LEFT);
+                            printama.printTextln("#Contrato    : " + _NTarjND , Printama.LEFT);
+
+                            break;
+                    }
 
                     printama.setSmallText();
                     printSeparatorLine(printama, tipopapel);
                     printama.addNewLine(1);
                     printama.setSmallText();
+                    printama.printTextlnBold("PRODUCTO     " + "U/MED   " + "PRECIO   " + "CANTIDAD  " + "IMPORTE", Printama.RIGHT);
+                    printama.setSmallText();
+                    printama.printTextln(_ArticuloDS,Printama.LEFT);
+                    if (_mtoDescuento == 0.00) {
+                        printama.printTextln(_ArticuloUMED+"    " + PrecioFF + "      " + CantidadFF +"     "+ MtoTotalFF,Printama.RIGHT);
+                    } else {
+                        printama.printTextln(_ArticuloUMED+"    " + PrecioFF + "      " + CantidadFF +"     "+ MtoCanjeado,Printama.RIGHT);
+                    }
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
 
-                    switch (_PagoID) {
-                        case 1 :
-                            printama.printTextlnBold("CONDICION DE PAGO:", Printama.LEFT);
-                            printama.printTextlnBold("CONTADO: S/ " + MtoTotalFF, Printama.RIGHT);
-                            break;
-                        case 2 :
+                    switch (_TipoDocumento) {
+                        case "01" :
 
-                            printama.printTextlnBold("CONDICION DE PAGO: CONTADO", Printama.LEFT);
+                            if (_mtoDescuento > 0) {
+                                printama.printTextln("DESCUENTO: S/ " + MtoDescuento, Printama.RIGHT);
+                            }
 
-                            switch (_TarjetaCreditoID) {
+                            printama.printTextln("OP. GRAVADAS: S/ " + MtoSubTotalFF, Printama.RIGHT);
+                            printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
+                            printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+
+                            switch (_PagoID) {
                                 case 1 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
-                                    }
-                                    printama.printTextlnBold("VISA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                    printama.printTextlnBold("CONDICION DE PAGO:", Printama.LEFT);
+                                    printama.printTextlnBold("CONTADO: S/ " + MtoTotalFF, Printama.RIGHT);
                                     break;
                                 case 2 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+
+                                    printama.printTextlnBold("CONDICION DE PAGO: CONTADO", Printama.LEFT);
+
+                                    switch (_TarjetaCreditoID) {
+                                        case 1 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("VISA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 2 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("MASTERCARD: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 3 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("DINERS: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 4 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("YAPE: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 5 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("AMERICAN EXPRES: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 6 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
                                     }
-                                    printama.printTextlnBold("MASTERCARD: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+
                                     break;
-                                case 3 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
-                                    }
-                                    printama.printTextlnBold("DINERS: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
-                                    break;
+
                                 case 4 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
-                                    }
-                                    printama.printTextlnBold("YAPE: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
-                                    break;
-                                case 5 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
-                                    }
-                                    printama.printTextlnBold("AMERICAN EXPRES: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
-                                    break;
-                                case 6 :
-                                    if (_mtoSoles > 0){
-                                        printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
-                                    }
-                                    printama.printTextlnBold("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
-                                    printama.setSmallText();
-                                    printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                    printama.printTextlnBold("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
                                     break;
                             }
 
+                            printama.setSmallText();
+                            printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
+                            printama.printTextln("                 ", Printama.CENTER);
+                            QRCodeWriter writer = new QRCodeWriter();
+                            BitMatrix bitMatrix;
+                            try {
+                                bitMatrix = writer.encode(QRGenerado, BarcodeFormat.QR_CODE, 200, 200);
+                                int width = bitMatrix.getWidth();
+                                int height = bitMatrix.getHeight();
+                                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+                                for (int x = 0; x < width; x++) {
+                                    for (int y = 0; y < height; y++) {
+                                        int color = Color.WHITE;
+                                        if (bitMatrix.get(x, y)) color = Color.BLACK;
+                                        bitmap.setPixel(x, y, color);
+                                    }
+                                }
+                                if (bitmap != null) {
+                                    printama.printImage(bitmap);
+                                }
+                            } catch (WriterException e) {
+                                e.printStackTrace();
+                            }
+                            printama.setSmallText();
+                            printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
+                            break;
+                        case "03" :
+
+                            if (_mtoDescuento > 0) {
+                                printama.printTextln("DESCUENTO: S/ " + MtoDescuento, Printama.RIGHT);
+                            }
+
+                            printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+
+                            switch (_PagoID) {
+                                case 1 :
+                                    printama.printTextlnBold("CONDICION DE PAGO:", Printama.LEFT);
+                                    printama.printTextlnBold("CONTADO: S/ " + MtoTotalFF, Printama.RIGHT);
+                                    break;
+                                case 2 :
+
+                                    printama.printTextlnBold("CONDICION DE PAGO: CONTADO", Printama.LEFT);
+
+                                    switch (_TarjetaCreditoID) {
+                                        case 1 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("VISA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 2 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("MASTERCARD: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 3 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("DINERS: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 4 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("YAPE: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 5 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("AMERICAN EXPRES: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 6 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                    }
+
+                                    break;
+
+                                case 4 :
+                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                    printama.printTextlnBold("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
+                                    break;
+                            }
+
+                            printama.setSmallText();
+                            printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
+                            printama.printTextln("                 ", Printama.CENTER);
+                            QRCodeWriter writerB = new QRCodeWriter();
+                            BitMatrix bitMatrixB;
+                            try {
+                                bitMatrixB = writerB.encode(QRGenerado, BarcodeFormat.QR_CODE, 200, 200);
+                                int width = bitMatrixB.getWidth();
+                                int height = bitMatrixB.getHeight();
+                                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+                                for (int x = 0; x < width; x++) {
+                                    for (int y = 0; y < height; y++) {
+                                        int color = Color.WHITE;
+                                        if (bitMatrixB.get(x, y)) color = Color.BLACK;
+                                        bitmap.setPixel(x, y, color);
+                                    }
+                                }
+                                if (bitmap != null) {
+                                    printama.printImage(bitmap);
+                                }
+                            } catch (WriterException e) {
+                                e.printStackTrace();
+                            }
+                            printama.setSmallText();
+                            printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
+                            break;
+                        case "98" :
+                            printama.printTextlnBold("TOTAL VENTA: S/ "+ MtoTotalFF , Printama.RIGHT);
+                            break;
+                        case "99" :
+                            printama.printTextlnBold("TOTAL VENTA: S/ "+ MtoTotalFF , Printama.RIGHT);
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.printTextlnBold("NOMBRE :" , Printama.LEFT);
+                            printama.printTextlnBold("DNI    :" , Printama.LEFT);
+                            printama.printTextlnBold("FIRMA  :" , Printama.LEFT);
+                            printama.addNewLine(1);
+                            break;
+                    }
+
+                    break;
+
+                case "65mm":
+
+                    switch (_TipoDocumento) {
+
+                        case "01" :
+                        case "03" :
+                            printama.printImage(Printama.RIGHT,logoRobles, logoSize);
+                            printama.setSmallText();
+                            if(GlobalInfo.getTerminalNameCompany10){
+                                printama.printTextlnBold(NameCompany, Printama.CENTER);
+                            }else {
+                                printama.printTextlnBold(" ");
+                            }
+                            printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
+                            printama.printTextlnBold(Address2, Printama.CENTER);
+                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                            printama.printTextlnBold(Branch2, Printama.CENTER);
+                            printama.printTextln("RUC: " + RUCCompany, Printama.CENTER);
+
                             break;
 
-                        case 4 :
-                            printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
-                            printama.printTextlnBold("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
+                        case "98" :
+                        case "99" :
+                            printama.printImage(Printama.RIGHT,logoRobles, logoSize);
+                            printama.setSmallText();
+                            if(GlobalInfo.getTerminalNameCompany10){
+                                printama.printTextlnBold(NameCompany, Printama.CENTER);
+                            }else {
+                                printama.printTextlnBold(" ");
+                            }
+                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                            printama.printTextlnBold(Branch2, Printama.CENTER);
+                            break;
+                    }
+
+                    switch (_TipoDocumento) {
+                        case "01" :
+                            printama.printTextlnBold("FACTURA DE VENTA ELECTRONICA", Printama.CENTER);
+                            break;
+                        case "03" :
+                            printama.printTextlnBold("BOLETA DE VENTA ELECTRONICA", Printama.CENTER);
+                            break;
+                        case "98" :
+                            printama.printTextlnBold("TICKET SERAFIN", Printama.CENTER);
+                            break;
+                        case "99" :
+                            printama.printTextlnBold("NOTA DE DESPACHO", Printama.CENTER);
+                            break;
+                    }
+
+                    printama.printTextln(_NroDocumento,Printama.CENTER);
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
+                    printama.printTextln("Fecha - Hora : " + _FechaDocumento + "  Turno: " + _Turno, Printama.LEFT);
+                    printama.printTextln("Cajero       : "+ _Cajero , Printama.LEFT);
+                    printama.printTextln("Lado         : "+ _nroLado, Printama.LEFT);
+
+                    if (!_NroPlaca.isEmpty()) {
+                        printama.printTextln("Nro. PLaca   : "+ _NroPlaca, Printama.LEFT);
+                    }
+
+                    switch (_TipoDocumento) {
+                        case "01" :
+                            printama.printTextln("RUC          : "+ _ClienteID , Printama.LEFT);
+                            printama.printTextln("Razon Social : "+ _ClienteRZ, Printama.LEFT);
+
+                            if (!_ClienteDR.isEmpty()) {
+                                printama.printTextln("Dirección    : "+ _ClienteDR, Printama.LEFT);
+                            }
+                            if (!_Obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : "+ _Obervacion, Printama.LEFT);
+                            }
+
+                            break;
+                        case "03" :
+
+                            if (CVarios.equals(_ClienteID)){
+
+                            }else {
+                                printama.printTextln("DNI          : "+ _ClienteID , Printama.LEFT);
+                                printama.printTextln("Nombres      : "+ _ClienteRZ, Printama.LEFT);
+
+                                if (!_ClienteDR.isEmpty()) {
+                                    printama.printTextln("Dirección    : "+ _ClienteDR, Printama.LEFT);
+                                }
+
+                                if (!_Obervacion.isEmpty()) {
+                                    printama.printTextln("Observación  : "+ _Obervacion, Printama.LEFT);
+                                }
+
+                            }
+                            break;
+                        case "99" :
+                            if (!_Kilometraje.isEmpty()) {
+                                printama.printTextln("Kilometraje  : " + _Kilometraje, Printama.LEFT);
+                            }
+
+                            if (!_Obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : " + _Obervacion, Printama.LEFT);
+                            }
+                            printama.printTextln("RUC/DNI      : " + _ClienteID, Printama.LEFT);
+                            printama.printTextln("Cliente      : " + _ClienteRZ, Printama.LEFT);
+                            printama.printTextln("#Contrato    : " + _NTarjND , Printama.LEFT);
+
                             break;
                     }
 
                     printama.setSmallText();
-                    printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
-                    printama.printTextln("                 ", Printama.CENTER);
-                    QRCodeWriter writerB = new QRCodeWriter();
-                    BitMatrix bitMatrixB;
-                    try {
-                        bitMatrixB = writerB.encode(QRGenerado, BarcodeFormat.QR_CODE, 200, 200);
-                        int width = bitMatrixB.getWidth();
-                        int height = bitMatrixB.getHeight();
-                        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-                        for (int x = 0; x < width; x++) {
-                            for (int y = 0; y < height; y++) {
-                                int color = Color.WHITE;
-                                if (bitMatrixB.get(x, y)) color = Color.BLACK;
-                                bitmap.setPixel(x, y, color);
-                            }
-                        }
-                        if (bitmap != null) {
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
+                    printama.printTextlnBold("PRODUCTO     " + "U/MED   " + "PRECIO   " + "CANTIDAD  " + "IMPORTE", Printama.RIGHT);
+                    printama.setSmallText();
+                    printama.printTextln(_ArticuloDS,Printama.LEFT);
+                    if (_mtoDescuento == 0.00) {
+                        printama.printTextln(_ArticuloUMED+"    " + PrecioFF + "      " + CantidadFF +"     "+ MtoTotalFF,Printama.RIGHT);
+                    } else {
+                        printama.printTextln(_ArticuloUMED+"    " + PrecioFF + "      " + CantidadFF +"     "+ MtoCanjeado,Printama.RIGHT);
+                    }
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
 
-                            switch (tipopapel) {
-                                case "58mm":
-                                case "80mm":
-                                    printama.printImage(bitmap);
+                    switch (_TipoDocumento) {
+                        case "01" :
+
+                            if (_mtoDescuento > 0) {
+                                printama.printTextln("DESCUENTO: S/ " + MtoDescuento, Printama.RIGHT);
+                            }
+
+                            printama.printTextln("OP. GRAVADAS: S/ " + MtoSubTotalFF, Printama.RIGHT);
+                            printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
+                            printama.printTextln("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+
+                            switch (_PagoID) {
+                                case 1 :
+                                    printama.printTextlnBold("CONDICION DE PAGO:", Printama.LEFT);
+                                    printama.printTextln("CONTADO: S/ " + MtoTotalFF, Printama.RIGHT);
                                     break;
-                                case "65mm":
+                                case 2 :
+
+                                    printama.printTextlnBold("CONDICION DE PAGO: CONTADO", Printama.LEFT);
+
+                                    switch (_TarjetaCreditoID) {
+                                        case 1 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("VISA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 2 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("MASTERCARD: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 3 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("DINERS: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 4 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("YAPE: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 5 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("AMERICAN EXPRES: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 6 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                    }
+
+                                    break;
+
+                                case 4 :
+                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                    printama.printTextln("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
+                                    break;
+                            }
+
+                            printama.setSmallText();
+                            printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
+                            printama.printTextln("                 ", Printama.CENTER);
+                            QRCodeWriter writer = new QRCodeWriter();
+                            BitMatrix bitMatrix;
+                            try {
+                                bitMatrix = writer.encode(QRGenerado, BarcodeFormat.QR_CODE, 200, 200);
+                                int width = bitMatrix.getWidth();
+                                int height = bitMatrix.getHeight();
+                                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+                                for (int x = 0; x < width; x++) {
+                                    for (int y = 0; y < height; y++) {
+                                        int color = Color.WHITE;
+                                        if (bitMatrix.get(x, y)) color = Color.BLACK;
+                                        bitmap.setPixel(x, y, color);
+                                    }
+                                }
+                                if (bitmap != null) {
                                     printama.printImage(Printama.RIGHT,bitmap,200);
+                                }
+                            } catch (WriterException e) {
+                                e.printStackTrace();
+                            }
+                            printama.setSmallText();
+                            printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
+                            break;
+                        case "03" :
+
+                            if (_mtoDescuento > 0) {
+                                printama.printTextln("DESCUENTO: S/ " + MtoDescuento, Printama.RIGHT);
+                            }
+
+                            printama.printTextln("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+
+                            switch (_PagoID) {
+                                case 1 :
+                                    printama.printTextlnBold("CONDICION DE PAGO:", Printama.LEFT);
+                                    printama.printTextln("CONTADO: S/ " + MtoTotalFF, Printama.RIGHT);
+                                    break;
+                                case 2 :
+
+                                    printama.printTextlnBold("CONDICION DE PAGO: CONTADO", Printama.LEFT);
+
+                                    switch (_TarjetaCreditoID) {
+                                        case 1 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("VISA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 2 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("MASTERCARD: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 3 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("DINERS: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 4 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("YAPE: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 5 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("AMERICAN EXPRES: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 6 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                    }
+
+                                    break;
+
+                                case 4 :
+                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                    printama.printTextln("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
                                     break;
                             }
 
-                        }
-                    } catch (WriterException e) {
-                        e.printStackTrace();
+                            printama.setSmallText();
+                            printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
+                            printama.printTextln("                 ", Printama.CENTER);
+                            QRCodeWriter writerB = new QRCodeWriter();
+                            BitMatrix bitMatrixB;
+                            try {
+                                bitMatrixB = writerB.encode(QRGenerado, BarcodeFormat.QR_CODE, 200, 200);
+                                int width = bitMatrixB.getWidth();
+                                int height = bitMatrixB.getHeight();
+                                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+                                for (int x = 0; x < width; x++) {
+                                    for (int y = 0; y < height; y++) {
+                                        int color = Color.WHITE;
+                                        if (bitMatrixB.get(x, y)) color = Color.BLACK;
+                                        bitmap.setPixel(x, y, color);
+                                    }
+                                }
+                                if (bitmap != null) {
+                                    printama.printImage(Printama.RIGHT,bitmap,200);
+                                }
+                            } catch (WriterException e) {
+                                e.printStackTrace();
+                            }
+                            printama.setSmallText();
+                            printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
+                            break;
+                        case "98" :
+                            printama.printTextln("TOTAL VENTA: S/ "+ MtoTotalFF , Printama.RIGHT);
+                            break;
+                        case "99" :
+                            printama.printTextln("TOTAL VENTA: S/ "+ MtoTotalFF , Printama.RIGHT);
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.printTextlnBold("NOMBRE :" , Printama.LEFT);
+                            printama.printTextlnBold("DNI    :" , Printama.LEFT);
+                            printama.printTextlnBold("FIRMA  :" , Printama.LEFT);
+                            printama.addNewLine(1);
+                            break;
                     }
-                    printama.setSmallText();
-                    printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
+
                     break;
-                case "98" :
-                    printama.printTextlnBold("TOTAL VENTA: S/ "+ MtoTotalFF , Printama.RIGHT);
-                    break;
-                case "99" :
-                    printama.printTextlnBold("TOTAL VENTA: S/ "+ MtoTotalFF , Printama.RIGHT);
-                    printama.setSmallText();
-                    printSeparatorLine(printama, tipopapel);
-                    printama.addNewLine(1);
-                    printama.setSmallText();
-                    printama.addNewLine(1);
-                    printama.setSmallText();
-                    printama.printTextlnBold("NOMBRE :" , Printama.LEFT);
-                    printama.printTextlnBold("DNI    :" , Printama.LEFT);
-                    printama.printTextlnBold("FIRMA  :" , Printama.LEFT);
-                    printama.addNewLine(1);
-                    break;
+
             }
 
             printama.feedPaper();

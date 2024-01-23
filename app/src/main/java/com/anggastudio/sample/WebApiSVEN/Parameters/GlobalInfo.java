@@ -24,7 +24,7 @@ public class GlobalInfo {
     /**
      * Tipo de tamaño papel
      */
-    public  static String getTipoPapel10 = "80mm";
+    public  static String getTipoPapel10;
 
     /**
      * Variable de numero de copias impresión
@@ -39,12 +39,13 @@ public class GlobalInfo {
     public static String getTSProductosTotalGLL10;
     public static String getTSProductosTotalSoles10;
     public static String getTSProductosTotalDesc10;
+    public static String getTSProductosTotalIncremento10;
     public static String getTotalPagosSoles10;
     public static String getTotalRTarjetasSoles10;
     public static String getMontoBruto10;
 
     /**
-     * Datos Recycler
+     * Datos lista de Clases
      */
     public  static List<Lados> getladosList10;
     public  static List<Mangueras> getmanguerasList10;
@@ -102,6 +103,15 @@ public class GlobalInfo {
     public static Boolean getuserCancelAnular10;
 
     /**
+     * Datos del Usuario Forzas Cambio
+     */
+
+    public static String getuserIDFE10;
+    public static String getuserNameFE10;
+    public static String getuserPassFE10;
+    public static Boolean getuserCancelFE10;
+
+    /**
      * Datos de los Lados y Mangueras
      */
     public static String getCara10;
@@ -117,6 +127,11 @@ public class GlobalInfo {
     public static Integer getterminalCompanyID10 = 1;
     public static Integer getterminalAlmacenID10;
     public static String  getterminalFechaHoraCierre10;
+    public static boolean getterminalVentaPlaya10;
+    public static boolean getterminalVentaTienda10;
+    public static boolean getTerminalNameCompany10;
+    public static Integer getTerminalImageW10;
+    public static boolean getterminalCvariosPrinter10 = true;
 
     /**
      * Datos de la Setting
@@ -140,6 +155,11 @@ public class GlobalInfo {
     public static String  getsettingtimerAppVenta10;
     public static String  getsettingRutaLogo110;
     public static String  getsettingRutaLogo210;
+    public static boolean getReporteVendedor10;
+    public static boolean getReporteTarjetas10;
+    public static boolean getVentasTipoPago10;
+    public static boolean getVentasProductos10;
+    public static boolean getVentasContometros10;
 
     /**
      * Datos del Cliente RUC-DNI
@@ -206,6 +226,7 @@ public class GlobalInfo {
     public static String  getcorrelativoNumero;
     public static Double  getcorrelativoMDescuento;
     public static String  getcorrelativoDocumentoVenta;
+    public static String  getcorrelativoTipoDesc;
 
     /**
      * Datos de la Cliente Sellecion
@@ -264,16 +285,14 @@ public class GlobalInfo {
 
 
     /**
-     * Datos R. Anulados
+     * Datos Reporte Anulados
      */
 
     public static Integer  getrAnuladosCantidad10;
-    public static String  getrAnuladosSoles10;
-
+    public static String   getrAnuladosSoles10;
     public static Integer  getrDespachosCantidad10;
-    public static String  getrDespachosSoles10;
-
-    public static String getTotalRVenddorSoles10;
+    public static String   getrDespachosSoles10;
+    public static String   getTotalRVenddorSoles10;
 
     /**
      * Setting Turno
@@ -284,18 +303,7 @@ public class GlobalInfo {
     public static Integer  getSettingRango110;
     public static Integer  getSettingRango210;
 
-
     public static String getnfcId10 = String.valueOf(-1);
-
-
-    public static boolean getterminalVentaPlaya10;
-    public static boolean getterminalVentaTienda10;
-
-    public static boolean getReporteVendedor10;
-    public static boolean getReporteTarjetas10;
-    public static boolean getVentasTipoPago10;
-    public static boolean getVentasProductos10;
-    public static boolean getVentasContometros10;
 
     /**|
      * URL - APIService

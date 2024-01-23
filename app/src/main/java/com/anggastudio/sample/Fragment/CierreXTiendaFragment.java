@@ -59,7 +59,7 @@ public class CierreXTiendaFragment extends Fragment {
             TotalSolesproducto,TotalMontoPago,TotalMtogalones,TotalDescuento,totalPagoBruto,
             TotalDescuento2,TotalIncremento,GranTotal;
 
-    String RAnuladosSoles10,RDespachosSoles10,SProductosTotalGLL,SProductosTotalSoles,SProductosTotalDesc,
+    String RAnuladosSoles10,RDespachosSoles10,SProductosTotalGLL,SProductosTotalSoles,SProductosTotalDesc, SProductosTotalIncremento,
             TotalPagosSoles,MontoBruto,TotalRTarjetasSoles;
 
     Button imprimirCierreX;
@@ -81,7 +81,7 @@ public class CierreXTiendaFragment extends Fragment {
 
     ImageView logoCierreX;
 
-    Double AnuladosSoles10,DespachosSoles10, RContometrosTotalGLL, RProductosTotalGLL, RProductosTotalSoles, RProductosTotalDesc, RPagosTotalSoles,RTarjetasTotal,RVendedorTotal;
+    Double AnuladosSoles10,DespachosSoles10, RContometrosTotalGLL, RProductosTotalGLL, RProductosTotalSoles, RProductosTotalDesc, RProductosTotalIncremento, RPagosTotalSoles,RTarjetasTotal,RVendedorTotal;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -158,9 +158,13 @@ public class CierreXTiendaFragment extends Fragment {
         logoCierreX.setImageURI(logoUri);
 
         /** Datos de Cierre Parcial de Caja (X) */
-        /** @Activar:NombreCompania
-        textNombreEmpresa.setText(GlobalInfo.getNameCompany10);*/
-        textNombreEmpresa.setVisibility(View.GONE);
+
+        if(GlobalInfo.getTerminalNameCompany10){
+            textNombreEmpresa.setText(GlobalInfo.getNameCompany10);
+        }else {
+            textNombreEmpresa.setVisibility(View.GONE);
+        }
+
         textSucural.setText("SUCURSAL: " + GlobalInfo.getBranchCompany10);
         FechaHoraIni.setText(GlobalInfo.getterminalFechaHoraCierre10);
         FechaHoraFin.setText(FechaHoraImpresion);
@@ -172,6 +176,7 @@ public class CierreXTiendaFragment extends Fragment {
         RProductosTotalGLL   = 0.00;
         RProductosTotalSoles = 0.00;
         RProductosTotalDesc  = 0.00;
+        RProductosTotalIncremento = 0.00;
         RPagosTotalSoles     = 0.00;
         RTarjetasTotal       = 0.00;
         RVendedorTotal       = 0.00;
@@ -324,10 +329,12 @@ public class CierreXTiendaFragment extends Fragment {
                     SProductosTotalDesc = String.format(Locale.getDefault(), "%,.2f" ,RProductosTotalDesc);
                     GlobalInfo.getTSProductosTotalDesc10 = SProductosTotalDesc;
                     TotalDescuento.setText(SProductosTotalDesc);
-
-                    /** Descuntos y Incrementos */
                     TotalDescuento2.setText(SProductosTotalDesc);
-                    TotalIncremento.setText("0.00");
+
+                    /** Ventas Por Productos - Incremento */
+                    SProductosTotalIncremento = String.format(Locale.getDefault(), "%,.2f" ,RProductosTotalIncremento);
+                    GlobalInfo.getTSProductosTotalIncremento10 = SProductosTotalIncremento;
+                    TotalIncremento.setText(SProductosTotalIncremento);
 
                     /** Pago Bruto - Suma TotalPagosSoles,TotalDesc y TotalIncremento */
                     MontoBruto = String.format(Locale.getDefault(), "%,.2f" ,RProductosTotalSoles + RProductosTotalDesc);
@@ -652,7 +659,23 @@ public class CierreXTiendaFragment extends Fragment {
                 break;
         }
 
+        /** Total de Incremento*/
+        StringBuilder IncrementoTotal = new StringBuilder();
 
+        String IncrementoTotalC       = "Total Incremento";
+        String TSProductosTotalIncrementos  = GlobalInfo.getTSProductosTotalIncremento10;
+
+        switch (tipopapel) {
+            case "65mm":
+            case "80mm":
+                String linees = String.format(Locale.getDefault(), "%-35s  %10s", IncrementoTotalC, TSProductosTotalIncrementos);
+                IncrementoTotal.append(linees);
+                break;
+            case "58mm":
+                String linNees = String.format(Locale.getDefault(), "%-20s  %10s", IncrementoTotalC, TSProductosTotalIncrementos);
+                IncrementoTotal.append(linNees);
+                break;
+        }
 
         /** Monto BRUTO */
         StringBuilder MontoBrutoTotal = new StringBuilder();
@@ -690,99 +713,65 @@ public class CierreXTiendaFragment extends Fragment {
                 break;
         }
 
-        /** @ActivarLogo:Cuadrado
-        int logoSize = (tipopapel.equals("80mm")) ? 200 : (tipopapel.equals("65mm") ? 200 : 400);*/
-
-        int logoSize = (tipopapel.equals("80mm")) ? 400 : (tipopapel.equals("65mm") ? 400 : 200);
+        int logoSize = (tipopapel.equals("80mm")) ? GlobalInfo.getTerminalImageW10 : (tipopapel.equals("65mm") ? GlobalInfo.getTerminalImageW10 : 400);
 
         /** Imprimir Cierre X**/
         Printama.with(getContext()).connect(printama -> {
+
             switch (tipopapel) {
+
                 case "58mm":
-                case "80mm":
-                    printama.printTextln("                 ", Printama.CENTER);
+
+                    printama.addNewLine();
                     printama.printImage(logoRobles, logoSize);
-                    break;
-                case "65mm":
-                    printama.printImage(Printama.RIGHT,logoRobles, logoSize);
-                    break;
-            }
-            printama.setSmallText();
-            /** @Activar:NombreCompania
-            printama.printTextlnBold(NameCompany, Printama.CENTER);*/
-            printama.printTextlnBold(" ");
-            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-            printama.printTextlnBold(Branch2, Printama.CENTER);
-            printama.setSmallText();
-            printSeparatorLine(printama, tipopapel);
-            printama.addNewLine(1);
-            printama.setSmallText();
-            printama.printTextlnBold("CIERRE PARCIAL DE CAJA (X)",Printama.CENTER);
-            printama.addNewLine(1);
-            switch (tipopapel) {
-                case "65mm":
-                case "80mm":
+
+                    printama.setSmallText();
+                    if(GlobalInfo.getTerminalNameCompany10){
+                        printama.printTextlnBold(NameCompany, Printama.CENTER);
+                    }else {
+                        printama.addNewLine();
+                    }
+                    printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                    printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
+                    printama.printTextlnBold("CIERRE PARCIAL DE CAJA (X)",Printama.CENTER);
+                    printama.addNewLine(1);
                     printama.printTextlnBold("Fecha/Hora Inicio : "+ FechaHoraIni,Printama.LEFT);
                     printama.printTextlnBold("Fecha/Hora Fin    : "+ FechaHoraFin , Printama.LEFT);
-                    break;
-                case "58mm":
-                    printama.printTextlnBold("Fec/Hora I : "+ FechaHoraIni,Printama.LEFT);
-                    printama.printTextlnBold("Fec/Hora F : "+ FechaHoraFin , Printama.LEFT);
-                    break;
-            }
-            printama.printTextlnBold("Fecha Trabajo     : "+ FechaTrabajo, Printama.LEFT);
-            printama.printTextlnBold("Turno             : "+ Turno, Printama.LEFT);
-            printama.printTextlnBold("Cajero            : "+ Cajero, Printama.LEFT);
-            printama.printTextlnBold("Nro. Despachos    : "+ NroDespacho, Printama.LEFT);
-            printama.printTextlnBold("Total        (S/) : "+ TotalDespacho, Printama.LEFT);
-            printama.printTextlnBold("Doc. Anulados     : "+ DocAnulados, Printama.LEFT);
-            printama.printTextlnBold("Total Doc. Anulados (S/) : "+ TotalDocAnulados, Printama.LEFT);
+                    printama.printTextlnBold("Fecha Trabajo     : "+ FechaTrabajo, Printama.LEFT);
+                    printama.printTextlnBold("Turno             : "+ Turno, Printama.LEFT);
+                    printama.printTextlnBold("Cajero            : "+ Cajero, Printama.LEFT);
+                    printama.printTextlnBold("Nro. Despachos    : "+ NroDespacho, Printama.LEFT);
+                    printama.printTextlnBold("Total        (S/) : "+ TotalDespacho, Printama.LEFT);
+                    printama.printTextlnBold("Doc. Anulados     : "+ DocAnulados, Printama.LEFT);
+                    printama.printTextlnBold("Total Doc. Anulados (S/) : "+ TotalDocAnulados, Printama.LEFT);
 
-            if(GlobalInfo.getVentasProductos10) {
-                printama.setSmallText();
-                printSeparatorLine(printama, tipopapel);
-                printama.addNewLine(1);
-                printama.setSmallText();
-                printama.printTextlnBold("VENTAS POR PRODUCTOS",Printama.CENTER);
-                printama.addNewLine(1);
-                switch (tipopapel) {
-                    case "65mm":
-                    case "80mm":
-                        printama.printTextlnBold("PRODUCTO      "+"VOLUMEN        "+"SOLES   "+" DESCUENTO",Printama.RIGHT);
-                        printama.printTextlnBold( VProductoBuilder.toString() + "---------" + "    " + "---------" + "    " + "---------", Printama.RIGHT);
-                        printama.printTextlnBold(TotalVolumenPro.toString(),Printama.RIGHT);
-                        break;
-                    case "58mm":
+                    if(GlobalInfo.getVentasProductos10) {
+
+                        printama.setSmallText();
+                        printSeparatorLine(printama, tipopapel);
+                        printama.addNewLine(1);
+                        printama.setSmallText();
+                        printama.printTextlnBold("VENTAS POR PRODUCTOS",Printama.CENTER);
+                        printama.addNewLine(1);
                         printama.printTextlnBold("PRODUCTO        "+"VOL.    "+"S/  "+"DTO.",Printama.RIGHT);
                         printama.printTextlnBold( VProductoBuilder.toString()  + "---------" + "  " + "---------", Printama.RIGHT);
                         printama.printTextlnBold(TotalVolumenPro.toString(),Printama.RIGHT);
-                        break;
-                }
-            }
 
-            if(GlobalInfo.getVentasTipoPago10) {
-                printama.setSmallText();
-                printSeparatorLine(printama, tipopapel);
-                printama.addNewLine(1);
-                printama.setSmallText();
-                printama.printTextlnBold("VENTAS POR TIPO DE PAGO",Printama.CENTER);
-                printama.addNewLine(1);
-                switch (tipopapel) {
-                    case "65mm":
-                    case "80mm":
-                        printama.printTextlnBold( VTipoPagoBuilder.toString(), Printama.RIGHT);
-                        printama.printTextlnBold("Transferencia Gratuito                   "+"  0.00",Printama.RIGHT);
-                        printama.printTextlnBold("Promociones                              "+"  0.00",Printama.RIGHT);
-                        printama.printTextlnBold("---------",Printama.RIGHT);
-                        printama.printTextlnBold(MontoNetoTotal.toString(),Printama.RIGHT);
+                    }
+
+                    if(GlobalInfo.getVentasTipoPago10) {
+
+                        printama.setSmallText();
+                        printSeparatorLine(printama, tipopapel);
                         printama.addNewLine(1);
                         printama.setSmallText();
-                        printama.printTextlnBold(DescuentosTotal.toString(),Printama.RIGHT);
-                        printama.printTextlnBold("Total Incremento                         "+"  0.00",Printama.RIGHT);
-                        printama.printTextlnBold("---------",Printama.RIGHT);
-                        printama.printTextlnBold(MontoBrutoTotal.toString(),Printama.RIGHT);
-                        break;
-                    case "58mm":
+                        printama.printTextlnBold("VENTAS POR TIPO DE PAGO",Printama.CENTER);
+                        printama.addNewLine(1);
                         printama.printTextlnBold( VTipoPagoBuilder.toString(), Printama.RIGHT);
                         printama.printTextlnBold("Transferencia Gratuito    "+"  0.00",Printama.RIGHT);
                         printama.printTextlnBold("Promociones               "+"  0.00",Printama.RIGHT);
@@ -791,39 +780,198 @@ public class CierreXTiendaFragment extends Fragment {
                         printama.addNewLine(1);
                         printama.setSmallText();
                         printama.printTextlnBold(DescuentosTotal.toString(),Printama.RIGHT);
-                        printama.printTextlnBold("Total Incremento          "+"  0.00",Printama.RIGHT);
+                        printama.printTextlnBold(IncrementoTotal.toString(),Printama.RIGHT);
                         printama.printTextlnBold("---------",Printama.RIGHT);
                         printama.printTextlnBold(MontoBrutoTotal.toString(),Printama.RIGHT);
-                        break;
-                }
-            }
 
-            if(GlobalInfo.getReporteTarjetas10) {
-                printama.setSmallText();
-                printSeparatorLine(printama, tipopapel);
-                printama.addNewLine(1);
-                printama.setSmallText();
-                printama.printTextlnBold("REPORTE POR TARJETAS",Printama.CENTER);
-                printama.addNewLine(1);
-                switch (tipopapel) {
-                    case "65mm":
-                    case "80mm":
-                        printama.printTextlnBold("NRO DOCUMENTO     "+"TIPO         "+"REF.      "+"  MONTO",Printama.RIGHT);
-                        printama.printTextlnBold( ReporteTarjetasBuilder.toString() + "---------", Printama.RIGHT);
-                        printama.printTextlnBold(RTarjetaTotal.toString(),Printama.RIGHT);
-                        break;
-                    case "58mm":
+                    }
+
+                    if(GlobalInfo.getReporteTarjetas10) {
+
+                        printama.setSmallText();
+                        printSeparatorLine(printama, tipopapel);
+                        printama.addNewLine(1);
+                        printama.setSmallText();
+                        printama.printTextlnBold("REPORTE POR TARJETAS",Printama.CENTER);
+                        printama.addNewLine(1);
                         printama.printTextlnBold("NRO DOCUMENTO "+"TIPO   "+"REF. "+" MONTO",Printama.RIGHT);
                         printama.printTextlnBold( ReporteTarjetasBuilder.toString() + "---------", Printama.RIGHT);
                         printama.printTextlnBold(RTarjetaTotal.toString(),Printama.RIGHT);
-                        break;
-                }
+
+                    }
+
+                    break;
+
+                case "80mm":
+
+                    printama.addNewLine();
+                    printama.printImage(logoRobles, logoSize);
+
+                    printama.setSmallText();
+                    if(GlobalInfo.getTerminalNameCompany10){
+                        printama.printTextlnBold(NameCompany, Printama.CENTER);
+                    }else {
+                        printama.addNewLine();
+                    }
+                    printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                    printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
+                    printama.printTextlnBold("CIERRE PARCIAL DE CAJA (X)",Printama.CENTER);
+                    printama.addNewLine(1);
+                    printama.printTextlnBold("Fec/Hora I : "+ FechaHoraIni,Printama.LEFT);
+                    printama.printTextlnBold("Fec/Hora F : "+ FechaHoraFin , Printama.LEFT);
+                    printama.printTextlnBold("Fecha Trabajo     : "+ FechaTrabajo, Printama.LEFT);
+                    printama.printTextlnBold("Turno             : "+ Turno, Printama.LEFT);
+                    printama.printTextlnBold("Cajero            : "+ Cajero, Printama.LEFT);
+                    printama.printTextlnBold("Nro. Despachos    : "+ NroDespacho, Printama.LEFT);
+                    printama.printTextlnBold("Total        (S/) : "+ TotalDespacho, Printama.LEFT);
+                    printama.printTextlnBold("Doc. Anulados     : "+ DocAnulados, Printama.LEFT);
+                    printama.printTextlnBold("Total Doc. Anulados (S/) : "+ TotalDocAnulados, Printama.LEFT);
+
+                    if(GlobalInfo.getVentasProductos10) {
+
+                        printama.setSmallText();
+                        printSeparatorLine(printama, tipopapel);
+                        printama.addNewLine(1);
+                        printama.setSmallText();
+                        printama.printTextlnBold("VENTAS POR PRODUCTOS",Printama.CENTER);
+                        printama.addNewLine(1);
+                        printama.printTextlnBold("PRODUCTO      "+"VOLUMEN        "+"SOLES   "+" DESCUENTO",Printama.RIGHT);
+                        printama.printTextlnBold( VProductoBuilder.toString() + "---------" + "    " + "---------" + "    " + "---------", Printama.RIGHT);
+                        printama.printTextlnBold(TotalVolumenPro.toString(),Printama.RIGHT);
+
+                    }
+
+                    if(GlobalInfo.getVentasTipoPago10) {
+
+                        printama.setSmallText();
+                        printSeparatorLine(printama, tipopapel);
+                        printama.addNewLine(1);
+                        printama.setSmallText();
+                        printama.printTextlnBold("VENTAS POR TIPO DE PAGO",Printama.CENTER);
+                        printama.addNewLine(1);
+                        printama.printTextlnBold( VTipoPagoBuilder.toString(), Printama.RIGHT);
+                        printama.printTextlnBold("Transferencia Gratuito                   "+"  0.00",Printama.RIGHT);
+                        printama.printTextlnBold("Promociones                              "+"  0.00",Printama.RIGHT);
+                        printama.printTextlnBold("---------",Printama.RIGHT);
+                        printama.printTextlnBold(MontoNetoTotal.toString(),Printama.RIGHT);
+                        printama.addNewLine(1);
+                        printama.setSmallText();
+                        printama.printTextlnBold(DescuentosTotal.toString(),Printama.RIGHT);
+                        printama.printTextlnBold(IncrementoTotal.toString(),Printama.RIGHT);
+                        printama.printTextlnBold("---------",Printama.RIGHT);
+                        printama.printTextlnBold(MontoBrutoTotal.toString(),Printama.RIGHT);
+
+                    }
+
+                    if(GlobalInfo.getReporteTarjetas10) {
+
+                        printama.setSmallText();
+                        printSeparatorLine(printama, tipopapel);
+                        printama.addNewLine(1);
+                        printama.setSmallText();
+                        printama.printTextlnBold("REPORTE POR TARJETAS",Printama.CENTER);
+                        printama.addNewLine(1);
+                        printama.printTextlnBold("NRO DOCUMENTO     "+"TIPO         "+"REF.      "+"  MONTO",Printama.RIGHT);
+                        printama.printTextlnBold( ReporteTarjetasBuilder.toString() + "---------", Printama.RIGHT);
+                        printama.printTextlnBold(RTarjetaTotal.toString(),Printama.RIGHT);
+
+                    }
+
+                    break;
+
+                case "65mm":
+
+                    printama.printImage(Printama.RIGHT,logoRobles, logoSize);
+
+                    printama.setSmallText();
+                    if(GlobalInfo.getTerminalNameCompany10){
+                        printama.printTextlnBold(NameCompany, Printama.CENTER);
+                    }else {
+                        printama.addNewLine();
+                    }
+                    printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                    printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
+                    printama.printTextlnBold("CIERRE PARCIAL DE CAJA (X)",Printama.CENTER);
+                    printama.addNewLine(1);
+                    printama.printTextln("Fecha/Hora Inicio : "+ FechaHoraIni,Printama.LEFT);
+                    printama.printTextln("Fecha/Hora Fin    : "+ FechaHoraFin , Printama.LEFT);
+                    printama.printTextln("Fecha Trabajo     : "+ FechaTrabajo, Printama.LEFT);
+                    printama.printTextln("Turno             : "+ Turno, Printama.LEFT);
+                    printama.printTextln("Cajero            : "+ Cajero, Printama.LEFT);
+                    printama.printTextln("Nro. Despachos    : "+ NroDespacho, Printama.LEFT);
+                    printama.printTextln("Total        (S/) : "+ TotalDespacho, Printama.LEFT);
+                    printama.printTextln("Doc. Anulados     : "+ DocAnulados, Printama.LEFT);
+                    printama.printTextln("Total Doc. Anulados (S/) : "+ TotalDocAnulados, Printama.LEFT);
+
+                    if(GlobalInfo.getVentasProductos10) {
+
+                        printama.setSmallText();
+                        printSeparatorLine(printama, tipopapel);
+                        printama.addNewLine(1);
+                        printama.setSmallText();
+                        printama.printTextlnBold("VENTAS POR PRODUCTOS",Printama.CENTER);
+                        printama.addNewLine(1);
+                        printama.printTextlnBold("PRODUCTO      "+"VOLUMEN        "+"SOLES   "+" DESCUENTO",Printama.RIGHT);
+                        printama.printTextln( VProductoBuilder.toString() + "---------" + "    " + "---------" + "    " + "---------", Printama.RIGHT);
+                        printama.printTextln(TotalVolumenPro.toString(),Printama.RIGHT);
+
+                    }
+
+                    if(GlobalInfo.getVentasTipoPago10) {
+
+                        printama.setSmallText();
+                        printSeparatorLine(printama, tipopapel);
+                        printama.addNewLine(1);
+                        printama.setSmallText();
+                        printama.printTextlnBold("VENTAS POR TIPO DE PAGO",Printama.CENTER);
+                        printama.addNewLine(1);
+                        printama.printTextln( VTipoPagoBuilder.toString(), Printama.RIGHT);
+                        printama.printTextln("Transferencia Gratuito                   "+"  0.00",Printama.RIGHT);
+                        printama.printTextln("Promociones                              "+"  0.00",Printama.RIGHT);
+                        printama.printTextlnBold("---------",Printama.RIGHT);
+                        printama.printTextln(MontoNetoTotal.toString(),Printama.RIGHT);
+                        printama.addNewLine(1);
+                        printama.setSmallText();
+                        printama.printTextln(DescuentosTotal.toString(),Printama.RIGHT);
+                        printama.printTextln(IncrementoTotal.toString(),Printama.RIGHT);
+                        printama.printTextlnBold("---------",Printama.RIGHT);
+                        printama.printTextln(MontoBrutoTotal.toString(),Printama.RIGHT);
+
+                    }
+
+                    if(GlobalInfo.getReporteTarjetas10) {
+
+                        printama.setSmallText();
+                        printSeparatorLine(printama, tipopapel);
+                        printama.addNewLine(1);
+                        printama.setSmallText();
+                        printama.printTextlnBold("REPORTE POR TARJETAS",Printama.CENTER);
+                        printama.addNewLine(1);
+                        printama.printTextlnBold("NRO DOCUMENTO     "+"TIPO         "+"REF.      "+"  MONTO",Printama.RIGHT);
+                        printama.printTextln( ReporteTarjetasBuilder.toString() + "---------", Printama.RIGHT);
+                        printama.printTextln(RTarjetaTotal.toString(),Printama.RIGHT);
+
+                    }
+
+                    break;
+
             }
 
             printama.addNewLine(1);
             printama.feedPaper();
             printama.close();
             printama.cutPaper();
+
         }, this::showToast);
 
     }

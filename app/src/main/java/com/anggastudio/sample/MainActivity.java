@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_BLUETOOTH_PERMISSION = 1;
     private static final String PREF_TIPO_PAPEL = "pref_tipo_papel";
     RadioGroup radioGroup;
+    TextView textotipopapel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,9 +47,13 @@ public class MainActivity extends AppCompatActivity {
             getSavedPrinter();
         }
 
-        radioGroup = findViewById(R.id.radioFormaPago);
+        radioGroup     = findViewById(R.id.radioFormaPago);
+        textotipopapel = findViewById(R.id.textotipopapel);
 
-        String tipoPapelPredeterminado = GlobalInfo.getTipoPapel10;
+        radioGroup.setVisibility(View.GONE);
+        textotipopapel.setVisibility(View.GONE);
+
+      /*   String tipoPapelPredeterminado = GlobalInfo.getTipoPapel10;
         int radioButtonId = -1;
 
         for (int i = 0; i < radioGroup.getChildCount(); i++) {
@@ -67,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             RadioButton radioButton = findViewById(checkedId);
             GlobalInfo.getTipoPapel10 = radioButton.getText().toString();
             saveTipoPapel(GlobalInfo.getTipoPapel10);
-        });
+        }); */
 
     }
 

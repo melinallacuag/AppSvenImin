@@ -19,15 +19,14 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:fontFamily="@font/nunito_black"
             android:text="SELECCIONAR PROCESO"
             android:textColor="@color/blue"
-            android:textSize="20sp"
-            android:textAlignment="center"
-            android:textStyle="bold" />
+            android:textSize="22sp"
+            android:textAlignment="center" />
 
         <TextView
             android:id="@+id/campo_correlativo"
@@ -39,8 +38,7 @@
             android:text="¿?"
             android:textAlignment="center"
             android:textColor="@color/gris"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textSize="20sp" />
 
 
         <LinearLayout
@@ -59,10 +57,10 @@
                 android:layout_weight="1"
                 android:backgroundTint="@color/colorDanger"
                 android:fontFamily="@font/nunito_extrabold"
-                android:text="cancelar"
+                android:text="@string/btn_cancelar"
                 android:textAllCaps="true"
                 android:textColor="#fff"
-                android:textSize="10sp"
+                android:textSize="14sp"
                 app:cornerRadius="10sp" />
 
             <Button
@@ -79,7 +77,7 @@
                 android:textAllCaps="true"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/colorSuccess"
-                android:textSize="10sp"
+                android:textSize="14sp"
                 app:cornerRadius="10sp" />
 
             <Button
@@ -94,7 +92,7 @@
                 android:textAllCaps="true"
                 android:textColor="@color/white"
                 android:backgroundTint="@color/colorSecondary"
-                android:textSize="10sp"
+                android:textSize="14sp"
                 app:cornerRadius="10sp" />
 
 

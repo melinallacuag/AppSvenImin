@@ -34,6 +34,10 @@ public class Terminal {
     private Boolean cierreX_VTipoPago;
     private Boolean cierreX_RTarjeta;
     private Boolean cierreX_RVendedor;
+    private Boolean nameCompany;
+    private Integer imageW;
+    private String  impresora;
+    private Boolean cVarios_Printer;
 
     public String getTerminalID() {
         return terminalID;
@@ -289,5 +293,37 @@ public class Terminal {
 
     public void setCierreX_RVendedor(Boolean cierreX_RVendedor) {
         this.cierreX_RVendedor = cierreX_RVendedor;
+    }
+
+    public Boolean getNameCompany() {
+        return nameCompany;
+    }
+
+    public void setNameCompany(Boolean nameCompany) {
+        this.nameCompany = nameCompany;
+    }
+
+    public Integer getImageW() {
+        return imageW;
+    }
+
+    public void setImageW(Integer imageW) {
+        this.imageW = imageW;
+    }
+
+    public String getImpresora() {
+        return impresora;
+    }
+
+    public void setImpresora(String impresora) {
+        this.impresora = impresora;
+    }
+
+    public Boolean getcVarios_Printer() {
+        return cVarios_Printer;
+    }
+
+    public void setcVarios_Printer(Boolean cVarios_Printer) {
+        this.cVarios_Printer = cVarios_Printer;
     }
 }
