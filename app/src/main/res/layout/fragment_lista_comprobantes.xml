@@ -26,20 +26,21 @@
             android:fontFamily="@font/nunito_black"
             android:text="LISTA DE COMPROBANTES"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="25sp"
             android:textAlignment="center"
             android:layout_margin="5dp"
-            android:textStyle="bold"
             android:gravity="center_horizontal" />
 
         <androidx.appcompat.widget.SearchView
             android:id="@+id/BuscarRazonSocial"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60sp"
             android:layout_marginTop="5sp"
             android:background="@drawable/input_border"
+            android:fontFamily="@font/nunito_black"
             android:inputType="textCapCharacters"
-            app:queryHint="Buscar por Razón Social"/>
+            android:textSize="20sp"
+            app:queryHint="Buscar por Razón Social" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardtransaccion"
@@ -52,54 +53,54 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="45sp"
+                android:layout_height="60sp"
                 android:gravity="center"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="150sp"
+                    android:layout_width="220sp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_extrabold"
                     android:gravity="center"
                     android:text="FECHA EMISIÓN"
                     android:textColor="@color/white"
-                    android:textSize="14sp" />
+                    android:textSize="18sp" />
 
                 <TextView
-                    android:layout_width="120sp"
+                    android:layout_width="220sp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_extrabold"
                     android:gravity="center"
                     android:text="RUC / DNI"
                     android:textColor="@color/white"
-                    android:textSize="14sp" />
+                    android:textSize="18sp" />
 
                 <TextView
-                    android:layout_width="250sp"
+                    android:layout_width="400sp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_extrabold"
                     android:gravity="center"
                     android:text="RAZÓN SOCIAL"
                     android:textColor="@color/white"
-                    android:textSize="14sp" />
+                    android:textSize="18sp" />
 
                 <TextView
-                    android:layout_width="100sp"
+                    android:layout_width="220sp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_extrabold"
                     android:gravity="center"
                     android:text="TOTAL"
                     android:textColor="@color/white"
-                    android:textSize="14sp" />
+                    android:textSize="18sp" />
 
                 <TextView
-                    android:layout_width="100sp"
+                    android:layout_width="220sp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_extrabold"
                     android:gravity="center"
                     android:text="ANULADO"
                     android:textColor="@color/white"
-                    android:textSize="14sp" />
+                    android:textSize="18sp" />
 
             </LinearLayout>
 
