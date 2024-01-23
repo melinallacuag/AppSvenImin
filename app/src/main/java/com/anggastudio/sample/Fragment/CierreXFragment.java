@@ -939,7 +939,7 @@ public class CierreXFragment extends Fragment {
 
                 case "58mm":
 
-                    printama.addNewLine();
+                    printama.printTextln("                 ", Printama.CENTER);
                     printama.printImage(logoRobles, logoSize);
 
                     printama.setSmallText();
@@ -1051,7 +1051,7 @@ public class CierreXFragment extends Fragment {
 
                 case "80mm":
 
-                    printama.addNewLine();
+                    printama.printTextln("                 ", Printama.CENTER);
                     printama.printImage(logoRobles, logoSize);
 
                     printama.setSmallText();
@@ -1164,7 +1164,6 @@ public class CierreXFragment extends Fragment {
                 case "65mm":
 
                     printama.printImage(Printama.RIGHT,logoRobles, logoSize);
-
                     printama.setSmallText();
                     if(GlobalInfo.getTerminalNameCompany10){
                         printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -1275,8 +1274,8 @@ public class CierreXFragment extends Fragment {
 
             printama.addNewLine(1);
             printama.feedPaper();
-            printama.close();
             printama.cutPaper();
+            printama.close();
 
         }, this::showToast);
 

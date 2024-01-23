@@ -3428,10 +3428,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                         case "01" :
                         case "03" :
-
-                            printama.addNewLine();
+                            printama.printTextln("                 ", Printama.CENTER);
                             printama.printImage(logoRobles, logoSize);
-
                             printama.setSmallText();
                             if(GlobalInfo.getTerminalNameCompany10){
                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -3448,10 +3446,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                         case "98" :
                         case "99" :
-
-                            printama.addNewLine();
+                            printama.printTextln("                 ", Printama.CENTER);
                             printama.printImage(logoRobles, logoSize);
-
                             printama.setSmallText();
                             if(GlobalInfo.getTerminalNameCompany10){
                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -3641,7 +3637,6 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                             printama.setSmallText();
                             printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
-                            printama.setSmallText();
                             printama.printTextln("                 ", Printama.CENTER);
                             QRCodeWriter writer = new QRCodeWriter();
                             BitMatrix bitMatrix;
@@ -3799,10 +3794,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                         case "01" :
                         case "03" :
-
-                            printama.addNewLine();
+                            printama.printTextln("                 ", Printama.CENTER);
                             printama.printImage(logoRobles, logoSize);
-
                             printama.setSmallText();
                             if(GlobalInfo.getTerminalNameCompany10){
                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -3819,10 +3812,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                         case "98" :
                         case "99" :
-
-                            printama.addNewLine();
+                            printama.printTextln("                 ", Printama.CENTER);
                             printama.printImage(logoRobles, logoSize);
-
                             printama.setSmallText();
                             if(GlobalInfo.getTerminalNameCompany10){
                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -4011,7 +4002,6 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                             printama.setSmallText();
                             printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
-                            printama.setSmallText();
                             printama.printTextln("                 ", Printama.CENTER);
                             QRCodeWriter writer = new QRCodeWriter();
                             BitMatrix bitMatrix;
@@ -4169,9 +4159,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                         case "01" :
                         case "03" :
-
                             printama.printImage(Printama.RIGHT,logoRobles, logoSize);
-
                             printama.setSmallText();
                             if(GlobalInfo.getTerminalNameCompany10){
                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -4188,9 +4176,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                         case "98" :
                         case "99" :
-
                             printama.printImage(Printama.RIGHT,logoRobles, logoSize);
-
                             printama.setSmallText();
                             if(GlobalInfo.getTerminalNameCompany10){
                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -4379,7 +4365,6 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                             printama.setSmallText();
                             printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
-                            printama.setSmallText();
                             printama.printTextln("                 ", Printama.CENTER);
                             QRCodeWriter writer = new QRCodeWriter();
                             BitMatrix bitMatrix;
