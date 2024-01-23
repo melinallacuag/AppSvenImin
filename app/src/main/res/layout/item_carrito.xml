@@ -24,17 +24,20 @@
 
             <ImageButton
                 android:id="@+id/btn_eliminar"
-                android:layout_width="35dp"
-                android:layout_height="40dp"
+                android:layout_width="50dp"
+                android:layout_height="55dp"
                 android:scaleType="centerCrop"
                 android:backgroundTint="@color/coloCar"
                 android:layout_gravity="center"
                 android:src="@drawable/icon_borrar"
+                android:layout_marginStart="10sp"
                 android:padding="12dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="20sp"
+                android:layout_marginEnd="10sp"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -50,7 +53,7 @@
                         android:layout_height="wrap_content"
                         android:textColor="@color/black"
                         android:fontFamily="@font/nunito_extrabold"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_weight="1"
                         tools:text="Nombre del Producto"/>
@@ -63,15 +66,15 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="16sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             android:textAlignment="textEnd"
                             android:text="S/. "/>
                         <TextView
                             android:id="@+id/tv_precio_carrito"
-                            android:layout_width="70dp"
+                            android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:textSize="16sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             android:textAlignment="textEnd"
                             tools:text="1000.00"/>
@@ -93,8 +96,8 @@
 
                         <ImageButton
                             android:id="@+id/btn_restar"
-                            android:layout_width="30dp"
-                            android:layout_height="35dp"
+                            android:layout_width="40dp"
+                            android:layout_height="45dp"
                             android:src="@drawable/icon_resta"
                             android:backgroundTint="@color/colorHumo"
                             android:scaleType="centerCrop"
@@ -102,9 +105,9 @@
 
                         <TextView
                             android:id="@+id/tv_cantidad"
-                            android:layout_width="30dp"
+                            android:layout_width="40dp"
                             android:layout_height="match_parent"
-                            android:textSize="14sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
                             android:textAlignment="center"
                             android:gravity="center"
@@ -112,8 +115,8 @@
 
                         <ImageButton
                             android:id="@+id/btn_sumar"
-                            android:layout_width="30dp"
-                            android:layout_height="35dp"
+                            android:layout_width="40dp"
+                            android:layout_height="45dp"
                             android:src="@drawable/icon_suma"
                             android:backgroundTint="@color/coloCar"
                             android:scaleType="centerCrop"
@@ -123,7 +126,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginStart="20dp"
                         android:textAlignment="textEnd"
@@ -133,9 +136,9 @@
 
                     <TextView
                         android:id="@+id/tv_totalprecio_carrito"
-                        android:layout_width="60dp"
+                        android:layout_width="70dp"
                         android:layout_height="match_parent"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
                         android:textAlignment="textEnd"
