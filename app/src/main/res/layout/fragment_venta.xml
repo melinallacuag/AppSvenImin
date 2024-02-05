@@ -59,7 +59,8 @@
                 android:text="@string/ope_cara"
                 android:textColor="@color/black"
                 android:textSize="16sp"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/datos_terminal"
@@ -68,9 +69,10 @@
                 android:fontFamily="@font/nunito_black"
                 android:textAlignment="textEnd"
                 android:textColor="@color/black"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:layout_weight="1"
-                android:gravity="end" />
+                android:gravity="end"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -90,7 +92,8 @@
             android:fontFamily="@font/nunito_black"
             android:text="@string/op_manguera"
             android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -108,7 +111,8 @@
             android:fontFamily="@font/nunito_black"
             android:text="@string/op_modalida"
             android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -166,7 +170,8 @@
             android:fontFamily="@font/nunito_black"
             android:text="@string/op_operacion"
             android:textColor="@color/black"
-            android:textSize="16sp"/>
+            android:textSize="15sp"
+            android:textStyle="bold"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -243,10 +248,25 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="2sp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/colorPrimaryBtn"
+                android:backgroundTint="@color/colorHumo"
                 android:fontFamily="@font/nunito_black"
                 android:gravity="center"
                 android:text="@string/ope_puntos"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                app:cornerRadius="10sp" />
+
+            <Button
+                android:id="@+id/btngratruito"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="2sp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorHumo"
+                android:fontFamily="@font/nunito_black"
+                android:gravity="center"
+                android:text="GRATUITO"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="14sp"
@@ -261,7 +281,8 @@
                 android:backgroundTint="@color/colorPrimaryBtn"
                 android:fontFamily="@font/nunito_black"
                 android:gravity="center"
-                android:text="@string/ope_canje"
+                android:text="GRATUITO"
+                android:visibility="gone"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="14sp"
@@ -274,7 +295,8 @@
             android:fontFamily="@font/nunito_black"
             android:text="@string/op_transacciones"
             android:textColor="@color/black"
-            android:textSize="15sp" />
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardtransaccion"

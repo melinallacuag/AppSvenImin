@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +22,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anggastudio.printama.Printama;
 import com.anggastudio.sample.Adapter.ReporteTarjetasAdapter;
-import com.anggastudio.sample.Adapter.ReporteVendedorAdapter;
-import com.anggastudio.sample.Adapter.VContometroAdapter;
 import com.anggastudio.sample.Adapter.VProductoAdapter;
 import com.anggastudio.sample.Adapter.VTipoPagoAdapter;
 import com.anggastudio.sample.NFCUtil;
@@ -31,8 +30,6 @@ import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
 import com.anggastudio.sample.WebApiSVEN.Models.Optran;
 import com.anggastudio.sample.WebApiSVEN.Models.RAnulados;
 import com.anggastudio.sample.WebApiSVEN.Models.ReporteTarjetas;
-import com.anggastudio.sample.WebApiSVEN.Models.ReporteVendedor;
-import com.anggastudio.sample.WebApiSVEN.Models.VContometro;
 import com.anggastudio.sample.WebApiSVEN.Models.VProducto;
 import com.anggastudio.sample.WebApiSVEN.Models.VTipoPago;
 import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
@@ -59,7 +56,7 @@ public class CierreXTiendaFragment extends Fragment {
             TotalSolesproducto,TotalMontoPago,TotalMtogalones,TotalDescuento,totalPagoBruto,
             TotalDescuento2,TotalIncremento,GranTotal;
 
-    String RAnuladosSoles10,RDespachosSoles10,SProductosTotalGLL,SProductosTotalSoles,SProductosTotalDesc, SProductosTotalIncremento,
+    String RAnuladosSoles10,RDespachosSoles10,SProductosTotalGLL,SProductosTotalSoles,SProductosTotalDesc,SProductosTotalIncremento,
             TotalPagosSoles,MontoBruto,TotalRTarjetasSoles;
 
     Button imprimirCierreX;
@@ -148,23 +145,28 @@ public class CierreXTiendaFragment extends Fragment {
         /**
          * @MOSTRAR:LogoEmpresa
          */
-        String rutaImagen="/storage/emulated/0/appSven/" + GlobalInfo.getsettingRutaLogo210;
-        File file = new File(rutaImagen);
+        String rutaImagen = "/storage/emulated/0/appSven/";
 
-        if(!file.exists()){
-            rutaImagen = "/storage/emulated/0/appSven/logo.png";
+        if (!TextUtils.isEmpty(GlobalInfo.getsettingRutaLogo210)) {
+            rutaImagen += GlobalInfo.getsettingRutaLogo210;
+            File file = new File(rutaImagen);
+            if (!file.exists()) {
+                rutaImagen = "/storage/emulated/0/appSven/sinlogo.jpg";
+            }
+        } else {
+            rutaImagen += "sinlogo.jpg";
         }
-        Uri logoUri = Uri.parse("file://" + rutaImagen);
-        logoCierreX.setImageURI(logoUri);
+
+        Uri imagenProd = Uri.parse("file://" + rutaImagen);
+        logoCierreX.setImageURI(imagenProd);
 
         /** Datos de Cierre Parcial de Caja (X) */
-
         if(GlobalInfo.getTerminalNameCompany10){
             textNombreEmpresa.setText(GlobalInfo.getNameCompany10);
         }else {
             textNombreEmpresa.setVisibility(View.GONE);
         }
-
+        textNombreEmpresa.setVisibility(View.GONE);
         textSucural.setText("SUCURSAL: " + GlobalInfo.getBranchCompany10);
         FechaHoraIni.setText(GlobalInfo.getterminalFechaHoraCierre10);
         FechaHoraFin.setText(FechaHoraImpresion);
@@ -506,10 +508,16 @@ public class CierreXTiendaFragment extends Fragment {
 
         //Bitmap logoRobles = BitmapFactory.decodeResource(getResources(), R.drawable.logoprincipal);
 
-        String rutaImagen="/storage/emulated/0/appSven/" + GlobalInfo.getsettingRutaLogo210;
-        File file = new File(rutaImagen);
-        if(!file.exists()){
-            rutaImagen = "/storage/emulated/0/appSven/sinfoto.jpg";
+        String rutaImagen = "/storage/emulated/0/appSven/";
+
+        if (!TextUtils.isEmpty(GlobalInfo.getsettingRutaLogo210)) {
+            rutaImagen += GlobalInfo.getsettingRutaLogo210;
+            File file = new File(rutaImagen);
+            if (!file.exists()) {
+                rutaImagen = "/storage/emulated/0/appSven/sinlogo.jpg";
+            }
+        } else {
+            rutaImagen += "sinlogo.jpg";
         }
         Bitmap logoRobles = BitmapFactory.decodeFile(rutaImagen);
 
@@ -716,6 +724,7 @@ public class CierreXTiendaFragment extends Fragment {
         int logoSize = (tipopapel.equals("80mm")) ? GlobalInfo.getTerminalImageW10 : (tipopapel.equals("65mm") ? GlobalInfo.getTerminalImageW10 : 400);
 
         /** Imprimir Cierre X**/
+
         Printama.with(getContext()).connect(printama -> {
 
             switch (tipopapel) {

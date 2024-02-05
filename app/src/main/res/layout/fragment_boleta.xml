@@ -17,7 +17,10 @@
             android:background="@drawable/cardmodal"
             android:backgroundTint="@color/white"
             android:orientation="vertical"
-            android:padding="20sp">
+            android:paddingStart="20sp"
+            android:paddingTop="10sp"
+            android:paddingEnd="20sp"
+            android:paddingBottom="10sp">
 
             <TextView
                 android:layout_width="match_parent"
@@ -26,7 +29,7 @@
                 android:fontFamily="@font/nunito_black"
                 android:text="@string/ope_boleta"
                 android:textColor="@color/blue"
-                android:textSize="22sp" />
+                android:textSize="20sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -38,25 +41,25 @@
                     android:id="@+id/alertPlaca"
                     android:layout_width="300sp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:hint="Ingresar N° de Placa"
                     app:boxBackgroundMode="outline"
-                    app:endIconMode="clear_text"
                     app:boxCornerRadiusBottomEnd="15dp"
                     app:boxCornerRadiusTopEnd="15dp"
+                    app:endIconMode="clear_text"
+                    android:layout_weight="1"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
-                    app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
+                    app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error" >
 
-                    <com.google.android.material.textfield.TextInputEditText
+
+                <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/inputPlaca"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_semibold"
+                        android:textSize="16sp"
                         android:inputType="textCapCharacters"
-                        android:text="000-0000"
-                        android:textSize="16sp" />
-
+                        android:text="000-0000"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <Button
@@ -78,23 +81,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textNFC"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:hint="Detectar la Etiqueta NFC"
-                android:layout_marginBottom="5sp"
                 app:boxBackgroundColor="#B5D9F8"
+                android:layout_weight="1"
                 app:boxCornerRadiusBottomEnd="15dp"
                 app:boxCornerRadiusTopEnd="15dp"
+                android:layout_marginBottom="5sp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
-                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error" >
+                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
 
-                <com.google.android.material.textfield.TextInputEditText
+
+            <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_EtiquetaNFC"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -106,19 +110,20 @@
             <Button
                 android:id="@+id/buscarListNFC"
                 android:layout_width="300sp"
-                android:layout_height="60sp"
-                android:layout_marginStart="10sp"
-                android:layout_marginLeft="10sp"
-                android:layout_marginTop="-4sp"
+                android:layout_height="65sp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/colorSecondary"
                 android:fontFamily="@font/nunito_extrabold"
                 android:text="AFILIADOS"
                 android:textColor="@color/white"
+                android:backgroundTint="@color/colorSecondary"
                 android:textSize="14sp"
+                android:layout_marginTop="-4sp"
+                android:layout_marginStart="10sp"
+                android:layout_marginLeft="10sp"
                 app:cornerRadius="10sp" />
 
         </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -128,7 +133,7 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/alertDNI"
-                    android:layout_width="400sp"
+                    android:layout_width="300sp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Ingresar DNI"
@@ -143,7 +148,7 @@
                     app:counterTextAppearance="@style/AppTheme.TextInputLayout.Counter"
                     app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/inputDNI"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -156,17 +161,17 @@
                 <Button
                     android:id="@+id/buscarDNIBoleta"
                     android:layout_width="200sp"
-                    android:layout_height="60sp"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/nunito_extrabold"
+                    android:layout_height="65sp"
+                    android:layout_marginStart="10sp"
                     android:text="@string/btn_reniec"
+                    android:textSize="14sp"
+                    android:layout_weight="1"
+                    app:cornerRadius="10sp"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/colorSecondary"
-                    android:textSize="14sp"
+                    android:fontFamily="@font/nunito_extrabold"
                     android:layout_marginTop="-8sp"
-                    android:layout_marginStart="10sp"
-                    android:layout_marginLeft="10sp"
-                    app:cornerRadius="10sp" />
+                    android:layout_marginLeft="10sp"/>
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -183,16 +188,16 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
                 app:counterTextAppearance="@style/AppTheme.TextInputLayout.Counter"
-                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error" >
+                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
 
-                <com.google.android.material.textfield.TextInputEditText
+
+            <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputNombre"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_semibold"
                     android:inputType="textCapCharacters"
                     android:textSize="16sp" />
-
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -207,16 +212,17 @@
                 app:endIconMode="clear_text"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
-                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error" >
+                app:counterTextAppearance="@style/AppTheme.TextInputLayout.Counter"
+                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
 
-                <com.google.android.material.textfield.TextInputEditText
+
+            <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputDireccion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_semibold"
                     android:inputType="textCapCharacters"
                     android:textSize="16sp" />
-
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -231,16 +237,17 @@
                 app:endIconMode="clear_text"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
+                app:counterTextAppearance="@style/AppTheme.TextInputLayout.Counter"
                 app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
 
-                <com.google.android.material.textfield.TextInputEditText
+
+            <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputObservacion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_semibold"
                     android:inputType="textCapCharacters"
                     android:textSize="16sp" />
-
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -289,26 +296,35 @@
                     android:text="Credito"
                     android:textColor="@color/gris"
                     android:textSize="16sp" />
+                <RadioButton
+                    android:id="@+id/radioGratuito"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:text="Gratuito"
+                    android:visibility="gone"
+                    android:textColor="@color/gris"
+                    android:textSize="16sp" />
             </RadioGroup>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/inputSelectTPago"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:gravity="center"
                 android:background="@drawable/cardlogin"
                 android:backgroundTint="#AFB1B1"
-                android:gravity="center"
-                android:visibility="gone" >
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_height="wrap_content">
 
                 <Spinner
                     android:id="@+id/SpinnerTPago"
-                    android:layout_width="match_parent"
-                    android:layout_height="50sp"
-                    android:layout_gravity="center"
                     android:layout_marginTop="-22sp"
-                    android:gravity="center" />
-
+                    android:gravity="center"
+                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="50sp"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -324,6 +340,21 @@
                 android:gravity="center"
                 android:textColor="@color/white"
                 android:textSize="16sp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/textMensajeGratuito"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_gravity="center"
+                android:background="@drawable/cardlogin"
+                android:backgroundTint="@color/colorNer"
+                android:fontFamily="@font/nunito_semibold"
+                android:text="Se realizara el modo de Pago en Gratuito"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="15sp"
                 android:visibility="gone"/>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -342,7 +373,8 @@
                 app:counterTextAppearance="@style/AppTheme.TextInputLayout.Counter"
                 app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
 
-                <com.google.android.material.textfield.TextInputEditText
+
+            <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputOperacion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -367,7 +399,8 @@
                 app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
                 app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error" >
 
-                <com.google.android.material.textfield.TextInputEditText
+
+            <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputPEfectivo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -375,7 +408,6 @@
                     android:inputType="numberDecimal"
                     android:text="0"
                     android:textSize="16sp" />
-
             </com.google.android.material.textfield.TextInputLayout>
 
             <LinearLayout
@@ -432,5 +464,4 @@
         </LinearLayout>
 
     </ScrollView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

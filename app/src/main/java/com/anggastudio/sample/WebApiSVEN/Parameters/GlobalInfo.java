@@ -7,6 +7,7 @@ import com.anggastudio.sample.WebApiSVEN.Models.CDia;
 import com.anggastudio.sample.WebApiSVEN.Models.ClienteCredito;
 import com.anggastudio.sample.WebApiSVEN.Models.ClientePrecio;
 import com.anggastudio.sample.WebApiSVEN.Models.DetalleVenta;
+import com.anggastudio.sample.WebApiSVEN.Models.Familia;
 import com.anggastudio.sample.WebApiSVEN.Models.LClientes;
 import com.anggastudio.sample.WebApiSVEN.Models.Lados;
 import com.anggastudio.sample.WebApiSVEN.Models.ListaComprobante;
@@ -22,15 +23,9 @@ import java.util.List;
 public class GlobalInfo {
 
     /**
-     * Tipo de tamaño papel
-     */
-    public  static String getTipoPapel10;
-
-    /**
      * Variable de numero de copias impresión
      */
     public static Integer getNumeroVecesIMP10;
-
 
     /**
      * Variable de impresión para el Cierre X
@@ -43,6 +38,7 @@ public class GlobalInfo {
     public static String getTotalPagosSoles10;
     public static String getTotalRTarjetasSoles10;
     public static String getMontoBruto10;
+    public static String getTGratuita10;
 
     /**
      * Datos lista de Clases
@@ -60,6 +56,7 @@ public class GlobalInfo {
     public  static List<VProducto> getvProductoList10;
     public  static List<VTipoPago> getvTipoPagoList10;
     public static  List<ClientePrecio>  getclientePrecioList10;
+    public static  List<Familia>  getfamiliaList10;
     /**
      * Cliente precio
      */
@@ -131,6 +128,7 @@ public class GlobalInfo {
     public static boolean getterminalVentaTienda10;
     public static boolean getTerminalNameCompany10;
     public static Integer getTerminalImageW10;
+    public static String  getTipoPapel10;
     public static boolean getterminalCvariosPrinter10 = true;
 
     /**
@@ -179,7 +177,6 @@ public class GlobalInfo {
     public static String getplacaClienteID10;
     public static String getplacaClienteRZ10;
     public static String getplacaClienteDR10;
-
 
 
     /**
@@ -260,7 +257,6 @@ public class GlobalInfo {
      */
 
     public static Boolean getDescuentoPase = false;
-
     public static String  getdescuentoClienteID10;
     public static String  getdescuentoTipoID10;
     public static String  getdescuentoArticuloID10;
@@ -287,7 +283,6 @@ public class GlobalInfo {
     /**
      * Datos Reporte Anulados
      */
-
     public static Integer  getrAnuladosCantidad10;
     public static String   getrAnuladosSoles10;
     public static Integer  getrDespachosCantidad10;
@@ -297,13 +292,39 @@ public class GlobalInfo {
     /**
      * Setting Turno
      */
-
     public static Integer  getSettingCompanyId10;
     public static Integer  getSettingTurno10;
     public static Integer  getSettingRango110;
     public static Integer  getSettingRango210;
 
+    //
     public static String getnfcId10 = String.valueOf(-1);
+
+
+    /**
+     * Market Comprobantes
+     */
+    public static String  getMarketFormaPago = "E";
+    public static String  getMarketPlaca     = "000-000";
+    public static String  getMarketClienteID = "11111111";
+    public static String  getMarketClienteRZ = "CLIENTE VARIOS";
+    public static String  getMarketClienteDR = "";
+    public static String  getMarketTarjetaCredito = "";
+    public static String  getMarketOperacion = "";
+    public static String  getMarketPEfectivo = "0.00";
+    public static Double getMarketMontoTotal;
+    public static Double getMarketPrecio;
+
+
+    /**
+     * Correlativo Tienda
+     */
+    public static String  getCorrelativoMarketFecha;
+    public static String  getCorrelativoMarketSerie;
+    public static String  getCorrelativoMarketNumero;
+    public static Double  getCorrelativoMarketMDescuento;
+    public static String  getCorrelativoMarketDocumentoVenta;
+    public static String  getCorrelativoMarketTipoDesc;
 
     /**|
      * URL - APIService
@@ -313,9 +334,10 @@ public class GlobalInfo {
     //public static final String BASE_URL = "http://192.168.1.14:8081/";
     //public static final String BASE_URL = "http://192.168.1.20:8081/";
     //public static final String BASE_URL = "http://192.168.1.227:8081/";
-    //public static final String BASE_URL = "http://192.168.1.245:8081/";
+    public static final String BASE_URL = "http://192.168.1.245:8081/";
     //public static final String BASE_URL = "http://192.168.18.43:8081/";
-    public static final String BASE_URL = "http://192.168.18.33:8081/";
+    //public static final String BASE_URL = "http://192.168.18.33:8081/";
+    // public static final String BASE_URL = "http://192.168.1.19:8081/";
 
     public static APIService getAPIService() {
         return getClient(BASE_URL).create(APIService.class);

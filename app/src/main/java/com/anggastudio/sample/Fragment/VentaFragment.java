@@ -1,9 +1,9 @@
 package com.anggastudio.sample.Fragment;
+
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,14 +20,9 @@ import android.nfc.tech.NfcB;
 import android.nfc.tech.NfcF;
 import android.nfc.tech.NfcV;
 import android.os.Bundle;
-import androidx.appcompat.widget.SearchView;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -36,12 +31,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.anggastudio.printama.Printama;
+import com.anggastudio.sample.Adapter.ArticuloGAdapter;
 import com.anggastudio.sample.Adapter.ClienteCreditoAdapter;
 import com.anggastudio.sample.Adapter.DetalleVentaAdapter;
 import com.anggastudio.sample.Adapter.LClienteAdapter;
@@ -54,15 +59,16 @@ import com.anggastudio.sample.Numero_Letras;
 import com.anggastudio.sample.PasswordChecker;
 import com.anggastudio.sample.R;
 import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
+import com.anggastudio.sample.WebApiSVEN.Models.Articulo;
 import com.anggastudio.sample.WebApiSVEN.Models.ClienteCredito;
 import com.anggastudio.sample.WebApiSVEN.Models.ClientePrecio;
 import com.anggastudio.sample.WebApiSVEN.Models.Correlativo;
 import com.anggastudio.sample.WebApiSVEN.Models.DetalleVenta;
-import com.anggastudio.sample.WebApiSVEN.Models.Optran;
-import com.anggastudio.sample.WebApiSVEN.Models.TipoPago;
 import com.anggastudio.sample.WebApiSVEN.Models.LClientes;
 import com.anggastudio.sample.WebApiSVEN.Models.Lados;
 import com.anggastudio.sample.WebApiSVEN.Models.Mangueras;
+import com.anggastudio.sample.WebApiSVEN.Models.Optran;
+import com.anggastudio.sample.WebApiSVEN.Models.TipoPago;
 import com.anggastudio.sample.WebApiSVEN.Models.Users;
 import com.anggastudio.sample.WebApiSVEN.Models.VentaCA;
 import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
@@ -73,15 +79,19 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -107,7 +117,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
     TimerTask timerTask;
     boolean mIsTaskScheduled = false;
 
-    RecyclerView recyclerLados,recyclerMangueras,recyclerLCliente,recyclerDetalleVenta,recyclerLClienteCredito,recyclerListaClientesAfiliados;
+    RecyclerView recyclerPGratuito,recyclerLados,recyclerMangueras,recyclerLCliente,recyclerDetalleVenta,recyclerLClienteCredito,recyclerListaClientesAfiliados;
 
     ClienteCreditoAdapter clienteCreditoAdapter;
 
@@ -123,13 +133,14 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
     TipoPago tipoPago;
     TipoPagoAdapter tipoPagoAdapter;
 
-    TextView  datos_terminal,textMensajePEfectivo;
+    TextView  datos_terminal,textMensajePEfectivo,totalmontoCar;
 
-    Dialog modalNFCLogin,modallistNFC,modalLibre,modalSoles,modalGalones,modalBoleta,modalClienteDNI,modalClienteRUC,modalFactura,modalNotaDespacho,modalSerafin,modalClienteCredito;
+    Dialog modalGratuito,modalNFCLogin,modallistNFC,modalLibre,modalSoles,modalGalones,modalBoleta,modalClienteDNI,modalClienteRUC,modalFactura,modalNotaDespacho,modalSerafin,modalClienteCredito;
 
     Button btnCancelarNFC,btnAceptarNFC,buscarListNFC,btnAutomatico,btnListadoComprobante,btnLibre,btnCancelarLibre,btnAceptarLibre,btnSoles,btnCancelarSoles,btnAgregarSoles,btnGalones,btnCancelarGalones,btnAgregarGalones,
            btnBoleta,btnCancelarBoleta,btnAgregarBoleta,btnGenerarBoleta,buscarPlacaBoleta,buscarDNIBoleta,btnCancelarLCliente,
-            btnFactura,buscarRUCFactura,buscarPlacaFactura,btnCancelarFactura,btnAgregarFactura,btnNotaDespacho,btnCancelarNotaDespacho,btnAgregarNotaDespacho,btnSerafin,btnCancelarSerafin,btnAgregarSerafin;
+            btnFactura,buscarRUCFactura,buscarPlacaFactura,btnCancelarFactura,btnAgregarFactura,btnNotaDespacho,btnCancelarNotaDespacho,btnAgregarNotaDespacho,btnSerafin,btnCancelarSerafin,btnAgregarSerafin,
+            btnGratruito;
 
     TextInputLayout alertuserNFC,alertpasswordNFC,alertSoles,alertGalones,alertPlaca,alertDNI,alertRUC,alertNombre,alertRazSocial,alertPEfectivo,alertOperacion,alertSelectTPago,
             alertCPlaca,alertCTarjeta,alertCCliente,alertCRazSocial;
@@ -148,6 +159,13 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
     FloatingActionButton btncarritocompra;
 
+    LinearLayout btnGuardarPG,btnCancelarPG;
+
+    ArticuloGAdapter articuloGAdapter;
+    List<Articulo> articuloGList;
+    Map<String, Integer> cantidadesSeleccionadas = new HashMap<>();
+    Map<String, Double> nuevosPrecios = new HashMap<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -161,32 +179,8 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
         mAPIService = GlobalInfo.getAPIService();
 
-
-        /*** Carrito de compras***/
-        btncarritocompra = view.findViewById(R.id.btncarritocompra);
-
-            if (GlobalInfo.getterminalVentaTienda10 && GlobalInfo.getterminalVentaPlaya10) {
-                btncarritocompra.setVisibility(View.VISIBLE);
-            } else {
-                btncarritocompra.setVisibility(View.GONE);
-            }
-
-        btncarritocompra.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragmentManagerCarrito = getActivity().getSupportFragmentManager();
-
-                FragmentTransaction fragmentTransactionCarrito = fragmentManagerCarrito.beginTransaction();
-
-                int fragmentContainerCarrito = R.id.fragment_container;
-                ProductosFragment productosFragment = new ProductosFragment();
-                fragmentTransactionCarrito.replace(fragmentContainerCarrito, productosFragment);
-                fragmentTransactionCarrito.addToBackStack(null);
-                fragmentTransactionCarrito.commit();
-            }
-        });
-
         btnAutomatico         = view.findViewById(R.id.btnAutomatico);
+        btncarritocompra      = view.findViewById(R.id.btncarritocompra);
         btnListadoComprobante = view.findViewById(R.id.btnListadoComprobante);
         btnLibre              = view.findViewById(R.id.btnLibre);
         btnSoles              = view.findViewById(R.id.btnSoles);
@@ -196,6 +190,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
         btnNotaDespacho       = view.findViewById(R.id.btnnotadespacho);
         btnSerafin            = view.findViewById(R.id.btnSerafin);
         datos_terminal        = view.findViewById(R.id.datos_terminal);
+        btnGratruito          = view.findViewById(R.id.btngratruito);
 
         /**
          * @Bloquear:Botones
@@ -207,6 +202,75 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
         btnFactura.setEnabled(false);
         btnNotaDespacho.setEnabled(false);
         btnSerafin.setEnabled(false);
+        btnGratruito.setEnabled(false);
+
+        /**
+         * @MODAL:ProductoGratuito
+         */
+
+        modalGratuito = new Dialog(getContext());
+        modalGratuito.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        modalGratuito.setContentView(R.layout.fragmento_gratuito);
+        modalGratuito.setCancelable(false);
+
+        btnGratruito.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                modalGratuito.show();
+
+                btnGuardarPG     = modalGratuito.findViewById(R.id.btnGuardarPG);
+                btnCancelarPG    = modalGratuito.findViewById(R.id.btnCancelarPG);
+                totalmontoCar    = modalGratuito.findViewById(R.id.totalmontoCar);
+                /**
+                 * @MODAL:MostrarListadoClienteDNI
+                 */
+                recyclerPGratuito = modalGratuito.findViewById(R.id.recyclerPGratuito);
+                recyclerPGratuito.setLayoutManager(new LinearLayoutManager(getContext()));
+                getArticuloG();
+
+                btnCancelarPG.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        modalGratuito.dismiss();
+                        reiniciarInteracciones();
+                    }
+                });
+
+                btnGuardarPG.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(getContext(), "Guardar Producto Gratuito", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
+        });
+
+        /**
+         * @VISTA:CarritoCompra
+         */
+        if (GlobalInfo.getterminalVentaTienda10 && GlobalInfo.getterminalVentaPlaya10) {
+            btncarritocompra.setVisibility(View.VISIBLE);
+        } else {
+            btncarritocompra.setVisibility(View.GONE);
+        }
+
+        btncarritocompra.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                FragmentManager fragmentManagerArticulo = getActivity().getSupportFragmentManager();
+                FragmentTransaction fragmentTransactionArticulo = fragmentManagerArticulo.beginTransaction();
+
+                int fragmentContainerArticulo = R.id.fragment_container;
+                ArticuloFragment articuloFragment = new ArticuloFragment();
+                fragmentTransactionArticulo.replace(fragmentContainerArticulo, articuloFragment);
+                fragmentTransactionArticulo.addToBackStack(null);
+                fragmentTransactionArticulo.commit();
+
+            }
+        });
 
         /**
          * @OBTENER:DatosTerminal_IDTurno
@@ -329,7 +393,6 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
         btnSoles.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 modalSoles.show();
 
                 btnCancelarSoles      = modalSoles.findViewById(R.id.btnCancelarSoles);
@@ -1154,7 +1217,6 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                         btnBuscadorClienteRZ  = modalClienteRUC.findViewById(R.id.btnBuscadorClienteRZ);
 
                         btnBuscadorClienteRZ.setIconifiedByDefault(false);
-
                         /** Buscardor por Cliente Raz. Social */
                         btnBuscadorClienteRZ.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                             @Override
@@ -1519,7 +1581,6 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                         btnBuscadorClienteRZ  = modalClienteCredito.findViewById(R.id.btnBuscadorClienteRZ);
 
                         btnBuscadorClienteRZ.setIconifiedByDefault(false);
-
                         /** Buscardor por Cliente Raz. Social */
                         btnBuscadorClienteRZ.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                             @Override
@@ -1893,6 +1954,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                 btnFactura.setEnabled(false);
                 btnNotaDespacho.setEnabled(false);
                 btnSerafin.setEnabled(false);
+                btnGratruito.setEnabled(false);
 
                 Manguera_ByLados();
 
@@ -1939,6 +2001,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                 btnFactura.setEnabled(true);
                 btnNotaDespacho.setEnabled(true);
                 btnSerafin.setEnabled(true);
+                btnGratruito.setEnabled(false);
 
                 GlobalInfo.getManguera10 = item.getMangueraID();
 
@@ -1948,6 +2011,53 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
         recyclerMangueras.setAdapter(manguerasAdapter);
 
+    }
+
+    /**
+     * @APISERVICE:ListadoPGratuito
+     */
+    private void getArticuloG(){
+
+        Call<List<Articulo>> call = mAPIService.getArticuloG();
+
+        call.enqueue(new Callback<List<Articulo>>() {
+            @Override
+            public void onResponse(Call<List<Articulo>> call, Response<List<Articulo>> response) {
+                try {
+
+                    if(!response.isSuccessful()){
+                        Toast.makeText(getContext(), "Codigo de error PG: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    articuloGList = response.body();
+
+                    articuloGAdapter = new ArticuloGAdapter(articuloGList,cantidadesSeleccionadas,nuevosPrecios,totalmontoCar, new ArticuloGAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(Articulo item) {
+
+                        }
+                    });
+
+                    recyclerPGratuito.setAdapter(articuloGAdapter);
+
+
+                }catch (Exception ex){
+                    Toast.makeText(getContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Articulo>> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de conexión APICORE Articulo - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void reiniciarInteracciones() {
+        cantidadesSeleccionadas.clear();
+        nuevosPrecios.clear();
+        articuloGAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -2433,6 +2543,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
         btnAutomatico.setBackgroundColor(Color.parseColor("#001E8A"));
 
         btnListadoComprobante.setEnabled(false);
+        btncarritocompra.setEnabled(false);
 
     }
 
@@ -2470,6 +2581,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
         btnAutomatico.setBackgroundColor(Color.parseColor("#dc3545"));
 
         btnListadoComprobante.setEnabled(true);
+        btncarritocompra.setEnabled(true);
 
     }
 
@@ -2521,7 +2633,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
             @Override
             public void onFailure(Call<Mangueras> call, Throwable t) {
-                Toast.makeText(getContext(), "Error de conexión APICORE", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Error de conexión APICORE Soles", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -2547,7 +2659,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
             @Override
             public void onFailure(Call<Mangueras> call, Throwable t) {
-                Toast.makeText(getContext(), "Error de conexión APICORE", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Error de conexión APICORE Galones", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -2736,6 +2848,12 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             mnobservacionPag = "CONTADO";
                         }
 
+                        /** Articulos Gratuitos mayor a 150.00 **/
+                      /*  if (GlobalInfo.getoptranSoles10 >= 150.00) {
+                            Toast.makeText(getContext(), "Por montos mayores a 150.00 soles debe ingresar articulos gratuitos", Toast.LENGTH_SHORT).show();
+                            return;
+                        }*/
+
                         /** Generamos correlativo para grabar **/
 
                         GlobalInfo.getcorrelativoMDescuento = 0.00;
@@ -2743,27 +2861,27 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                         if (mnRFID.equals("1")) {
 
                             findCorrelativoSINRFID(GlobalInfo.getterminalImei10, mnTipoDocumento, mnClienteID,
-                                    mnClienteRUC, mnClienteRS, mnCliernteDR,
-                                    mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion,
-                                    mnTarjND, mnTarjetaPuntos, mnPtosDisponibles,
-                                    mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
-                                    mnobservacionPag, GlobalInfo.getoptranOperador10,
-                                    mnImpuesto, mnMontoSoles, mnMtoSaldoCredito, mnRFID,
-                                    GlobalInfo.getoptranSoles10, GlobalInfo.getoptranArticuloID10,
-                                    GlobalInfo.getoptranGalones10, String.valueOf(GlobalInfo.getoptranTranID10));
+                                                   mnClienteRUC, mnClienteRS, mnCliernteDR,
+                                                   mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion,
+                                                   mnTarjND, mnTarjetaPuntos, mnPtosDisponibles,
+                                                   mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
+                                                   mnobservacionPag, GlobalInfo.getoptranOperador10,
+                                                   mnImpuesto, mnMontoSoles, mnMtoSaldoCredito, mnRFID,
+                                                   GlobalInfo.getoptranSoles10, GlobalInfo.getoptranArticuloID10,
+                                                   GlobalInfo.getoptranGalones10, String.valueOf(GlobalInfo.getoptranTranID10));
 
 
                         } else {
 
                             findCorrelativoCPE(GlobalInfo.getterminalImei10, mnTipoDocumento, mnClienteID,
-                                    mnClienteRUC, mnClienteRS, mnCliernteDR,
-                                    mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion,
-                                    mnTarjND, mnTarjetaPuntos, mnPtosDisponibles,
-                                    mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
-                                    mnobservacionPag, GlobalInfo.getoptranOperador10,
-                                    mnImpuesto, mnMontoSoles, mnMtoSaldoCredito, mnRFID,
-                                    GlobalInfo.getoptranSoles10, GlobalInfo.getoptranArticuloID10,
-                                    GlobalInfo.getoptranGalones10, String.valueOf(GlobalInfo.getoptranTranID10));
+                                               mnClienteRUC, mnClienteRS, mnCliernteDR,
+                                               mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion,
+                                               mnTarjND, mnTarjetaPuntos, mnPtosDisponibles,
+                                               mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
+                                               mnobservacionPag, GlobalInfo.getoptranOperador10,
+                                               mnImpuesto, mnMontoSoles, mnMtoSaldoCredito, mnRFID,
+                                               GlobalInfo.getoptranSoles10, GlobalInfo.getoptranArticuloID10,
+                                               GlobalInfo.getoptranGalones10, String.valueOf(GlobalInfo.getoptranTranID10));
 
                         }
 
@@ -3045,7 +3163,6 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
     }
 
-
     /**
      * @APISERVICE:GenerarCorrelativoComprobante
      */
@@ -3073,7 +3190,6 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                     List<Correlativo> correlativoList = response.body();
 
                     for(Correlativo correlativo: correlativoList) {
-
                         GlobalInfo.getcorrelativoFecha      = String.valueOf(correlativo.getFechaProceso());
                         GlobalInfo.getcorrelativoSerie      = String.valueOf(correlativo.getSerie());
                         GlobalInfo.getcorrelativoNumero     = String.valueOf(correlativo.getNumero());
@@ -3186,20 +3302,21 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                     /** FIN Calculando los totales **/
 
                     /** GRABAR VENTA EN BASE DE DATOS **/
+
                     grabarVentaCA(GlobalInfo.getterminalCompanyID10, mnTipoDocumento, GRNumeroSerie, GRNumeroDocumento,
-                            GlobalInfo.getterminalID10, mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR,
-                            GlobalInfo.getterminalTurno10, GlobalInfo.getcorrelativoFecha, xFechaDocumento,
-                            GlobalInfo.getoptranFechaTran10,
-                            mnMtoDescuento1, mnMtoSubTotal1, mnMtoImpuesto1, mnMtoPagar,
-                            mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion, mnReferencia,
-                            mnTarjND, mnTarjetaPuntos, mnPtosGanados, mnPtosDisponibles,
-                            mnMtoCanje, GlobalInfo.getuserID10,
-                            mnItem, mnArticuloID, GlobalInfo.getoptranProductoDs10, GlobalInfo.getoptranUniMed10, GlobalInfo.getterminalAlmacenID10,
-                            GlobalInfo.getsettingImpuestoID110, GlobalInfo.getsettingImpuestoValor110, GlobalInfo.getoptranPrecio10, mnPrecioOrig, mnCantidad,
-                            mnFise, GlobalInfo.getoptranTranID10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranManguera10,
-                            mnobservacionDet,
-                            mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoPagar, mnMontoSoles, mnobservacionPag,
-                            mnOperador, mnMtoIncremento1);
+                                  GlobalInfo.getterminalID10, mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR,
+                                  GlobalInfo.getterminalTurno10, GlobalInfo.getcorrelativoFecha, xFechaDocumento,
+                                  GlobalInfo.getoptranFechaTran10,
+                                  mnMtoDescuento1, mnMtoSubTotal1, mnMtoImpuesto1, mnMtoPagar,
+                                  mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion, mnReferencia,
+                                  mnTarjND, mnTarjetaPuntos, mnPtosGanados, mnPtosDisponibles,
+                                  mnMtoCanje, GlobalInfo.getuserID10,
+                                  mnItem, mnArticuloID, GlobalInfo.getoptranProductoDs10, GlobalInfo.getoptranUniMed10, GlobalInfo.getterminalAlmacenID10,
+                                  GlobalInfo.getsettingImpuestoID110, GlobalInfo.getsettingImpuestoValor110, GlobalInfo.getoptranPrecio10, mnPrecioOrig, mnCantidad,
+                                  mnFise, GlobalInfo.getoptranTranID10, GlobalInfo.getoptranNroLado10, GlobalInfo.getoptranManguera10,
+                                  mnobservacionDet,
+                                  mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoPagar, mnMontoSoles, mnobservacionPag,
+                                  mnOperador, mnMtoIncremento1);
 
                     /** FIN GRABAR VENTA EN BASE DE DATOS **/
 
@@ -3314,7 +3431,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                 _fise, xtranID, _nroLado, _manguera,
                 _observacionDet,
                 _pagoID, _tarjetaID, _TarjetaDS, _mtoPagoPEN, _mtoPagoUSD,
-                _observacionPag,_mtoIncremento);
+                _observacionPag, _mtoIncremento);
 
         Call<VentaCA> call = mAPIService.postVentaCA(ventaCA);
 
@@ -3330,7 +3447,7 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
             @Override
             public void onFailure(Call<VentaCA> call, Throwable t) {
-                Toast.makeText(getContext(), "Error de conexión APICORE", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Error de conexión APICORE Grabar Venta", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -3347,12 +3464,26 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                               String _FechaQR, Integer _PagoID, Integer _TarjetaCreditoID, String _OperacionREF,
                               Double _mtoCanjeado, Double _mtoDescuento, Double _mtoSoles){
 
-        String rutaImagen="/storage/emulated/0/appSven/" + GlobalInfo.getsettingRutaLogo210;
+        String rutaImagen = "/storage/emulated/0/appSven/";
+
+        if (!TextUtils.isEmpty(GlobalInfo.getsettingRutaLogo210)) {
+            rutaImagen += GlobalInfo.getsettingRutaLogo210;
+            File file = new File(rutaImagen);
+            if (!file.exists()) {
+                rutaImagen = "/storage/emulated/0/appSven/sinlogo.jpg";
+            }
+        } else {
+            rutaImagen += "sinlogo.jpg";
+        }
+
+        Bitmap logoRobles = BitmapFactory.decodeFile(rutaImagen);
+
+       /* String rutaImagen="/storage/emulated/0/appSven/" + GlobalInfo.getsettingRutaLogo210;
         File file = new File(rutaImagen);
         if(!file.exists()){
             rutaImagen = "/storage/emulated/0/appSven/sinfoto.jpg";
         }
-        Bitmap logoRobles = BitmapFactory.decodeFile(rutaImagen);
+        Bitmap logoRobles = BitmapFactory.decodeFile(rutaImagen);*/
 
         String TipoDNI = "1";
         String CVarios = "11111111";

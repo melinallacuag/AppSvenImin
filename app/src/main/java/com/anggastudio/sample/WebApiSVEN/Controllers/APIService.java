@@ -1,13 +1,15 @@
 package com.anggastudio.sample.WebApiSVEN.Controllers;
 import com.anggastudio.sample.WebApiSVEN.Models.Anular;
+import com.anggastudio.sample.WebApiSVEN.Models.Articulo;
 import com.anggastudio.sample.WebApiSVEN.Models.CDia;
 import com.anggastudio.sample.WebApiSVEN.Models.CTurno;
 import com.anggastudio.sample.WebApiSVEN.Models.ClienteCredito;
 import com.anggastudio.sample.WebApiSVEN.Models.ClientePrecio;
 import com.anggastudio.sample.WebApiSVEN.Models.Company;
 import com.anggastudio.sample.WebApiSVEN.Models.Correlativo;
-import com.anggastudio.sample.WebApiSVEN.Models.Descuentos;
 import com.anggastudio.sample.WebApiSVEN.Models.DetalleVenta;
+import com.anggastudio.sample.WebApiSVEN.Models.Familia;
+import com.anggastudio.sample.WebApiSVEN.Models.Gratuita;
 import com.anggastudio.sample.WebApiSVEN.Models.LClientes;
 import com.anggastudio.sample.WebApiSVEN.Models.Lados;
 import com.anggastudio.sample.WebApiSVEN.Models.ListaComprobante;
@@ -28,6 +30,8 @@ import com.anggastudio.sample.WebApiSVEN.Models.VContometro;
 import com.anggastudio.sample.WebApiSVEN.Models.VProducto;
 import com.anggastudio.sample.WebApiSVEN.Models.VTipoPago;
 import com.anggastudio.sample.WebApiSVEN.Models.VentaCA;
+import com.anggastudio.sample.WebApiSVEN.Models.VentaMarketCA;
+import com.anggastudio.sample.WebApiSVEN.Models.VentaMarketDA;
 
 import java.util.List;
 
@@ -216,6 +220,12 @@ public interface APIService {
     Call<List<VTipoPago>> findVTipoPago(@Path("id") String id,@Path("turno") Integer turno);
 
     /**
+     * Reporte de Transferencia Gratuita
+     */
+    @GET("api/rgratuita/listado/{id}/{turno}")
+    Call<List<Gratuita>> findRGratuita(@Path("id") String id, @Path("turno") Integer turno);
+
+    /**
      * Incio de Día
      */
     @GET("api/cdia/listado/{terminalid}")
@@ -295,4 +305,43 @@ public interface APIService {
     @GET("api/settingturno/listado")
     Call<List<SettingTurno>> getSettingTurno();
 
+    /**
+     * Familia
+     */
+    @GET("api/familia/listado")
+    Call<List<Familia>> getFamilia();
+
+    /**
+     * Articulo
+     */
+    @GET("api/articulo/listado")
+    Call<List<Articulo>> getArticulo();
+
+    /**
+     * @VentaMarketDA
+     */
+    @POST("api/ventamarketda/listado")
+    Call<VentaMarketDA> postVentaMarketDA(@Body VentaMarketDA ventaMarketDA);
+
+    @GET("api/ventamarketda/listado/{tipodoc}/{seriedoc}/{nrodoc}/{nroItem}/{articuloID}/{articuloDS}/{uniMed}/{terminalID}/{fechaDocumento}/{precio1}/{cantidad}/{mtoSubTotal}/{mtoImpuesto}/{mtoTotal}")
+        Call<List<VentaMarketDA>> getMarketDA(@Path("tipodoc") String tipodoc, @Path("seriedoc") String seriedoc, @Path("nrodoc") String nrodoc, @Path("nroItem") Integer nroItem, @Path("articuloID") String articuloID, @Path("articuloDS") String articuloDS, @Path("uniMed") String uniMed, @Path("terminalID") String terminalID, @Path("fechaDocumento") String fechaDocumento, @Path("precio1") Double precio1, @Path("cantidad") Double cantidad, @Path("mtoSubTotal") Double mtoSubTotal, @Path("mtoImpuesto") Double mtoImpuesto, @Path("mtoTotal") Double mtoTotal);
+
+    /**
+     * @VentaMarketCA
+     */
+    @POST("api/ventamarketca/listado")
+    Call<VentaMarketCA> postVentaMarketCA(@Body VentaMarketCA ventaMarketCA);
+
+    @GET("api/ventamarketca/listado/{tipodoc}/{seriedoc}/{nrodoc}/{terminalID}/{clienteID}/{clienteRUC}/{clienteRZ}/{clienteDR}/{fechaDocumento}/{mtoSubTotal}/{mtoImpuesto}/{mtoTotal}/{nroPlaca}/{userID}/{pagoID}/{tarjetaID}/{tarjetaDS}/{mtoPagoPEN}/{mtoPagoUSD}/{observacionPag}")
+    Call<List<VentaMarketCA>> getMarketCA(@Path("tipodoc") String tipodoc, @Path("seriedoc") String seriedoc, @Path("nrodoc") String nrodoc, @Path("terminalID") String terminalID,@Path("clienteID") String clienteID, @Path("clienteRUC") String clienteRUC, @Path("clienteRZ") String clienteRZ, @Path("clienteDR") String clienteDR, @Path("fechaDocumento") String fechaDocumento,@Path("mtoSubTotal") Double mtoSubTotal,@Path("mtoImpuesto") Double mtoImpuesto,@Path("mtoTotal") Double mtoTotal, @Path("nroPlaca") String nroPlaca, @Path("userID") String userID, @Path("pagoID") Integer pagoID, @Path("tarjetaID") Integer tarjetaID,@Path("tarjetaDS") String tarjetaDS,@Path("mtoPagoPEN") Double mtoPagoPEN,@Path("mtoPagoUSD") Double mtoPagoUSD,@Path("observacionPag") String observacionPag);
+
+    /**
+     * @PGratuito
+     */
+
+    /**
+     * Articulo
+     */
+    @GET("api/articulo/listadotg")
+    Call<List<Articulo>> getArticuloG();
 }

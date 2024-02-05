@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -21,14 +19,14 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="60dp"
                 android:layout_weight="1"
                 android:fontFamily="@font/nunito_extrabold"
                 android:gravity="center"
+                android:layout_marginStart="35sp"
                 android:text="Venta de Productos"
                 android:textAlignment="center"
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
             <ImageButton
@@ -78,23 +76,32 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <ImageButton
+                    android:id="@+id/btnpromociones"
+                    android:layout_width="60sp"
+                    android:layout_height="50sp"
+                    android:layout_marginTop="10sp"
+                    android:background="@drawable/input_border"
+                    android:backgroundTint="@color/coloCar"
+                    android:src="@drawable/icons8_promocion" />
+
                 <Button
-                    android:id="@+id/btntodo"
+                    android:id="@+id/btnTodoArticulo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
+                    android:textSize="18sp"
                     android:backgroundTint="@color/colorHumo"
-                    android:textSize="16sp"
                     android:text="Todo" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerCategoria"
+                    android:id="@+id/recyclerFamilia"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/linearLayoutRecyclerProducto"
+                android:id="@+id/linearLayoutRecyclerArticulo"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -131,16 +138,18 @@
                 android:layout_weight="1"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:textColor="@color/black"
-                android:layout_marginStart="35dp"
-                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:layout_marginStart="30dp"
+                android:textSize="20sp"
                 android:fontFamily="@font/nunito_extrabold"
+                android:textStyle="bold"
                 android:text="Ir al Carrito de Compra" />
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_marginEnd="20sp"
                 android:src="@drawable/icons_adelante" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>

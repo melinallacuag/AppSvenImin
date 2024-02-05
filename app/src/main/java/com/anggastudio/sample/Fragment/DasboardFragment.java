@@ -1,24 +1,12 @@
 package com.anggastudio.sample.Fragment;
-import android.Manifest;
+
 import android.app.Dialog;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
-import android.os.Environment;
-import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +14,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.anggastudio.sample.Login;
 import com.anggastudio.sample.NFCUtil;
 import com.anggastudio.sample.PasswordChecker;
@@ -46,13 +40,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DasboardFragment extends Fragment{
-
-    private static final int TU_CODIGO_DE_SOLICITUD_DE_PERMISO = 123;
 
     private APIService mAPIService;
     private NFCUtil nfcUtil;
@@ -67,9 +60,11 @@ public class DasboardFragment extends Fragment{
             modalAlertaCTurnoActual,modalAlertaIngreso,modalInicioDiaGenerado;
 
     ShapeableImageView img_Logo;
+
     ImageView imageee;
 
     TextInputEditText usuario, contraseña;
+
     TextInputLayout alertuser,alertpassword;
 
     String usuarioUser,contraseñaUser;
@@ -118,15 +113,20 @@ public class DasboardFragment extends Fragment{
         /**
          * @MOSTRAR:LogoEmpresa_Dasboard
          */
-        String rutaImagen="/storage/emulated/0/appSven/" + GlobalInfo.getsettingRutaLogo110;
-        File file = new File(rutaImagen);
+        String rutaImagen = "/storage/emulated/0/appSven/";
 
-        if(!file.exists()){
-            rutaImagen = "/storage/emulated/0/appSven/sinfoto.jpg";
+        if (!TextUtils.isEmpty(GlobalInfo.getsettingRutaLogo110)) {
+            rutaImagen += GlobalInfo.getsettingRutaLogo110;
+            File file = new File(rutaImagen);
+            if (!file.exists()) {
+                rutaImagen = "/storage/emulated/0/appSven/sinlogo.jpg";
+            }
+        } else {
+            rutaImagen += "sinlogo.jpg";
         }
 
-        Uri logoUri = Uri.parse("file://" + rutaImagen);
-        img_Logo.setImageURI(logoUri);
+        Uri imagenProd = Uri.parse("file://" + rutaImagen);
+        img_Logo.setImageURI(imagenProd);
 
         /**
          * @OBTENER:DatoGeneralCompania
@@ -146,10 +146,10 @@ public class DasboardFragment extends Fragment{
         modalAlertaIngreso.setCancelable(true);
 
         if (GlobalInfo.getterminalVentaPlaya10) {
-            ventas.setText("GRIFO");
+            ventas.setText("Grifo");
             imageee.setImageResource(R.drawable.icon_salefuel);
         } else if (GlobalInfo.getterminalVentaTienda10) {
-            ventas.setText("TIENDA");
+            ventas.setText("Tienda");
             imageee.setImageResource(R.drawable.iconcaja);
         }
         /**
@@ -162,11 +162,12 @@ public class DasboardFragment extends Fragment{
                 if(GlobalInfo.getterminalVentaPlaya10){
 
                     if ( GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty() ){
+
                         FragmentManager fragmentManagerVenta = getActivity().getSupportFragmentManager();
                         FragmentTransaction fragmentTransactionVenta = fragmentManagerVenta.beginTransaction();
+
                         int fragmentContainerVenta  = R.id.fragment_container;
                         VentaFragment ventaFragment = new VentaFragment();
-
                         fragmentTransactionVenta.replace(fragmentContainerVenta, ventaFragment);
                         fragmentTransactionVenta.addToBackStack(null);
                         fragmentTransactionVenta.commit();
@@ -191,31 +192,31 @@ public class DasboardFragment extends Fragment{
 
                                 FragmentManager fragmentManagerVenta = getActivity().getSupportFragmentManager();
                                 FragmentTransaction fragmentTransactionVenta = fragmentManagerVenta.beginTransaction();
+
                                 int fragmentContainerVenta  = R.id.fragment_container;
                                 VentaFragment ventaFragment = new VentaFragment();
-
                                 fragmentTransactionVenta.replace(fragmentContainerVenta, ventaFragment);
                                 fragmentTransactionVenta.addToBackStack(null);
                                 fragmentTransactionVenta.commit();
 
                                 modalAlertaIngreso.dismiss();
+
                             }
                         });
                     }
 
                 }else if(GlobalInfo.getterminalVentaTienda10){
 
-                    FragmentManager fragmentManagerCarrito = getActivity().getSupportFragmentManager();
+                    FragmentManager fragmentManagerArticulo = getActivity().getSupportFragmentManager();
+                    FragmentTransaction fragmentTransactionArticulo = fragmentManagerArticulo.beginTransaction();
 
-                    FragmentTransaction fragmentTransactionCarrito = fragmentManagerCarrito.beginTransaction();
+                    int fragmentContainerArticulo = R.id.fragment_container;
+                    ArticuloFragment articuloFragment = new ArticuloFragment();
+                    fragmentTransactionArticulo.replace(fragmentContainerArticulo, articuloFragment);
+                    fragmentTransactionArticulo.addToBackStack(null);
+                    fragmentTransactionArticulo.commit();
 
-                    int fragmentContainerCarrito = R.id.fragment_container;
-                    ProductosFragment productosFragment = new ProductosFragment();
-                    fragmentTransactionCarrito.replace(fragmentContainerCarrito, productosFragment);
-                    fragmentTransactionCarrito.addToBackStack(null);
-                    fragmentTransactionCarrito.commit();
                 }
-
             }
         });
 
@@ -367,7 +368,7 @@ public class DasboardFragment extends Fragment{
                                             @Override
                                             public void onClick(View view) {
 
-                                                usuarioUser = usuario.getText().toString();
+                                                usuarioUser    = usuario.getText().toString();
                                                 contraseñaUser = contraseña.getText().toString();
 
                                                 if (usuarioUser.isEmpty()) {
@@ -445,7 +446,7 @@ public class DasboardFragment extends Fragment{
                                             @Override
                                             public void onClick(View view) {
 
-                                                usuarioUser = usuario.getText().toString();
+                                                usuarioUser    = usuario.getText().toString();
                                                 contraseñaUser = contraseña.getText().toString();
 
                                                 if (usuarioUser.isEmpty()) {
@@ -523,7 +524,7 @@ public class DasboardFragment extends Fragment{
                                             @Override
                                             public void onClick(View view) {
 
-                                                usuarioUser = usuario.getText().toString();
+                                                usuarioUser    = usuario.getText().toString();
                                                 contraseñaUser = contraseña.getText().toString();
 
                                                 if (usuarioUser.isEmpty()) {
@@ -545,8 +546,6 @@ public class DasboardFragment extends Fragment{
 
                                     }
                                 });
-
-                                return;
                             }
 
                         }
@@ -716,6 +715,7 @@ public class DasboardFragment extends Fragment{
                                 if (HoraActual >= 0 && HoraActual <= 3000) {
                                     findOptranDia(GlobalInfo.getterminalImei10);
                                 } else {
+
                                     if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
 
                                         /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
@@ -792,6 +792,7 @@ public class DasboardFragment extends Fragment{
 
                                         return;
                                     }
+
                                 }
 
                             } else {
@@ -799,6 +800,7 @@ public class DasboardFragment extends Fragment{
                                 if (HoraActual >= GlobalInfo.getSettingRango110 && HoraActual <= GlobalInfo.getSettingRango210) {
                                     findOptranDia(GlobalInfo.getterminalImei10);
                                 } else {
+
                                     if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
 
                                         /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
@@ -875,6 +877,7 @@ public class DasboardFragment extends Fragment{
 
                                         return;
                                     }
+
                                 }
 
                             }

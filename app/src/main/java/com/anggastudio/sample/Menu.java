@@ -1,11 +1,8 @@
 package com.anggastudio.sample;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
-import android.widget.Toast;
 
-import com.anggastudio.sample.Fragment.CierreXFragment;
 import com.anggastudio.sample.Fragment.DasboardFragment;
 
 public class Menu extends AppCompatActivity{

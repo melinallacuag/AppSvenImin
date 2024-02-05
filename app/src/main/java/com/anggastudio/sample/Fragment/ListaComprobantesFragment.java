@@ -1,38 +1,27 @@
 package com.anggastudio.sample.Fragment;
+
 import android.app.Dialog;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.nfc.NfcAdapter;
-import android.nfc.tech.IsoDep;
-import android.nfc.tech.MifareClassic;
-import android.nfc.tech.MifareUltralight;
-import android.nfc.tech.Ndef;
-import android.nfc.tech.NfcA;
-import android.nfc.tech.NfcB;
-import android.nfc.tech.NfcF;
-import android.nfc.tech.NfcV;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.anggastudio.printama.Printama;
 import com.anggastudio.sample.Adapter.ListaComprobanteAdapter;
-import com.anggastudio.sample.Login;
 import com.anggastudio.sample.NFCUtil;
 import com.anggastudio.sample.Numero_Letras;
 import com.anggastudio.sample.PasswordChecker;
@@ -40,7 +29,6 @@ import com.anggastudio.sample.R;
 import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
 import com.anggastudio.sample.WebApiSVEN.Models.Anular;
 import com.anggastudio.sample.WebApiSVEN.Models.ListaComprobante;
-import com.anggastudio.sample.WebApiSVEN.Models.Mangueras;
 import com.anggastudio.sample.WebApiSVEN.Models.Reimpresion;
 import com.anggastudio.sample.WebApiSVEN.Models.Users;
 import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
@@ -53,6 +41,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.io.File;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -95,7 +84,6 @@ public class ListaComprobantesFragment extends Fragment  {
 
         BuscarRazonSocial   = view.findViewById(R.id.BuscarRazonSocial);
 
-        /** DesactivarIcono del Buscador **/
         BuscarRazonSocial.setIconifiedByDefault(false);
 
         /** Listado de Comprobantes  */
@@ -442,11 +430,19 @@ public class ListaComprobantesFragment extends Fragment  {
                             /**
                              * Iniciar impresión del comprobante
                              */
-                            String rutaImagen="/storage/emulated/0/appSven/" + GlobalInfo.getsettingRutaLogo210;
-                            File file = new File(rutaImagen);
-                            if(!file.exists()){
-                                rutaImagen = "/storage/emulated/0/appSven/sinfoto.jpg";
+
+                            String rutaImagen = "/storage/emulated/0/appSven/";
+
+                            if (!TextUtils.isEmpty(GlobalInfo.getsettingRutaLogo210)) {
+                                rutaImagen += GlobalInfo.getsettingRutaLogo210;
+                                File file = new File(rutaImagen);
+                                if (!file.exists()) {
+                                    rutaImagen = "/storage/emulated/0/appSven/sinlogo.jpg";
+                                }
+                            } else {
+                                rutaImagen += "sinlogo.jpg";
                             }
+
                             Bitmap logoRobles = BitmapFactory.decodeFile(rutaImagen);
 
                             String TipoDNI = "1";
@@ -541,7 +537,6 @@ public class ListaComprobantesFragment extends Fragment  {
                                         case "99" :
                                             printama.printTextln("                 ", Printama.CENTER);
                                             printama.printImage(logoRobles, logoSize);
-
                                             printama.setSmallText();
                                             if(GlobalInfo.getTerminalNameCompany10){
                                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -583,7 +578,9 @@ public class ListaComprobantesFragment extends Fragment  {
                                     printama.printTextln("Fecha-Hora : " + fechaDocumento1, Printama.LEFT);
                                     printama.printTextln("Turno        : " + turno1, Printama.LEFT);
                                     printama.printTextln("Cajero       : " + Cajero1, Printama.LEFT);
-                                    printama.printTextln("Lado         : " + nroLado1, Printama.LEFT);
+                                    if (!nroLado1.isEmpty() && !nroLado1.equals("99")) {
+                                        printama.printTextln("Lado         : " + nroLado1, Printama.LEFT);
+                                    }
                                     if (!nroPlaca1.isEmpty()) {
                                         printama.printTextln("Nro. PLaca   : " + nroPlaca1, Printama.LEFT);
                                     }
@@ -1012,7 +1009,11 @@ public class ListaComprobantesFragment extends Fragment  {
                                     printama.setSmallText();
                                     printama.printTextln("Fecha - Hora : " + fechaDocumento1 + "  Turno: " + turno1, Printama.LEFT);
                                     printama.printTextln("Cajero       : " + Cajero1, Printama.LEFT);
-                                    printama.printTextln("Lado         : " + nroLado1, Printama.LEFT);
+
+                                    if (!nroLado1.isEmpty() && !nroLado1.equals("99")) {
+                                        printama.printTextln("Lado         : " + nroLado1, Printama.LEFT);
+                                    }
+
                                     if (!nroPlaca1.isEmpty()) {
                                         printama.printTextln("Nro. PLaca   : " + nroPlaca1, Printama.LEFT);
                                     }
@@ -1440,7 +1441,9 @@ public class ListaComprobantesFragment extends Fragment  {
                                     printama.setSmallText();
                                     printama.printTextln("Fecha - Hora : " + fechaDocumento1 + "  Turno: " + turno1, Printama.LEFT);
                                     printama.printTextln("Cajero       : " + Cajero1, Printama.LEFT);
-                                    printama.printTextln("Lado         : " + nroLado1, Printama.LEFT);
+                                    if (!nroLado1.isEmpty() && !nroLado1.equals("99")) {
+                                        printama.printTextln("Lado         : " + nroLado1, Printama.LEFT);
+                                    }
                                     if (!nroPlaca1.isEmpty()) {
                                         printama.printTextln("Nro. PLaca   : " + nroPlaca1, Printama.LEFT);
                                     }

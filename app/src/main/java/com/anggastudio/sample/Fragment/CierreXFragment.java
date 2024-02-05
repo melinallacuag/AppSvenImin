@@ -1,36 +1,14 @@
 package com.anggastudio.sample.Fragment;
 
 import android.app.Dialog;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.nfc.NfcAdapter;
-import android.nfc.tech.IsoDep;
-import android.nfc.tech.MifareClassic;
-import android.nfc.tech.MifareUltralight;
-import android.nfc.tech.Ndef;
-import android.nfc.tech.NfcA;
-import android.nfc.tech.NfcB;
-import android.nfc.tech.NfcF;
-import android.nfc.tech.NfcV;
-import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.os.Handler;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -38,8 +16,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.anggastudio.printama.Printama;
-import com.anggastudio.sample.Adapter.LadosAdapter;
 import com.anggastudio.sample.Adapter.ReporteTarjetasAdapter;
 import com.anggastudio.sample.Adapter.ReporteVendedorAdapter;
 import com.anggastudio.sample.Adapter.VContometroAdapter;
@@ -48,8 +29,7 @@ import com.anggastudio.sample.Adapter.VTipoPagoAdapter;
 import com.anggastudio.sample.NFCUtil;
 import com.anggastudio.sample.R;
 import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
-import com.anggastudio.sample.WebApiSVEN.Models.Company;
-import com.anggastudio.sample.WebApiSVEN.Models.Lados;
+import com.anggastudio.sample.WebApiSVEN.Models.Gratuita;
 import com.anggastudio.sample.WebApiSVEN.Models.Optran;
 import com.anggastudio.sample.WebApiSVEN.Models.RAnulados;
 import com.anggastudio.sample.WebApiSVEN.Models.ReporteTarjetas;
@@ -58,18 +38,12 @@ import com.anggastudio.sample.WebApiSVEN.Models.VContometro;
 import com.anggastudio.sample.WebApiSVEN.Models.VProducto;
 import com.anggastudio.sample.WebApiSVEN.Models.VTipoPago;
 import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.StringJoiner;
 import java.util.TimeZone;
 
 import retrofit2.Call;
@@ -85,10 +59,10 @@ public class CierreXFragment extends Fragment {
     TextView TotalDocAnulados,DocAnulados,NroDespacho,TotalDespacho,Cajero,Turno,FechaTrabajo,
             FechaHoraFin,FechaHoraIni,TotalVolumenContometro,textSucural,textNombreEmpresa,
             TotalSolesproducto,TotalMontoPago,TotalMtogalones,TotalDescuento,totalPagoBruto,
-            TotalDescuento2,TotalIncremento,GranTotal,GranVendedorTotal;
+            TotalDescuento2,TotalIncremento,GranTotal,GranVendedorTotal,rgratuita;
 
     String RAnuladosSoles10,RDespachosSoles10, TVolumenContometro,SProductosTotalGLL,SProductosTotalSoles,SProductosTotalDesc,SProductosTotalIncremento,
-            TotalPagosSoles,MontoBruto,TotalRTarjetasSoles,TotalRVendedorSoles;
+            TotalPagosSoles,MontoBruto,TotalRTarjetasSoles,TotalRVendedorSoles,TotalTGratuita;
 
     Button imprimirCierreX;
     Dialog modalAlerta;
@@ -113,9 +87,11 @@ public class CierreXFragment extends Fragment {
     List<RAnulados> rAnuladosList;
     List<RAnulados> rDescuentoList;
 
+    List<Gratuita> gratuitaList;
+
     ImageView logoCierreX;
 
-    Double AnuladosSoles10,DespachosSoles10, RContometrosTotalGLL, RProductosTotalGLL, RProductosTotalSoles, RProductosTotalDesc,RProductosTotalIncremento, RPagosTotalSoles,RTarjetasTotal,RVendedorTotal;
+    Double AnuladosSoles10,DespachosSoles10, RContometrosTotalGLL, RProductosTotalGLL, RProductosTotalSoles, RProductosTotalDesc,RProductosTotalIncremento, RPagosTotalSoles,RTarjetasTotal,RVendedorTotal,RPagosTotalGratuita;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -131,6 +107,7 @@ public class CierreXFragment extends Fragment {
 
         mAPIService = GlobalInfo.getAPIService();
 
+        rgratuita           = view.findViewById(R.id.rgratuita);
         textNombreEmpresa   = view.findViewById(R.id.textNombreEmpresa);
         textSucural         = view.findViewById(R.id.textSucural);
         FechaHoraIni        = view.findViewById(R.id.FechaHoraIni);
@@ -184,14 +161,20 @@ public class CierreXFragment extends Fragment {
         /**
          * @MOSTRAR:LogoEmpresa
          */
-        String rutaImagen="/storage/emulated/0/appSven/" + GlobalInfo.getsettingRutaLogo210;
-        File file = new File(rutaImagen);
+        String rutaImagen = "/storage/emulated/0/appSven/";
 
-        if(!file.exists()){
-            rutaImagen = "/storage/emulated/0/appSven/logo.png";
+        if (!TextUtils.isEmpty(GlobalInfo.getsettingRutaLogo210)) {
+            rutaImagen += GlobalInfo.getsettingRutaLogo210;
+            File file = new File(rutaImagen);
+            if (!file.exists()) {
+                rutaImagen = "/storage/emulated/0/appSven/sinlogo.jpg";
+            }
+        } else {
+            rutaImagen += "sinlogo.jpg";
         }
-        Uri logoUri = Uri.parse("file://" + rutaImagen);
-        logoCierreX.setImageURI(logoUri);
+
+        Uri imagenProd = Uri.parse("file://" + rutaImagen);
+        logoCierreX.setImageURI(imagenProd);
 
         /** Datos de Cierre Parcial de Caja (X) */
 
@@ -213,6 +196,7 @@ public class CierreXFragment extends Fragment {
         RProductosTotalSoles = 0.00;
         RProductosTotalDesc  = 0.00;
         RProductosTotalIncremento = 0.00;
+        RPagosTotalGratuita    = 0.00;
         RPagosTotalSoles     = 0.00;
         RTarjetasTotal       = 0.00;
         RVendedorTotal       = 0.00;
@@ -222,6 +206,9 @@ public class CierreXFragment extends Fragment {
 
         /** Listado de R.Anulados */
         findRAnulados(GlobalInfo.getterminalID10, String.valueOf(GlobalInfo.getterminalTurno10), "A");
+
+        /** Transferencia Gratuita */
+        findRGratuita(GlobalInfo.getterminalID10,GlobalInfo.getterminalTurno10);
 
         /** Listado de Venta por Contometros  */
         recyclerVContometro = view.findViewById(R.id.recyclerVContometro);
@@ -250,6 +237,44 @@ public class CierreXFragment extends Fragment {
 
         return view;
     }
+    /** API SERVICE - TRASFERENCIA GRATUITA */
+    private void findRGratuita(String id,Integer turno){
+
+        Call<List<Gratuita>> call = mAPIService.findRGratuita(id,turno);
+
+        call.enqueue(new Callback<List<Gratuita>>() {
+            @Override
+            public void onResponse(Call<List<Gratuita>> call, Response<List<Gratuita>> response) {
+                try {
+
+                    if(!response.isSuccessful()){
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    gratuitaList = response.body();
+
+                    for(Gratuita gratuita: gratuitaList) {
+                        GlobalInfo.getTGratuita10 = String.format("%.2f",gratuita.getSoles());
+                    }
+
+                    rgratuita.setText(String.valueOf(GlobalInfo.getTGratuita10));
+
+
+                }catch (Exception ex){
+                    Toast.makeText(getContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Gratuita>> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de conexión APICORE R Anulados - RED - WIFI", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+    }
+
     /** API SERVICE - R. Despacho */
     private void findRDespacho(String terminalId, String turno, String tipo){
 
@@ -641,11 +666,18 @@ public class CierreXFragment extends Fragment {
 
         //Bitmap logoRobles = BitmapFactory.decodeResource(getResources(), R.drawable.logoprincipal);
 
-        String rutaImagen="/storage/emulated/0/appSven/" + GlobalInfo.getsettingRutaLogo210;
-        File file = new File(rutaImagen);
-        if(!file.exists()){
-            rutaImagen = "/storage/emulated/0/appSven/sinfoto.jpg";
+        String rutaImagen = "/storage/emulated/0/appSven/";
+
+        if (!TextUtils.isEmpty(GlobalInfo.getsettingRutaLogo210)) {
+            rutaImagen += GlobalInfo.getsettingRutaLogo210;
+            File file = new File(rutaImagen);
+            if (!file.exists()) {
+                rutaImagen = "/storage/emulated/0/appSven/sinlogo.jpg";
+            }
+        } else {
+            rutaImagen += "sinlogo.jpg";
         }
+
         Bitmap logoRobles = BitmapFactory.decodeFile(rutaImagen);
 
         String NameCompany   = GlobalInfo.getNameCompany10;
@@ -670,6 +702,7 @@ public class CierreXFragment extends Fragment {
         String TotalDespacho    = String.valueOf(GlobalInfo.getrDespachosSoles10);
         String DocAnulados      = String.valueOf(GlobalInfo.getrAnuladosCantidad10);
         String TotalDocAnulados = String.valueOf(GlobalInfo.getrAnuladosSoles10);
+        String TGratuita        = String.valueOf(GlobalInfo.getTGratuita10);
 
         /**  Venta por Contometro Digitales **/
         StringBuilder VContometroBuilder = new StringBuilder();
@@ -938,7 +971,6 @@ public class CierreXFragment extends Fragment {
             switch (tipopapel) {
 
                 case "58mm":
-
                     printama.printTextln("                 ", Printama.CENTER);
                     printama.printImage(logoRobles, logoSize);
 
@@ -1006,7 +1038,7 @@ public class CierreXFragment extends Fragment {
                         printama.printTextlnBold("VENTAS POR TIPO DE PAGO",Printama.CENTER);
                         printama.addNewLine(1);
                         printama.printTextlnBold( VTipoPagoBuilder.toString(), Printama.RIGHT);
-                        printama.printTextlnBold("Transferencia Gratuito    "+"  0.00",Printama.RIGHT);
+                        printama.printTextlnBold("Transferencia Gratuito    "+ TGratuita,Printama.RIGHT);
                         printama.printTextlnBold("Promociones               "+"  0.00",Printama.RIGHT);
                         printama.printTextlnBold("---------",Printama.RIGHT);
                         printama.printTextlnBold(MontoNetoTotal.toString(),Printama.RIGHT);
@@ -1053,7 +1085,6 @@ public class CierreXFragment extends Fragment {
 
                     printama.printTextln("                 ", Printama.CENTER);
                     printama.printImage(logoRobles, logoSize);
-
                     printama.setSmallText();
                     if(GlobalInfo.getTerminalNameCompany10){
                         printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -1118,8 +1149,8 @@ public class CierreXFragment extends Fragment {
                         printama.printTextlnBold("VENTAS POR TIPO DE PAGO",Printama.CENTER);
                         printama.addNewLine(1);
                         printama.printTextlnBold( VTipoPagoBuilder.toString(), Printama.RIGHT);
-                        printama.printTextlnBold("Transferencia Gratuito                   "+"  0.00",Printama.RIGHT);
-                        printama.printTextlnBold("Promociones                              "+"  0.00",Printama.RIGHT);
+                        printama.printTextlnBold("Transferencia Gratuito                   " + TGratuita,Printama.RIGHT);
+                        printama.printTextlnBold("Promociones                              " + "0.00",Printama.RIGHT);
                         printama.printTextlnBold("---------",Printama.RIGHT);
                         printama.printTextlnBold(MontoNetoTotal.toString(),Printama.RIGHT);
                         printama.addNewLine(1);
@@ -1153,7 +1184,7 @@ public class CierreXFragment extends Fragment {
                         printama.setSmallText();
                         printama.printTextlnBold("REPORTE POR VENDEDOR",Printama.CENTER);
                         printama.addNewLine(1);
-                        printama.printTextlnBold("NOMBRES            " + "NRO DESPACHOS         " + " SOLES", Printama.RIGHT);
+                        printama.printTextlnBold("NOMBRES             " + "NRO DESPACHOS         " + " SOLES", Printama.RIGHT);
                         printama.printTextlnBold(ReporteVendedorBuilder.toString() + "---------", Printama.RIGHT);
                         printama.printTextlnBold(GranRVendedorTotal.toString(), Printama.RIGHT);
 
@@ -1164,6 +1195,7 @@ public class CierreXFragment extends Fragment {
                 case "65mm":
 
                     printama.printImage(Printama.RIGHT,logoRobles, logoSize);
+
                     printama.setSmallText();
                     if(GlobalInfo.getTerminalNameCompany10){
                         printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -1227,7 +1259,7 @@ public class CierreXFragment extends Fragment {
                         printama.printTextlnBold("VENTAS POR TIPO DE PAGO",Printama.CENTER);
                         printama.addNewLine(1);
                         printama.printTextln( VTipoPagoBuilder.toString(), Printama.RIGHT);
-                        printama.printTextln("Transferencia Gratuito                   "+"  0.00",Printama.RIGHT);
+                        printama.printTextln("Transferencia Gratuito                   "+ TGratuita,Printama.RIGHT);
                         printama.printTextln("Promociones                              "+"  0.00",Printama.RIGHT);
                         printama.printTextlnBold("---------",Printama.RIGHT);
                         printama.printTextln(MontoNetoTotal.toString(),Printama.RIGHT);
