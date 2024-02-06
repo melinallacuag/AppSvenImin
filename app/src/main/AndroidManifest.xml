@@ -26,6 +26,13 @@
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ConfigurarLados"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".Bienvenida"
             android:exported="true"
             android:launchMode="singleInstance">

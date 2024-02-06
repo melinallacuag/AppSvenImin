@@ -1,5 +1,5 @@
 package com.anggastudio.sample;
-import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -7,6 +7,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
 import com.anggastudio.sample.WebApiSVEN.Models.Company;
@@ -20,7 +22,9 @@ import com.anggastudio.sample.WebApiSVEN.Models.Users;
 import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -30,7 +34,7 @@ public class Login extends AppCompatActivity{
     private APIService mAPIService;
     private NFCUtil nfcUtil;
 
-    ImageButton configuracion;
+    ImageButton configuracion,btnConfigurarLados;
     Button btniniciar;
     TextInputEditText inputUsuario, inputContraseña;
     TextInputLayout alertuser,alertpassword;
@@ -57,7 +61,21 @@ public class Login extends AppCompatActivity{
         alertuser       = findViewById(R.id.textusuario);
         alertpassword   = findViewById(R.id.textcontraseña);
         configuracion   = findViewById(R.id.btnconfiguracion);
+        btnConfigurarLados = findViewById(R.id.btnConfigurarLados);
         imeii           = findViewById(R.id.imei);
+
+        configuracion.setColorFilter(getResources().getColor(R.color.white));
+        btnConfigurarLados.setColorFilter(getResources().getColor(R.color.white));
+
+        /**
+         * @CONFIGURAR:Lados
+         */
+        btnConfigurarLados.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent( getApplicationContext(),ConfigurarLados.class));
+            }
+        });
 
         /**
          *  @CONFIGURAR:ImpresoraBluetooth
@@ -70,13 +88,13 @@ public class Login extends AppCompatActivity{
         });
 
         /**
-         *  @OBTENER:Imei
+         * @OBTENER:Imei
          */
         imeii.setText(ObtenerIMEI.getDeviceId(getApplicationContext()));
         GlobalInfo.getterminalImei10 = imeii.getText().toString();
 
         /**
-         *  @INGRESAR:Login
+         * @INGRESAR:Login
          */
         btniniciar.setOnClickListener(new View.OnClickListener() {
 
@@ -108,12 +126,12 @@ public class Login extends AppCompatActivity{
         });
 
         /**
-         *  @LISTADO:SpinnerTipoPago
+         * @LISTADO:SpinnerTipoPago
          */
         getTipoPago();
 
         /**
-         *  @OBTENER_APISERVICE:Terminal
+         * @OBTENER_APISERVICE:Terminal
          */
         findTerminal(GlobalInfo.getterminalImei10.toUpperCase());
 
@@ -300,7 +318,7 @@ public class Login extends AppCompatActivity{
 
             @Override
             public void onFailure(Call<List<Company>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Company - RED - WIFI", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE - RED - WIFI", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -332,7 +350,7 @@ public class Login extends AppCompatActivity{
 
             @Override
             public void onFailure(Call<List<Lados>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Caras - RED - WIFI", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Cara - RED - WIFI", Toast.LENGTH_SHORT).show();
             }
         });
 
