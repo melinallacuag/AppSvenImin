@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:fontFamily="@font/nunito_black"
-            android:text="LISTA DE CLIENTES DE CREIDTO"
+            android:text="LISTA DE CLIENTES DE CREDITO"
             android:textAlignment="center"
             android:textColor="@color/blue"
             android:textSize="22sp"/>
@@ -51,7 +51,7 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="250sp"
+                    android:layout_width="300sp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_extrabold"
                     android:gravity="center"
@@ -60,11 +60,20 @@
                     android:textSize="12sp" />
 
                 <TextView
-                    android:layout_width="100sp"
+                    android:layout_width="180sp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_extrabold"
                     android:gravity="center"
                     android:text="NRO TARJETA"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"/>
+
+                <TextView
+                    android:layout_width="100sp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:gravity="center"
+                    android:text="PRODUCTO"
                     android:textColor="@color/white"
                     android:textSize="12sp"/>
 
