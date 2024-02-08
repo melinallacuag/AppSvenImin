@@ -33,7 +33,7 @@
 
                     <TextView
                         android:id="@+id/textArticuloID"
-                        android:layout_width="80sp"
+                        android:layout_width="90sp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"
@@ -42,7 +42,7 @@
 
                     <TextView
                         android:id="@+id/textClienteID"
-                        android:layout_width="80sp"
+                        android:layout_width="90sp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"
@@ -52,7 +52,7 @@
 
                     <TextView
                         android:id="@+id/textClienteRZ"
-                        android:layout_width="150sp"
+                        android:layout_width="200sp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"
@@ -61,7 +61,7 @@
 
                     <TextView
                         android:id="@+id/textTipoCliente"
-                        android:layout_width="80sp"
+                        android:layout_width="100sp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"
@@ -70,7 +70,7 @@
 
                     <TextView
                         android:id="@+id/textMontoDescuento"
-                        android:layout_width="100sp"
+                        android:layout_width="150sp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"

@@ -66,7 +66,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="18sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"
                             android:textAlignment="textEnd"
                             android:text="S/. "/>
@@ -74,7 +74,7 @@
                             android:id="@+id/tv_precio_carrito"
                             android:layout_width="80dp"
                             android:layout_height="wrap_content"
-                            android:textSize="18sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"
                             android:textAlignment="textEnd"
                             tools:text="1000.00"/>
@@ -107,7 +107,7 @@
                             android:id="@+id/tv_cantidad"
                             android:layout_width="40dp"
                             android:layout_height="match_parent"
-                            android:textSize="16sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"
                             android:textAlignment="center"
                             android:gravity="center"
@@ -126,7 +126,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:textSize="16sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
                         android:layout_marginStart="20dp"
                         android:textAlignment="textEnd"
@@ -136,9 +136,9 @@
 
                     <TextView
                         android:id="@+id/tv_totalprecio_carrito"
-                        android:layout_width="70dp"
+                        android:layout_width="80dp"
                         android:layout_height="match_parent"
-                        android:textSize="16sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
                         android:textAlignment="textEnd"

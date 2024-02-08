@@ -94,32 +94,26 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupButtonClickListener() {
         findViewById(R.id.btn_printer_test).setOnClickListener(v -> {
-            // Lógica específica del botón aquí
 
-
-                for (int i = 0; i <= 1; i += 1) {
-                    printQrReceipt2();
-                }
-
+            printQrReceipt2();
 
         });
     }
 
     private void printQrReceipt2() {
         Bitmap logo = Printama.getBitmapFromVector(this, R.drawable.logo_app);
-        String nota = "Some Text";
+        String nota = "http://4-fact.com/sven/auth/consulta";
         Printama.with(this).connect(printama -> {
+            printama.printTextln("                 ", Printama.CENTER);
             printama.printImage(logo, 200);
             printama.addNewLine();
-            printama.printTextln("Title Text", Printama.CENTER);
-            printama.printTextln("Title Text", Printama.CENTER);
-            printama.printTextln("Title Text", Printama.CENTER);
-            printama.printTextln("Title Text", Printama.CENTER);
-            printama.printTextln("Title Text", Printama.CENTER);
-            printama.printTextln("Title Text", Printama.CENTER);
-            printama.printTextln("Title Text", Printama.CENTER);
-            printama.printDashedLine();
+            printama.setSmallText();
+            printama.printTextln("APPSVEN", Printama.CENTER);
+            printama.printTextln("Sistema Inteligente de Estaciones de Servicio", Printama.CENTER);
             printama.addNewLine();
+            printama.setSmallText();
+            printama.printTextln("Con más de 12 anos de experiencia en soluciones integrales para la gesttión de estaciones de servicio.");
+            printama.printTextln("                 ", Printama.CENTER);
             QRCodeWriter writer = new QRCodeWriter();
             BitMatrix bitMatrix;
             try {
@@ -142,8 +136,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             printama.addNewLine();
+            printama.setSmallText();
             printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
-
             printama.feedPaper();
             printama.cutPaper();
             printama.close();

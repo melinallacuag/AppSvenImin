@@ -325,7 +325,7 @@
                 android:text="Se realizara el modo de Pago en Efectivo"
                 android:textAlignment="center"
                 android:textColor="#fff"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:visibility="gone"/>
 

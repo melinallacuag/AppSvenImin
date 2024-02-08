@@ -27,6 +27,7 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".ConfigurarLados"
+            android:windowSoftInputMode="adjustPan"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

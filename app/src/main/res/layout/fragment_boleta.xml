@@ -339,7 +339,7 @@
                 android:textAlignment="center"
                 android:gravity="center"
                 android:textColor="@color/white"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:visibility="gone"/>
 
             <TextView
@@ -354,7 +354,7 @@
                 android:textAlignment="center"
                 android:gravity="center"
                 android:textColor="@color/white"
-                android:textSize="15sp"
+                android:textSize="18sp"
                 android:visibility="gone"/>
 
             <com.google.android.material.textfield.TextInputLayout

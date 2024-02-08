@@ -1762,7 +1762,7 @@ public class ArticuloFragment extends Fragment {
                     /**
                      * @MOSTRARPEODUCTOS:Columnas3
                      */
-                    GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
+                    GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 8);
                     recyclerArticulo.setLayoutManager(layoutManager);
                     recyclerArticulo.setAdapter(articuloAdapter);
                     articuloAdapter.notifyDataSetChanged();

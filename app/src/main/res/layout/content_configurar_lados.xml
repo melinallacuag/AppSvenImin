@@ -8,7 +8,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="45dp"
+        android:layout_height="60dp"
         android:background="@color/blue"
         android:gravity="center"
         android:orientation="horizontal">
@@ -21,7 +21,7 @@
             android:fontFamily="@font/nunito_extrabold"
             android:text="Configuración de Lados por Punto de Venta"
             android:textColor="@color/white"
-            android:textSize="18sp" />
+            android:textSize="20sp" />
 
     </LinearLayout>
 
@@ -29,145 +29,174 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="14dp">
+        android:padding="25dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/alertTerminalId"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Ingresar Terminal"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="15dp"
-                app:boxCornerRadiusTopEnd="15dp"
-                android:layout_marginRight="10sp"
-                app:endIconMode="clear_text"
-                app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/inputTerminalId"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/nunito_semibold"
-                    android:inputType="textCapCharacters"
-                    android:textSize="16sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/alertNroLado"
-                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Ingresar Número Lado"
-                app:boxBackgroundMode="outline"
-                app:boxCornerRadiusBottomEnd="15dp"
-                app:boxCornerRadiusTopEnd="15dp"
-                app:endIconMode="clear_text"
-                app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/inputNroLado"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/nunito_semibold"
-                    android:inputType="number"
-                    android:textSize="16sp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </LinearLayout>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardtransaccion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/colorPrimaryBtn"
-            android:layout_marginTop="10sp"
-            app:cardCornerRadius="10dp">
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="45sp"
-                android:elevation="1sp"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="150sp"
+                android:layout_width="100sp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginRight="45sp"
+                android:layout_weight="1">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardtransaccion"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/nunito_extrabold"
-                    android:gravity="center"
-                    android:textColor="@color/white"
-                    android:textSize="14sp"
-                    android:text="PUNTO DE VENTA"
-                    android:textStyle="bold" />
-                <TextView
-                    android:layout_width="150sp"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/nunito_extrabold"
-                    android:gravity="center"
-                    android:textColor="@color/white"
-                    android:textSize="14sp"
-                    android:text="NRO. LADO"
-                    android:textStyle="bold"/>
+                    android:backgroundTint="@color/colorPrimaryBtn"
+                    android:layout_marginTop="10sp"
+                    app:cardCornerRadius="10dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="45sp"
+                        android:elevation="1sp"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="200sp"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/nunito_extrabold"
+                            android:gravity="center"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:text="PUNTO DE VENTA"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="200sp"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/nunito_extrabold"
+                            android:gravity="center"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:text="NRO. LADO"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="10sp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerCLados"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_marginTop="5sp"
-            android:layout_height="500sp"
-            android:orientation="vertical">
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerCLados"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnEliminaCLado"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:layout_margin="2sp"
-                android:backgroundTint="@color/colorDanger"
-                android:fontFamily="@font/nunito_extrabold"
-                android:text="eliminar"
-                android:textAllCaps="true"
-                android:textColor="@color/white"
-                android:textSize="14sp" />
+                android:orientation="vertical"
+                android:layout_weight="1">
 
-            <Button
-                android:id="@+id/btnAgregarCLado"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="2sp"
-                android:layout_weight="1"
-                android:fontFamily="@font/nunito_extrabold"
-                android:text="GUARDAR"
-                android:textAllCaps="true"
-                android:backgroundTint="@color/colorSuccess"
-                android:textColor="@color/white"
-                android:textSize="14sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20sp"
+                    android:fontFamily="@font/nunito_black"
+                    android:text="INGRESAR DATOS"
+                    android:textSize="20sp"
+                    android:textAlignment="center"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="20sp"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/alertTerminalId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Ingresar Terminal"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="15dp"
+                    app:boxCornerRadiusTopEnd="15dp"
+                    android:layout_marginRight="10sp"
+                    app:endIconMode="clear_text"
+                    android:layout_marginBottom="25sp"
+                    app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputTerminalId"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/nunito_semibold"
+                        android:inputType="textCapCharacters"
+                        android:textSize="16sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/alertNroLado"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Ingresar Número Lado"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="15dp"
+                    app:boxCornerRadiusTopEnd="15dp"
+                    app:endIconMode="clear_text"
+                    android:layout_marginBottom="25sp"
+                    app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputNroLado"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/nunito_semibold"
+                        android:inputType="number"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <Button
+                        android:id="@+id/btnEliminaCLado"
+                        android:layout_width="match_parent"
+                        android:layout_height="60sp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:layout_margin="2sp"
+                        android:backgroundTint="@color/colorDanger"
+                        android:fontFamily="@font/nunito_extrabold"
+                        android:text="eliminar"
+                        android:textAllCaps="true"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/btnAgregarCLado"
+                        android:layout_width="match_parent"
+                        android:layout_height="60sp"
+                        android:layout_gravity="center"
+                        android:layout_margin="2sp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/nunito_extrabold"
+                        android:text="GUARDAR"
+                        android:textAllCaps="true"
+                        android:backgroundTint="@color/colorSuccess"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
-
-
 
 </LinearLayout>

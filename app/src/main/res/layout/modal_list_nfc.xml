@@ -61,7 +61,7 @@
                         android:textSize="12sp" />
 
                     <TextView
-                        android:layout_width="80sp"
+                        android:layout_width="90sp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"
@@ -70,7 +70,7 @@
                         android:textSize="12sp" />
 
                     <TextView
-                        android:layout_width="80sp"
+                        android:layout_width="90sp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"
@@ -79,7 +79,7 @@
                         android:textSize="12sp" />
 
                     <TextView
-                        android:layout_width="150sp"
+                        android:layout_width="200sp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"
@@ -88,7 +88,7 @@
                         android:textSize="12sp" />
 
                     <TextView
-                        android:layout_width="80sp"
+                        android:layout_width="100sp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"
@@ -97,7 +97,7 @@
                         android:textSize="12sp" />
 
                     <TextView
-                        android:layout_width="100sp"
+                        android:layout_width="150sp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"
