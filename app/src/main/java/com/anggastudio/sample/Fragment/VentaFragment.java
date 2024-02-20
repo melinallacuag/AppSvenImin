@@ -2904,16 +2904,32 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
 
                         if (mnRFID.equals("1")) {
 
-                            findCorrelativoSINRFID(GlobalInfo.getterminalImei10, mnTipoDocumento, mnClienteID,
-                                                   mnClienteRUC, mnClienteRS, mnCliernteDR,
-                                                   mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion,
-                                                   mnTarjND, mnTarjetaPuntos, mnPtosDisponibles,
-                                                   mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
-                                                   mnobservacionPag, GlobalInfo.getoptranOperador10,
-                                                   mnImpuesto, mnMontoSoles, mnMtoSaldoCredito, mnRFID,
-                                                   GlobalInfo.getoptranSoles10, GlobalInfo.getoptranArticuloID10,
-                                                   GlobalInfo.getoptranGalones10, String.valueOf(GlobalInfo.getoptranTranID10));
+                            /** Cuando es 0 no es necesario leer RFID **/
+                            if (GlobalInfo.getsettingDescuentoRFID10 == 0) {
 
+                                findCorrelativoSINRFID(GlobalInfo.getterminalImei10, mnTipoDocumento, mnClienteID,
+                                        mnClienteRUC, mnClienteRS, mnCliernteDR,
+                                        mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion,
+                                        mnTarjND, mnTarjetaPuntos, mnPtosDisponibles,
+                                        mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
+                                        mnobservacionPag, GlobalInfo.getoptranOperador10,
+                                        mnImpuesto, mnMontoSoles, mnMtoSaldoCredito, mnRFID,
+                                        GlobalInfo.getoptranSoles10, GlobalInfo.getoptranArticuloID10,
+                                        GlobalInfo.getoptranGalones10, String.valueOf(GlobalInfo.getoptranTranID10));
+
+                            } else {
+
+                                findCorrelativoCPE(GlobalInfo.getterminalImei10, mnTipoDocumento, mnClienteID,
+                                        mnClienteRUC, mnClienteRS, mnCliernteDR,
+                                        mnNroPlaca, mnKilometraje, mnTipoVenta, mnObservacion,
+                                        mnTarjND, mnTarjetaPuntos, mnPtosDisponibles,
+                                        mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
+                                        mnobservacionPag, GlobalInfo.getoptranOperador10,
+                                        mnImpuesto, mnMontoSoles, mnMtoSaldoCredito, mnRFID,
+                                        GlobalInfo.getoptranSoles10, GlobalInfo.getoptranArticuloID10,
+                                        GlobalInfo.getoptranGalones10, String.valueOf(GlobalInfo.getoptranTranID10));
+
+                            }
 
                         } else {
 
