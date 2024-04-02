@@ -3551,16 +3551,33 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
         String NameCompany = GlobalInfo.getNameCompany10;
         String RUCCompany = GlobalInfo.getRucCompany10;
 
-        String AddressCompany = (GlobalInfo.getAddressCompany10 != null) ? GlobalInfo.getAddressCompany10 : "";
-        String[] partesAddress = AddressCompany.split(" - " , 2);
-        String Address1 = partesAddress[0];
-        String Address2 = partesAddress[1];
+        /** Branch Company **/
 
         String BranchCompany = (GlobalInfo.getBranchCompany10 != null) ? GlobalInfo.getBranchCompany10 : "";
-        String[] partesBranch = BranchCompany.split(" - " , 2);
-        String Branch1 = partesBranch[0];
-        String Branch2 = partesBranch[1];
+        String finalBranch = "";
+        String finalBranch1 = "";
 
+        if (!BranchCompany.isEmpty()) {
+            String[] partesBranch = BranchCompany.split(" - ", 2);
+            finalBranch = partesBranch[0];
+            finalBranch1 = partesBranch[1];
+        }
+        String Branch1 = finalBranch;
+        String Branch2 = finalBranch1;
+
+        /** Address Company **/
+
+        String AddressCompany = (GlobalInfo.getAddressCompany10 != null) ? GlobalInfo.getAddressCompany10 : "";
+        String finalAddress = "";
+        String finalAddress1 = "";
+
+        if (!AddressCompany.isEmpty()) {
+            String[] partesAddress = AddressCompany.split(" - " , 2);
+            finalAddress = partesAddress[0];
+            finalAddress1 = partesAddress[1];
+        }
+        String Address1 = finalAddress;
+        String Address2 = finalAddress1;
 
 
         switch (_TipoDocumento) {
@@ -3627,10 +3644,17 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             }else {
                                 printama.printTextlnBold(" ");
                             }
-                            printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
-                            printama.printTextlnBold(Address2, Printama.CENTER);
-                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                            printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                            if (!Address1.isEmpty() && !Address2.isEmpty()) {
+                                printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
+                                printama.printTextlnBold(Address2, Printama.CENTER);
+                            }
+
+                            if (!Branch1.isEmpty() && !Branch2.isEmpty()) {
+                                printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            }
+
                             printama.printTextlnBold("RUC: " + RUCCompany, Printama.CENTER);
 
                             break;
@@ -3645,8 +3669,11 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             }else {
                                 printama.printTextlnBold(" ");
                             }
-                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                            printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                            if (!Branch1.isEmpty() && !Branch2.isEmpty()) {
+                                printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            }
                             break;
                     }
 
@@ -3993,10 +4020,17 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             }else {
                                 printama.printTextlnBold(" ");
                             }
-                            printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
-                            printama.printTextlnBold(Address2, Printama.CENTER);
-                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                            printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                            if (!Address1.isEmpty() && !Address2.isEmpty()) {
+                                printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
+                                printama.printTextlnBold(Address2, Printama.CENTER);
+                            }
+
+                            if (!Branch1.isEmpty() && !Branch2.isEmpty()) {
+                                printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            }
+
                             printama.printTextlnBold("RUC: " + RUCCompany, Printama.CENTER);
 
                             break;
@@ -4011,8 +4045,11 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             }else {
                                 printama.printTextlnBold(" ");
                             }
-                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                            printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                            if (!Branch1.isEmpty() && !Branch2.isEmpty()) {
+                                printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            }
                             break;
                     }
 
@@ -4357,10 +4394,17 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             }else {
                                 printama.printTextlnBold(" ");
                             }
-                            printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
-                            printama.printTextlnBold(Address2, Printama.CENTER);
-                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                            printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                            if (!Address1.isEmpty() && !Address2.isEmpty()) {
+                                printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
+                                printama.printTextlnBold(Address2, Printama.CENTER);
+                            }
+
+                            if (!Branch1.isEmpty() && !Branch2.isEmpty()) {
+                                printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            }
+
                             printama.printTextln("RUC: " + RUCCompany, Printama.CENTER);
 
                             break;
@@ -4374,8 +4418,11 @@ public class VentaFragment extends Fragment implements NfcAdapter.ReaderCallback
                             }else {
                                 printama.printTextlnBold(" ");
                             }
-                            printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                            printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                            if (!Branch1.isEmpty() && !Branch2.isEmpty()) {
+                                printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            }
                             break;
                     }
 

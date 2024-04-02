@@ -184,7 +184,21 @@ public class CierreXFragment extends Fragment {
             textNombreEmpresa.setVisibility(View.GONE);
         }
 
-        textSucural.setText("SUCURSAL: " + GlobalInfo.getBranchCompany10);
+        String DirSucursal = "";
+        if (GlobalInfo.getBranchCompany10 != null && !GlobalInfo.getBranchCompany10.isEmpty()) {
+            DirSucursal = GlobalInfo.getBranchCompany10.replace("-", "");
+            textSucural.setText("SUCURSAL: " + DirSucursal);
+        } else {
+
+            if (GlobalInfo.getAddressCompany10 != null && !GlobalInfo.getAddressCompany10.isEmpty()) {
+                DirSucursal = GlobalInfo.getAddressCompany10.replace("-", "");
+                textSucural.setText("SUCURSAL: " + DirSucursal);
+            }else {
+                textSucural.setText("");
+            }
+
+        }
+
         FechaHoraIni.setText(GlobalInfo.getterminalFechaHoraCierre10);
         FechaHoraFin.setText(FechaHoraImpresion);
         FechaTrabajo.setText(GlobalInfo.getterminalFecha10);
@@ -248,7 +262,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error Gratuito: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -286,7 +300,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error R. Despacho: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -329,7 +343,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error Anulados: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -372,7 +386,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error V. Contometro: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -404,7 +418,7 @@ public class CierreXFragment extends Fragment {
 
     }
 
-    /** API SERVICE - Venta por Contrometro */
+    /** API SERVICE - Venta por Productos */
     private void findVProducto(String id,Integer turno){
 
         Call<List<VProducto>> call = mAPIService.findVProducto(id,turno);
@@ -415,7 +429,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error V. Producto: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -484,7 +498,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error V. Tipo Pago: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -532,7 +546,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error RTarjetas(: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -577,7 +591,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error RVendedor: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -623,7 +637,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error OptranTurno: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -682,10 +696,38 @@ public class CierreXFragment extends Fragment {
 
         String NameCompany   = GlobalInfo.getNameCompany10;
 
-        String BranchCompany = (GlobalInfo.getBranchCompany10 != null) ? GlobalInfo.getBranchCompany10 : "";
+     /*   String BranchCompany = (GlobalInfo.getBranchCompany10 != null) ? GlobalInfo.getBranchCompany10 : "";
         String[] partesBranch = BranchCompany.split(" - " , 2);
         String Branch1 = partesBranch[0];
-        String Branch2 = partesBranch[1];
+        String Branch2 = partesBranch[1];*/
+
+        /** Branch Company **/
+
+        String BranchCompany = (GlobalInfo.getBranchCompany10 != null) ? GlobalInfo.getBranchCompany10 : "";
+        String finalBranch = "";
+        String finalBranch1 = "";
+
+        if (!BranchCompany.isEmpty()) {
+            String[] partesBranch = BranchCompany.split(" - ", 2);
+            finalBranch = partesBranch[0];
+            finalBranch1 = partesBranch[1];
+        }
+        String Branch1 = finalBranch;
+        String Branch2 = finalBranch1;
+
+        /** Address Company **/
+
+        String AddressCompany = (GlobalInfo.getAddressCompany10 != null) ? GlobalInfo.getAddressCompany10 : "";
+        String finalAddress = "";
+        String finalAddress1 = "";
+
+        if (!AddressCompany.isEmpty()) {
+            String[] partesAddress = AddressCompany.split(" - " , 2);
+            finalAddress = partesAddress[0];
+            finalAddress1 = partesAddress[1];
+        }
+        String Address1 = finalAddress;
+        String Address2 = finalAddress1;
 
         String FechaHoraIni  = GlobalInfo.getterminalFechaHoraCierre10;
 
@@ -980,8 +1022,18 @@ public class CierreXFragment extends Fragment {
                     }else {
                         printama.addNewLine();
                     }
-                    printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                    printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                    if (!Branch1.isEmpty() && !Branch2.isEmpty()) {
+                        printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
+                        printama.printTextlnBold(Branch2, Printama.CENTER);
+                    }else {
+                        if (!Address1.isEmpty() && !Address2.isEmpty()) {
+                            printama.printTextlnBold("SUCURSAL: " + Address1, Printama.CENTER);
+                            printama.printTextlnBold(Address2, Printama.CENTER);
+                        }else{
+                            printama.printTextlnBold("", Printama.CENTER);
+                        }
+                    }
 
                     printama.setSmallText();
                     printSeparatorLine(printama, tipopapel);
