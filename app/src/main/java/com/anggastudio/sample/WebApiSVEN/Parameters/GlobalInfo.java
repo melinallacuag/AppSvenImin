@@ -129,6 +129,8 @@ public class GlobalInfo {
     public static Integer getTerminalImageW10;
     public static String  getTipoPapel10;
     public static boolean getterminalCvariosPrinter10 = true;
+    public static String  getTerminaltimerAppVenta10;
+    public static boolean getTerminalInicioDiaValidar10;
 
     /**
      * @SETTING
@@ -222,6 +224,8 @@ public class GlobalInfo {
     public static String  getMarketTarjetaCredito = "";
     public static String  getMarketOperacion = "";
     public static String  getMarketPEfectivo = "0.00";
+    public static String  getMarketObservacion = "";
+    public static String  getMarketnroTarjetaNotaD ="";
     public static Double  getMarketMontoTotal;
     public static Double  getMarketPrecio;
 

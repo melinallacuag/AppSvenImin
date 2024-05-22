@@ -192,7 +192,7 @@ public class CierreXFragment extends Fragment {
 
             if (GlobalInfo.getAddressCompany10 != null && !GlobalInfo.getAddressCompany10.isEmpty()) {
                 DirSucursal = GlobalInfo.getAddressCompany10.replace("-", "");
-                textSucural.setText("SUCURSAL: " + DirSucursal);
+                textSucural.setText("PRINCIPAL: " + DirSucursal);
             }else {
                 textSucural.setText("");
             }
@@ -678,8 +678,6 @@ public class CierreXFragment extends Fragment {
 
     private void cierrex(String tipopapel) {
 
-        //Bitmap logoRobles = BitmapFactory.decodeResource(getResources(), R.drawable.logoprincipal);
-
         String rutaImagen = "/storage/emulated/0/appSven/";
 
         if (!TextUtils.isEmpty(GlobalInfo.getsettingRutaLogo210)) {
@@ -696,24 +694,6 @@ public class CierreXFragment extends Fragment {
 
         String NameCompany   = GlobalInfo.getNameCompany10;
 
-     /*   String BranchCompany = (GlobalInfo.getBranchCompany10 != null) ? GlobalInfo.getBranchCompany10 : "";
-        String[] partesBranch = BranchCompany.split(" - " , 2);
-        String Branch1 = partesBranch[0];
-        String Branch2 = partesBranch[1];*/
-
-        /** Branch Company **/
-
-        String BranchCompany = (GlobalInfo.getBranchCompany10 != null) ? GlobalInfo.getBranchCompany10 : "";
-        String finalBranch = "";
-        String finalBranch1 = "";
-
-        if (!BranchCompany.isEmpty()) {
-            String[] partesBranch = BranchCompany.split(" - ", 2);
-            finalBranch = partesBranch[0];
-            finalBranch1 = partesBranch[1];
-        }
-        String Branch1 = finalBranch;
-        String Branch2 = finalBranch1;
 
         /** Address Company **/
 
@@ -724,10 +704,44 @@ public class CierreXFragment extends Fragment {
         if (!AddressCompany.isEmpty()) {
             String[] partesAddress = AddressCompany.split(" - " , 2);
             finalAddress = partesAddress[0];
-            finalAddress1 = partesAddress[1];
+            finalAddress1 = (partesAddress.length > 1) ? partesAddress[1] : "";
         }
         String Address1 = finalAddress;
         String Address2 = finalAddress1;
+
+        String Address1Part1 = Address1.substring(0, Math.min(Address1.length(), 36));
+        String Address1Part2 = "";
+
+        if (!Address1Part1.isEmpty()) {
+            if (Address1.length() > 36) {
+                Address1Part2 = Address1.substring(36);
+            }
+        }
+        String finalAddress1Part = Address1Part2;
+
+        /** Branch Company **/
+
+        String BranchCompany = (GlobalInfo.getBranchCompany10 != null) ? GlobalInfo.getBranchCompany10 : "";
+        String finalBranch = "";
+        String finalBranch1 = "";
+
+        if (!BranchCompany.isEmpty()) {
+            String[] partesBranch = BranchCompany.split(" - ", 2);
+            finalBranch = partesBranch[0];
+            finalBranch1 = (partesBranch.length > 1) ? partesBranch[1] : "";
+        }
+        String Branch1 = finalBranch;
+        String Branch2 = finalBranch1;
+
+        String Branch1Part1 = Branch1.substring(0, Math.min(Branch1.length(), 37));
+        String Branch1Part2 = "";
+
+        if (!Branch1Part1.isEmpty()) {
+            if (Branch1.length() > 37) {
+                Branch1Part2 = Branch1.substring(37);
+            }
+        }
+        String finalBranch1Part = Branch1Part2;
 
         String FechaHoraIni  = GlobalInfo.getterminalFechaHoraCierre10;
 
@@ -976,7 +990,7 @@ public class CierreXFragment extends Fragment {
             switch (tipopapel) {
                 case "65mm":
                 case "80mm":
-                    String linnesS = String.format(Locale.getDefault(), "%-22s %4s %20s", nombreV, ndespachosV,solesV);
+                    String linnesS = String.format(Locale.getDefault(), "%-21s %4s %20s", nombreV, ndespachosV,solesV);
                     ReporteVendedorBuilder.append(linnesS).append("\n");
                     break;
                 case "58mm":
@@ -1023,15 +1037,25 @@ public class CierreXFragment extends Fragment {
                         printama.addNewLine();
                     }
 
-                    if (!Branch1.isEmpty() && !Branch2.isEmpty()) {
-                        printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                        printama.printTextlnBold(Branch2, Printama.CENTER);
-                    }else {
-                        if (!Address1.isEmpty() && !Address2.isEmpty()) {
-                            printama.printTextlnBold("SUCURSAL: " + Address1, Printama.CENTER);
-                            printama.printTextlnBold(Address2, Printama.CENTER);
-                        }else{
-                            printama.printTextlnBold("", Printama.CENTER);
+                    if (!Branch1.isEmpty()) {
+                        if (!Branch1Part1.isEmpty() && !Branch2.isEmpty()) {
+                            printama.printTextlnBold("SUCURSAL: " + Branch1Part1, Printama.CENTER);
+                            if (!finalBranch1Part.isEmpty()) {
+                                printama.printTextlnBold(finalBranch1Part + " - " + Branch2, Printama.CENTER);
+                            } else {
+                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            }
+                        }
+                    }else{
+                        if (!Address1.isEmpty()) {
+                            if (!Address1Part1.isEmpty() && !Address2.isEmpty()) {
+                                printama.printTextlnBold("PRINCIPAL: " + Address1Part1, Printama.CENTER);
+                                if (!finalAddress1Part.isEmpty()) {
+                                    printama.printTextlnBold(finalAddress1Part + " - " + Address2, Printama.CENTER);
+                                } else {
+                                    printama.printTextlnBold(Address2, Printama.CENTER);
+                                }
+                            }
                         }
                     }
 
@@ -1143,8 +1167,28 @@ public class CierreXFragment extends Fragment {
                     }else {
                         printama.addNewLine();
                     }
-                    printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                    printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                    if (!Branch1.isEmpty()) {
+                        if (!Branch1Part1.isEmpty() && !Branch2.isEmpty()) {
+                            printama.printTextlnBold("SUCURSAL: " + Branch1Part1, Printama.CENTER);
+                            if (!finalBranch1Part.isEmpty()) {
+                                printama.printTextlnBold(finalBranch1Part + " - " + Branch2, Printama.CENTER);
+                            } else {
+                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            }
+                        }
+                    }else{
+                        if (!Address1.isEmpty()) {
+                            if (!Address1Part1.isEmpty() && !Address2.isEmpty()) {
+                                printama.printTextlnBold("PRINCIPAL: " + Address1Part1, Printama.CENTER);
+                                if (!finalAddress1Part.isEmpty()) {
+                                    printama.printTextlnBold(finalAddress1Part + " - " + Address2, Printama.CENTER);
+                                } else {
+                                    printama.printTextlnBold(Address2, Printama.CENTER);
+                                }
+                            }
+                        }
+                    }
 
                     printama.setSmallText();
                     printSeparatorLine(printama, tipopapel);
@@ -1254,8 +1298,28 @@ public class CierreXFragment extends Fragment {
                     }else {
                         printama.addNewLine();
                     }
-                    printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                    printama.printTextlnBold(Branch2, Printama.CENTER);
+
+                    if (!Branch1.isEmpty()) {
+                        if (!Branch1Part1.isEmpty() && !Branch2.isEmpty()) {
+                            printama.printTextlnBold("SUCURSAL: " + Branch1Part1, Printama.CENTER);
+                            if (!finalBranch1Part.isEmpty()) {
+                                printama.printTextlnBold(finalBranch1Part + " - " + Branch2, Printama.CENTER);
+                            } else {
+                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            }
+                        }
+                    }else{
+                        if (!Address1.isEmpty()) {
+                            if (!Address1Part1.isEmpty() && !Address2.isEmpty()) {
+                                printama.printTextlnBold("PRINCIPAL: " + Address1Part1, Printama.CENTER);
+                                if (!finalAddress1Part.isEmpty()) {
+                                    printama.printTextlnBold(finalAddress1Part + " - " + Address2, Printama.CENTER);
+                                } else {
+                                    printama.printTextlnBold(Address2, Printama.CENTER);
+                                }
+                            }
+                        }
+                    }
 
                     printama.setSmallText();
                     printSeparatorLine(printama, tipopapel);
@@ -1349,14 +1413,11 @@ public class CierreXFragment extends Fragment {
                         printama.printTextlnBold("NOMBRES             " + "NRO DESPACHOS         " + " SOLES", Printama.RIGHT);
                         printama.printTextln(ReporteVendedorBuilder.toString() + "---------", Printama.RIGHT);
                         printama.printTextln(GranRVendedorTotal.toString(), Printama.RIGHT);
-
                     }
 
                     break;
 
             }
-
-            printama.addNewLine(1);
             printama.feedPaper();
             printama.cutPaper();
             printama.close();

@@ -1,15 +1,48 @@
 package com.anggastudio.sample.Fragment;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
+import android.nfc.tech.IsoDep;
+import android.nfc.tech.MifareClassic;
+import android.nfc.tech.MifareUltralight;
+import android.nfc.tech.Ndef;
+import android.nfc.tech.NfcA;
+import android.nfc.tech.NfcB;
+import android.nfc.tech.NfcF;
+import android.nfc.tech.NfcV;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Parcelable;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -26,32 +59,31 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.anggastudio.printama.Printama;
 import com.anggastudio.sample.Adapter.ArticuloAdapter;
 import com.anggastudio.sample.Adapter.CarritoAdapter;
+import com.anggastudio.sample.Adapter.ClienteCreditoAdapter;
 import com.anggastudio.sample.Adapter.FamiliaAdapter;
 import com.anggastudio.sample.Adapter.LClienteAdapter;
+import com.anggastudio.sample.Adapter.LRegistroClienteAdapter;
 import com.anggastudio.sample.Adapter.TipoPagoAdapter;
 import com.anggastudio.sample.CaptureActivityPortrait;
 import com.anggastudio.sample.NFCUtil;
 import com.anggastudio.sample.Numero_Letras;
+import com.anggastudio.sample.PasswordChecker;
 import com.anggastudio.sample.R;
 import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
+import com.anggastudio.sample.WebApiSVEN.Models.Anular;
 import com.anggastudio.sample.WebApiSVEN.Models.Articulo;
+import com.anggastudio.sample.WebApiSVEN.Models.ClienteCredito;
+import com.anggastudio.sample.WebApiSVEN.Models.ClientePrecio;
 import com.anggastudio.sample.WebApiSVEN.Models.Correlativo;
+import com.anggastudio.sample.WebApiSVEN.Models.DetalleVenta;
 import com.anggastudio.sample.WebApiSVEN.Models.Familia;
 import com.anggastudio.sample.WebApiSVEN.Models.LClientes;
 import com.anggastudio.sample.WebApiSVEN.Models.TipoPago;
+import com.anggastudio.sample.WebApiSVEN.Models.Users;
+import com.anggastudio.sample.WebApiSVEN.Models.VentaCA;
 import com.anggastudio.sample.WebApiSVEN.Models.VentaMarketCA;
 import com.anggastudio.sample.WebApiSVEN.Models.VentaMarketDA;
 import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
@@ -68,6 +100,7 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -83,11 +116,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ArticuloFragment extends Fragment {
+public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallback{
 
     private APIService mAPIService;
-
     private NFCUtil nfcUtil;
+
+    private NfcAdapter nfcAdapter;
+    private PendingIntent pendingIntent;
+    private IntentFilter[] intentFilters;
+    private String[][] techLists;
 
     boolean isTodoProductoSelected = false;
 
@@ -102,12 +139,13 @@ public class ArticuloFragment extends Fragment {
 
     List<Articulo> articuloSeleccionados = new ArrayList<Articulo>();
 
-    RecyclerView recyclerFamilia, recyclerArticulo, recyclerCarrito, recyclerLCliente;
-    Button btnTodoArticulo,
+    RecyclerView recyclerFamilia, recyclerArticulo, recyclerCarrito, recyclerLCliente,recyclerLClienteCredito;
+    Button btnAceptarErrorWifi,btnAceptarError,
+            btnTodoArticulo,
             buscarListNFC,
             btnBoleta,btnCancelarBoleta,btnAgregarBoleta,btnGenerarBoleta,buscarPlacaBoleta,buscarDNIBoleta,btnCancelarLCliente,
             btnFactura,buscarRUCFactura,buscarPlacaFactura,btnCancelarFactura,btnAgregarFactura,
-            btnNotaDespacho;
+            btnNotaDespacho,btnCancelarNotaDespacho,btnAgregarNotaDespacho;
 
     CardView btncarritocompra;
 
@@ -117,17 +155,17 @@ public class ArticuloFragment extends Fragment {
     Map<String, Double> nuevosPrecios = new HashMap<>();
 
     TextView totalmontoCar,textMensajePEfectivo,textMensajeGratuito,text_guardarC,text_inprimirC,titleconfirmar,titleimprimir;
-    Dialog modal_CV_Articulo,modalCarrito, modalBoleta, modalClienteDNI,modalFactura,modalClienteRUC;
+    Dialog modal_ErrorWifi,modal_ErrorServidor,modal_CV_Articulo,modalCarrito, modalBoleta, modalClienteDNI,modalFactura,modalClienteRUC,modalNotaDespacho,modalClienteCredito;
 
     CarritoAdapter carritoAdapter;
     SearchView BuscarProducto,btnBuscadorClienteRZ;
 
     TextInputLayout textNFC,alertPlaca,alertDNI,alertNombre,alertPEfectivo,alertOperacion,alertSelectTPago,
-            alertRUC,alertRazSocial,
-            alertObservacion;
+            alertRUC,alertRazSocial,alertObservacion,alertTarjeta,alertCliente,alertKilometraje;
 
     TextInputEditText inputNFC,inputPlaca,inputDNI,inputNombre,inputDireccion,inputObservacion,inputOperacion,inputPEfectivo,
-            inputRUC,inputRazSocial;
+            inputRUC,inputRazSocial,
+            inputTarjeta,inputCliente,inputKilometraje;
 
     RadioGroup radioFormaPago;
     RadioButton radioEfectivo,radioTarjeta,radioCredito,radioGratuito,radioNombreFormaPago;
@@ -144,12 +182,21 @@ public class ArticuloFragment extends Fragment {
     TextView nombreCliente,textCliente;
 
     private String mnTipoDocumento,mnTipoPago,mnNroPlaca,mnClienteID,mnClienteRUC,mnClienteRS,mnCliernteDR,mnTarjetaCredito,mnOperacionREF,mnobservacionPag,
-            detArticuloId,detArticuloDs,detUmedida,opGratruitas;
+            detArticuloId,detArticuloDs,detUmedida,opGratruitas,mnTarjND,mnobservacion;
 
     private Double mnMontoSoles,mnMtoSaldoCredito,mnPtosDisponibles,detPrecio,detCantidad,detTotal,detTotal1,detSubtotal,detSubtotal1,detImpuesto,detImpuesto1,
             mnMtoSubTotal1, mnMtoImpuesto1;
 
     private Integer mnPagoID,mnTarjetaCreditoID;
+
+    private Boolean mnRespuestaCorre;
+
+    ClienteCreditoAdapter clienteCreditoAdapter;
+    Double monto;
+
+    List<ClientePrecio> clientePrecioList;
+
+    private boolean isVentaGuardadaCorrectamente = false;
 
     /**
      * @CONFIGURACIÓN:ObtenerResultado
@@ -249,6 +296,13 @@ public class ArticuloFragment extends Fragment {
                         articulo.setSeleccionado(false);
                     }
 
+                    articuloSeleccionados.clear();
+                    cantidadesSeleccionadas.clear();
+
+                    articuloAdapter.notifyDataSetChanged();
+                    carritoAdapter.notifyDataSetChanged();
+                    btncarritocompra.setVisibility(View.GONE);
+
                 }else {
 
                     btnpromociones.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#999999")));
@@ -268,12 +322,13 @@ public class ArticuloFragment extends Fragment {
                         articulo.setSeleccionado(false);
                     }
 
+                    articuloSeleccionados.clear();
+                    cantidadesSeleccionadas.clear();
+
+                    articuloAdapter.notifyDataSetChanged();
+                    carritoAdapter.notifyDataSetChanged();
+                    btncarritocompra.setVisibility(View.GONE);
                 }
-                articuloSeleccionados.clear();
-                cantidadesSeleccionadas.clear();
-                articuloAdapter.notifyDataSetChanged();
-                carritoAdapter.notifyDataSetChanged();
-                btncarritocompra.setVisibility(View.GONE);
             }
         });
 
@@ -477,7 +532,7 @@ public class ArticuloFragment extends Fragment {
                     public void onClick(View v) {
                         btnBoleta.setVisibility(View.VISIBLE);
                         btnFactura.setVisibility(View.VISIBLE);
-                        btnNotaDespacho.setVisibility(View.GONE);
+                        btnNotaDespacho.setVisibility(View.VISIBLE);
                         btnSeleccionCliente.setVisibility(View.GONE);
                     }
                 });
@@ -534,7 +589,6 @@ public class ArticuloFragment extends Fragment {
                         btnAgregarBoleta  = modalBoleta.findViewById(R.id.btnAgregarBoleta);
                         buscarListNFC     = modalBoleta.findViewById(R.id.buscarListNFC);
 
-                        textNFC.setVisibility(View.GONE);
                         buscarListNFC.setVisibility(View.GONE);
                         alertObservacion.setVisibility(View.GONE);
                         radioCredito.setVisibility(View.GONE);
@@ -544,6 +598,35 @@ public class ArticuloFragment extends Fragment {
                         inputNombre.setEnabled(true);
                         alertDNI.setBoxBackgroundColorResource(R.color.transparentenew);
                         alertNombre.setBoxBackgroundColorResource(R.color.transparentenew);
+
+                        /**
+                         * @DETECTAR:EtiquietaNFC
+                         */
+                        inputNFC.setKeyListener(null);
+                        insertNFC();
+
+                        /**
+                         * @DETECTAR:NFC
+                         * @OBTENER:DatosClientes
+                         */
+                        inputNFC.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                if (s.length() == 16) {
+                                    String nfcCode = s.toString();
+
+                                    findClientePrecioDNI(nfcCode, String.valueOf(GlobalInfo.getterminalCompanyID10));
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {
+                            }
+                        });
 
 
                         /**
@@ -743,6 +826,7 @@ public class ArticuloFragment extends Fragment {
                                 inputDireccion.getText().clear();
                                 radioFormaPago.check(radioEfectivo.getId());
                                 inputPEfectivo.setText("0");
+                                inputNFC.getText().clear();
                                 inputOperacion.getText().clear();
 
                                 alertPlaca.setErrorEnabled(false);
@@ -774,117 +858,121 @@ public class ArticuloFragment extends Fragment {
 
                                 int checkedRadioButtonId = radioFormaPago.getCheckedRadioButtonId();
 
-                                    if (GlobalInfo.getMarketPlaca.isEmpty()) {
+                                if (GlobalInfo.getMarketPlaca.isEmpty()) {
 
-                                        alertPlaca.setError("* El campo Placa es obligatorio");
+                                    alertPlaca.setError("* El campo Placa es obligatorio");
+                                    return;
+                                } else if (GlobalInfo.getMarketClienteID.isEmpty()) {
+
+                                    alertDNI.setError("* El campo DNI es obligatorio");
+                                    return;
+                                } else if (GlobalInfo.getMarketClienteID.length() < 8) {
+
+                                    alertDNI.setError("* El DNI debe tener 8 dígitos");
+                                    return;
+                                } else if (GlobalInfo.getMarketClienteRZ.isEmpty()) {
+
+                                    alertNombre.setError("* El campo Nombre es obligatorio");
+                                    return;
+                                } else if (GlobalInfo.getMarketClienteRZ.length() < 8) {
+
+                                    alertNombre.setError("* El Nombre debe tener mínino 8 dígitos");
+                                    return;
+                                } else if (checkedRadioButtonId == radioTarjeta.getId()) {
+
+                                    if (GlobalInfo.getMarketOperacion.isEmpty()) {
+                                        alertOperacion.setError("* El campo Nro Operación es obligatorio");
                                         return;
-                                    } else if (GlobalInfo.getMarketClienteID.isEmpty()) {
-
-                                        alertDNI.setError("* El campo DNI es obligatorio");
+                                    } else if (GlobalInfo.getMarketOperacion.length() < 4) {
+                                        alertOperacion.setError("* El  Nro Operación debe tener mayor a 4 dígitos");
                                         return;
-                                    } else if (GlobalInfo.getMarketClienteID.length() < 8) {
-
-                                        alertDNI.setError("* El DNI debe tener 8 dígitos");
+                                    } else if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
+                                        alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
                                         return;
-                                    } else if (GlobalInfo.getMarketClienteRZ.isEmpty()) {
-
-                                        alertNombre.setError("* El campo Nombre es obligatorio");
-                                        return;
-                                    } else if (GlobalInfo.getMarketClienteRZ.length() < 8) {
-
-                                        alertNombre.setError("* El Nombre debe tener mínino 8 dígitos");
-                                        return;
-                                    } else if (checkedRadioButtonId == radioTarjeta.getId()) {
-
-                                        if (GlobalInfo.getMarketOperacion.isEmpty()) {
-                                            alertOperacion.setError("* El campo Nro Operación es obligatorio");
-                                            return;
-                                        } else if (GlobalInfo.getMarketOperacion.length() < 4) {
-                                            alertOperacion.setError("* El  Nro Operación debe tener mayor a 4 dígitos");
-                                            return;
-                                        } else if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
-                                            alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
-                                            return;
-                                        }
-
-                                    } else if (checkedRadioButtonId == radioCredito.getId()) {
-
-                                        if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
-                                            alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
-                                            return;
-                                        }
-
                                     }
 
-                                    GlobalInfo.getMarketTarjetaCredito = "";
-                                    GlobalInfo.getMarketOperacion = "";
-                                    GlobalInfo.getMarketPEfectivo = "0.00";
+                                } else if (checkedRadioButtonId == radioCredito.getId()) {
 
-                                    alertPlaca.setErrorEnabled(false);
-                                    alertDNI.setErrorEnabled(false);
-                                    alertNombre.setErrorEnabled(false);
-                                    alertOperacion.setErrorEnabled(false);
-                                    alertPEfectivo.setErrorEnabled(false);
+                                    if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
+                                        alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
+                                        return;
+                                    }
+
+                                }
+
+                                GlobalInfo.getMarketTarjetaCredito = "";
+                                GlobalInfo.getMarketOperacion = "";
+                                GlobalInfo.getMarketPEfectivo = "0.00";
+                                GlobalInfo.getMarketnroTarjetaNotaD = "";
+                                GlobalInfo.getMarketObservacion     = "";
+
+
+                                alertPlaca.setErrorEnabled(false);
+                                alertDNI.setErrorEnabled(false);
+                                alertNombre.setErrorEnabled(false);
+                                alertOperacion.setErrorEnabled(false);
+                                alertPEfectivo.setErrorEnabled(false);
 
                                 GlobalInfo.getMarketFormaPago = radioNombreFormaPago.getText().toString().substring(0, 1);
 
                                 if (GlobalInfo.getMarketFormaPago.equals("T")) {
 
-                                        Double dosDecimales = Double.valueOf(GlobalInfo.getMarketPEfectivo);
-                                        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                                    Double dosDecimales = Double.valueOf(GlobalInfo.getMarketPEfectivo);
+                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
-                                        GlobalInfo.getMarketTarjetaCredito  = String.valueOf(Integer.valueOf(tipoPago.getCardID()));
-                                        GlobalInfo.getMarketOperacion       = inputOperacion.getText().toString();
+                                    GlobalInfo.getMarketTarjetaCredito  = String.valueOf(Integer.valueOf(tipoPago.getCardID()));
+                                    GlobalInfo.getMarketOperacion       = inputOperacion.getText().toString();
 
-                                        if (dosDecimales != Double.parseDouble(decimalFormat.format(dosDecimales))) {
-                                            alertPEfectivo.setError("* Por favor ingrese un valor con dos decimales solamente");
-                                            return;
-                                        } else {
-                                            GlobalInfo.getMarketPEfectivo  = inputPEfectivo.getText().toString();
-                                        }
-
-
-                                    } else if (GlobalInfo.getMarketFormaPago.equals("C")) {
-
-                                        Double dosDecimales = Double.valueOf(GlobalInfo.getMarketPEfectivo );
-                                        DecimalFormat decimalFormat = new DecimalFormat("#.##");
-
-                                        if (dosDecimales != Double.parseDouble(decimalFormat.format(dosDecimales))) {
-                                            alertPEfectivo.setError("* Por favor ingrese un valor con dos decimales solamente");
-                                            return;
-                                        } else {
-                                            GlobalInfo.getMarketPEfectivo       = inputPEfectivo.getText().toString();
-                                        }
+                                    if (dosDecimales != Double.parseDouble(decimalFormat.format(dosDecimales))) {
+                                        alertPEfectivo.setError("* Por favor ingrese un valor con dos decimales solamente");
+                                        return;
+                                    } else {
+                                        GlobalInfo.getMarketPEfectivo  = inputPEfectivo.getText().toString();
                                     }
+
+
+                                } else if (GlobalInfo.getMarketFormaPago.equals("C")) {
+
+                                    Double dosDecimales = Double.valueOf(GlobalInfo.getMarketPEfectivo );
+                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
+                                    if (dosDecimales != Double.parseDouble(decimalFormat.format(dosDecimales))) {
+                                        alertPEfectivo.setError("* Por favor ingrese un valor con dos decimales solamente");
+                                        return;
+                                    } else {
+                                        GlobalInfo.getMarketPEfectivo       = inputPEfectivo.getText().toString();
+                                    }
+                                }
 
                                 Toast.makeText(getContext(), "Se agrego correctamente", Toast.LENGTH_SHORT).show();
 
-                                    modalBoleta.dismiss();
+                                modalBoleta.dismiss();
 
-                                    if (!GlobalInfo.getMarketClienteRZ.equals("CLIENTE VARIOS")) {
-                                        textCliente.setVisibility(View.GONE);
-                                        nombreCliente.setVisibility(View.VISIBLE);
-                                        nombreCliente.setText("Venta a: " + GlobalInfo.getMarketClienteRZ);
-                                    }else{
-                                        textCliente.setVisibility(View.VISIBLE);
-                                        nombreCliente.setVisibility(View.GONE);
-                                        nombreCliente.setText("Venta a: " + GlobalInfo.getMarketClienteRZ);
-                                    }
-
-                                    /** Limpiar el Formulario - Boleta*/
-                                    inputPlaca.setText("000-0000");
-                                    inputDNI.getText().clear();
-                                    inputNombre.getText().clear();
-                                    inputDireccion.getText().clear();
-                                    inputPEfectivo.setText("0");
-                                    inputOperacion.getText().clear();
-                                    radioFormaPago.check(radioEfectivo.getId());
-
-                                    btnBoleta.setVisibility(View.GONE);
-                                    btnFactura.setVisibility(View.GONE);
-                                    btnNotaDespacho.setVisibility(View.GONE);
-                                    btnSeleccionCliente.setVisibility(View.VISIBLE);
+                                if (!GlobalInfo.getMarketClienteRZ.equals("CLIENTE VARIOS")) {
+                                    textCliente.setVisibility(View.GONE);
+                                    nombreCliente.setVisibility(View.VISIBLE);
+                                    nombreCliente.setText("Venta a: " + GlobalInfo.getMarketClienteRZ);
+                                }else{
+                                    textCliente.setVisibility(View.VISIBLE);
+                                    nombreCliente.setVisibility(View.GONE);
+                                    nombreCliente.setText("Venta a: " + GlobalInfo.getMarketClienteRZ);
                                 }
+
+                                /** Limpiar el Formulario - Boleta*/
+                                inputPlaca.setText("000-0000");
+                                inputDNI.getText().clear();
+                                inputNombre.getText().clear();
+                                inputDireccion.getText().clear();
+                                inputPEfectivo.setText("0");
+                                inputOperacion.getText().clear();
+                                inputNFC.getText().clear();
+                                radioFormaPago.check(radioEfectivo.getId());
+
+                                btnBoleta.setVisibility(View.GONE);
+                                btnFactura.setVisibility(View.GONE);
+                                btnNotaDespacho.setVisibility(View.GONE);
+                                btnSeleccionCliente.setVisibility(View.VISIBLE);
+                            }
 
                         });
 
@@ -1143,129 +1231,330 @@ public class ArticuloFragment extends Fragment {
                                 GlobalInfo.getMarketOperacion       = inputOperacion.getText().toString();
                                 GlobalInfo.getMarketPEfectivo       = inputPEfectivo.getText().toString();
 
-                                        int checkedRadioButtonId = radioFormaPago.getCheckedRadioButtonId();
+                                int checkedRadioButtonId = radioFormaPago.getCheckedRadioButtonId();
 
-                                        if (GlobalInfo.getMarketPlaca.isEmpty()) {
+                                if (GlobalInfo.getMarketPlaca.isEmpty()) {
 
-                                            alertPlaca.setError("* El campo Placa es obligatorio");
-                                            return;
-                                        } else if (GlobalInfo.getMarketClienteID   .isEmpty()) {
+                                    alertPlaca.setError("* El campo Placa es obligatorio");
+                                    return;
+                                } else if (GlobalInfo.getMarketClienteID   .isEmpty()) {
 
-                                            alertRUC.setError("* El campo RUC es obligatorio");
-                                            return;
-                                        } else if (GlobalInfo.getMarketClienteID   .length() < 11) {
+                                    alertRUC.setError("* El campo RUC es obligatorio");
+                                    return;
+                                } else if (GlobalInfo.getMarketClienteID   .length() < 11) {
 
-                                            alertRUC.setError("* El RUC debe tener 11 dígitos");
-                                            return;
-                                        } else if (GlobalInfo.getMarketClienteRZ.isEmpty()) {
+                                    alertRUC.setError("* El RUC debe tener 11 dígitos");
+                                    return;
+                                } else if (GlobalInfo.getMarketClienteRZ.isEmpty()) {
 
-                                            alertRazSocial.setError("* La Razon Social es obligatorio");
-                                            return;
-                                        }  else if (GlobalInfo.getMarketClienteRZ.length() < 11 ) {
+                                    alertRazSocial.setError("* La Razon Social es obligatorio");
+                                    return;
+                                }  else if (GlobalInfo.getMarketClienteRZ.length() < 11 ) {
 
-                                            alertRazSocial.setError("* La Razon Social debe tener mínino 11 dígitos");
-                                            return;
-                                        }else if (checkedRadioButtonId == radioTarjeta.getId()) {
+                                    alertRazSocial.setError("* La Razon Social debe tener mínino 11 dígitos");
+                                    return;
+                                }else if (checkedRadioButtonId == radioTarjeta.getId()) {
 
-                                            if (GlobalInfo.getMarketOperacion.isEmpty()) {
+                                    if (GlobalInfo.getMarketOperacion.isEmpty()) {
 
-                                                alertOperacion.setError("* El campo Nro Operación es obligatorio");
-                                                return;
-                                            } else if (GlobalInfo.getMarketOperacion.length() < 4) {
+                                        alertOperacion.setError("* El campo Nro Operación es obligatorio");
+                                        return;
+                                    } else if (GlobalInfo.getMarketOperacion.length() < 4) {
 
-                                                alertOperacion.setError("* El  Nro Operación debe tener mayor a 4 dígitos");
-                                                return;
-                                            } else if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
+                                        alertOperacion.setError("* El  Nro Operación debe tener mayor a 4 dígitos");
+                                        return;
+                                    } else if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
 
-                                                alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
-                                                return;
-                                            }
+                                        alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
+                                        return;
+                                    }
 
-                                        } else if (checkedRadioButtonId == radioCredito.getId()) {
+                                } else if (checkedRadioButtonId == radioCredito.getId()) {
 
-                                            if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
+                                    if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
 
-                                                alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
-                                                return;
-                                            }
+                                        alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
+                                        return;
+                                    }
 
-                                        }
+                                }
 
-                                        alertPlaca.setErrorEnabled(false);
-                                        alertRUC.setErrorEnabled(false);
-                                        alertRazSocial.setErrorEnabled(false);
-                                        alertOperacion.setErrorEnabled(false);
-                                        alertPEfectivo.setErrorEnabled(false);
-
-
-                                        GlobalInfo.getMarketTarjetaCredito = "";
-                                        GlobalInfo.getMarketOperacion = "";
-                                        GlobalInfo.getMarketPEfectivo = "0.00";
-
-                                        GlobalInfo.getMarketFormaPago = radioNombreFormaPago.getText().toString().substring(0, 1);
-
-                                        if (GlobalInfo.getMarketFormaPago.equals("T")) {
-
-                                            Double dosDecimales = Double.valueOf(GlobalInfo.getMarketPEfectivo);
-                                            DecimalFormat decimalFormat = new DecimalFormat("#.##");
-
-                                            GlobalInfo.getMarketTarjetaCredito  = String.valueOf(Integer.valueOf(tipoPago.getCardID()));
-                                            GlobalInfo.getMarketOperacion       = inputOperacion.getText().toString();
-
-                                            if (dosDecimales != Double.parseDouble(decimalFormat.format(dosDecimales))) {
-                                                alertPEfectivo.setError("* Por favor ingrese un valor con dos decimales solamente");
-                                                return;
-                                            } else {
-                                                GlobalInfo.getMarketPEfectivo  = inputPEfectivo.getText().toString();
-                                            }
+                                alertPlaca.setErrorEnabled(false);
+                                alertRUC.setErrorEnabled(false);
+                                alertRazSocial.setErrorEnabled(false);
+                                alertOperacion.setErrorEnabled(false);
+                                alertPEfectivo.setErrorEnabled(false);
 
 
-                                        } else if (GlobalInfo.getMarketFormaPago.equals("C")) {
+                                GlobalInfo.getMarketTarjetaCredito = "";
+                                GlobalInfo.getMarketOperacion = "";
+                                GlobalInfo.getMarketPEfectivo = "0.00";
+                                GlobalInfo.getMarketnroTarjetaNotaD = "";
+                                GlobalInfo.getMarketObservacion     = "";
 
-                                            Double dosDecimales = Double.valueOf(GlobalInfo.getMarketPEfectivo );
-                                            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                                GlobalInfo.getMarketFormaPago = radioNombreFormaPago.getText().toString().substring(0, 1);
 
-                                            if (dosDecimales != Double.parseDouble(decimalFormat.format(dosDecimales))) {
-                                                alertPEfectivo.setError("* Por favor ingrese un valor con dos decimales solamente");
-                                                return;
-                                            } else {
-                                                GlobalInfo.getMarketPEfectivo       = inputPEfectivo.getText().toString();
-                                            }
-                                        }
+                                if (GlobalInfo.getMarketFormaPago.equals("T")) {
 
-                                        Toast.makeText(getContext(), "Se agrego correctamente", Toast.LENGTH_SHORT).show();
+                                    Double dosDecimales = Double.valueOf(GlobalInfo.getMarketPEfectivo);
+                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
-                                        modalFactura.dismiss();
+                                    GlobalInfo.getMarketTarjetaCredito  = String.valueOf(Integer.valueOf(tipoPago.getCardID()));
+                                    GlobalInfo.getMarketOperacion       = inputOperacion.getText().toString();
 
-                                        if (!GlobalInfo.getMarketClienteRZ.equals("CLIENTE VARIOS")) {
-                                            textCliente.setVisibility(View.GONE);
-                                            nombreCliente.setVisibility(View.VISIBLE);
-                                            nombreCliente.setText("Venta a: " + GlobalInfo.getMarketClienteRZ);
-                                        }else{
-                                            textCliente.setVisibility(View.VISIBLE);
-                                            nombreCliente.setVisibility(View.GONE);
-                                            nombreCliente.setText("Venta a: " + GlobalInfo.getMarketClienteRZ);
-                                        }
+                                    if (dosDecimales != Double.parseDouble(decimalFormat.format(dosDecimales))) {
+                                        alertPEfectivo.setError("* Por favor ingrese un valor con dos decimales solamente");
+                                        return;
+                                    } else {
+                                        GlobalInfo.getMarketPEfectivo  = inputPEfectivo.getText().toString();
+                                    }
 
-                                        /** Limpiar el Formulario - Boleta*/
-                                        inputPlaca.setText("000-0000");
-                                        inputRUC.getText().clear();
-                                        inputRazSocial.getText().clear();
-                                        inputDireccion.getText().clear();
-                                        inputPEfectivo.setText("0");
-                                        inputOperacion.getText().clear();
-                                        radioFormaPago.check(radioEfectivo.getId());
 
-                                        btnBoleta.setVisibility(View.GONE);
-                                        btnFactura.setVisibility(View.GONE);
-                                        btnNotaDespacho.setVisibility(View.GONE);
-                                        btnSeleccionCliente.setVisibility(View.VISIBLE);
+                                } else if (GlobalInfo.getMarketFormaPago.equals("C")) {
+
+                                    Double dosDecimales = Double.valueOf(GlobalInfo.getMarketPEfectivo );
+                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
+                                    if (dosDecimales != Double.parseDouble(decimalFormat.format(dosDecimales))) {
+                                        alertPEfectivo.setError("* Por favor ingrese un valor con dos decimales solamente");
+                                        return;
+                                    } else {
+                                        GlobalInfo.getMarketPEfectivo       = inputPEfectivo.getText().toString();
+                                    }
+                                }
+
+                                Toast.makeText(getContext(), "Se agrego correctamente", Toast.LENGTH_SHORT).show();
+
+                                modalFactura.dismiss();
+
+                                if (!GlobalInfo.getMarketClienteRZ.equals("CLIENTE VARIOS")) {
+                                    textCliente.setVisibility(View.GONE);
+                                    nombreCliente.setVisibility(View.VISIBLE);
+                                    nombreCliente.setText("Venta a: " + GlobalInfo.getMarketClienteRZ);
+                                }else{
+                                    textCliente.setVisibility(View.VISIBLE);
+                                    nombreCliente.setVisibility(View.GONE);
+                                    nombreCliente.setText("Venta a: " + GlobalInfo.getMarketClienteRZ);
+                                }
+
+                                /** Limpiar el Formulario - Boleta*/
+                                inputPlaca.setText("000-0000");
+                                inputRUC.getText().clear();
+                                inputRazSocial.getText().clear();
+                                inputDireccion.getText().clear();
+                                inputPEfectivo.setText("0");
+                                inputOperacion.getText().clear();
+                                radioFormaPago.check(radioEfectivo.getId());
+
+                                btnBoleta.setVisibility(View.GONE);
+                                btnFactura.setVisibility(View.GONE);
+                                btnNotaDespacho.setVisibility(View.GONE);
+                                btnSeleccionCliente.setVisibility(View.VISIBLE);
 
                             }
                         });
 
                     }
 
+                });
+
+                /**
+                 * @MODAL:MostrarFormularioNotaDespacho
+                 */
+                modalNotaDespacho = new Dialog(getContext());
+                modalNotaDespacho.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                modalNotaDespacho.setContentView(R.layout.fragment_notadespacho);
+                modalNotaDespacho.setCancelable(false);
+
+                btnNotaDespacho.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        modalNotaDespacho.show();
+
+                        btnCancelarNotaDespacho   = modalNotaDespacho.findViewById(R.id.btnCancelarNotaDespacho);
+                        btnAgregarNotaDespacho    = modalNotaDespacho.findViewById(R.id.btnAgregarNotaDespacho);
+
+                        inputPlaca               = modalNotaDespacho.findViewById(R.id.inputCPlaca);
+                        inputTarjeta             = modalNotaDespacho.findViewById(R.id.input_CNTarjeta);
+                        inputCliente             = modalNotaDespacho.findViewById(R.id.inputCCliente);
+                        inputRazSocial           = modalNotaDespacho.findViewById(R.id.inputCRazSocial);
+                        inputDireccion           = modalNotaDespacho.findViewById(R.id.inputCDireccion);
+                        inputKilometraje         = modalNotaDespacho.findViewById(R.id.inputCKilometraje);
+                        inputObservacion         = modalNotaDespacho.findViewById(R.id.inputCObservacion);
+
+                        alertPlaca               = modalNotaDespacho.findViewById(R.id.alertPlaca);
+                        alertTarjeta             = modalNotaDespacho.findViewById(R.id.alertTarjeta);
+                        alertCliente             = modalNotaDespacho.findViewById(R.id.alertCCliente);
+                        alertRazSocial           = modalNotaDespacho.findViewById(R.id.alertCRazSocial);
+                        alertKilometraje         = modalNotaDespacho.findViewById(R.id.alertKilometraje);
+
+                        alertKilometraje.setVisibility(View.GONE);
+
+                        /**
+                         * @MODAL:MostrarListadoClienteNotaDespacho
+                         */
+                        modalClienteCredito = new Dialog(getContext());
+                        modalClienteCredito.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        modalClienteCredito.setContentView(R.layout.modal_cliente_credito);
+                        modalClienteCredito.setCancelable(false);
+
+                        /**
+                         * @MODAL:MostrarListadoClienteNotaDespacho
+                         */
+                        recyclerLClienteCredito = modalClienteCredito.findViewById(R.id.recyclerLClienteCredito);
+                        recyclerLClienteCredito.setLayoutManager(new LinearLayoutManager(getContext()));
+                        ClienteCredito();
+
+                        /**
+                         * @SELECCIONAR:DobleClick_MostrarListadoClienteCredito
+                         */
+                        GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+                            @Override
+                            public boolean onDoubleTap(MotionEvent e) {
+
+                                modalClienteCredito.show();
+
+                                btnCancelarLCliente   = modalClienteCredito.findViewById(R.id.btnCancelarLClienteCredito);
+                                btnBuscadorClienteRZ  = modalClienteCredito.findViewById(R.id.btnBuscadorClienteRZ);
+
+                                btnBuscadorClienteRZ.setIconifiedByDefault(false);
+                                /** Buscardor por Cliente Raz. Social */
+                                btnBuscadorClienteRZ.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                                    @Override
+                                    public boolean onQueryTextSubmit(String query) {
+                                        return false;
+                                    }
+
+                                    @Override
+                                    public boolean onQueryTextChange(String newText) {
+                                        String userInput = newText.toLowerCase();
+                                        if (clienteCreditoAdapter != null) {
+                                            clienteCreditoAdapter.filtrado(userInput);
+                                        }
+                                        return false;
+                                    }
+                                });
+
+                                btnCancelarLCliente.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        btnBuscadorClienteRZ.setQuery("", false);
+                                        modalClienteCredito.dismiss();
+                                    }
+                                });
+
+                                return true;
+                            }
+                        });
+
+                        inputCliente.setOnTouchListener(new View.OnTouchListener() {
+                            @Override
+                            public boolean onTouch(View v, MotionEvent event) {
+                                gestureDetector.onTouchEvent(event);
+                                if (!gestureDetector.onTouchEvent(event)) {
+
+                                    return false;
+                                }
+                                return true;
+                            }
+                        });
+
+                        /**
+                         * @CANCELAR:NotaDespacho
+                         */
+                        btnCancelarNotaDespacho.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                modalNotaDespacho.dismiss();
+
+                                inputPlaca.setText("000-0000");
+                                inputTarjeta.getText().clear();
+                                inputCliente.getText().clear();
+                                inputRazSocial.getText().clear();
+                                inputDireccion.getText().clear();
+                                inputKilometraje.getText().clear();
+                                inputObservacion.getText().clear();
+
+                                alertCliente.setErrorEnabled(false);
+                                alertPlaca.setErrorEnabled(false);
+                                alertRazSocial.setErrorEnabled(false);
+
+                                btnBoleta.setVisibility(View.GONE);
+                                btnFactura.setVisibility(View.GONE);
+                                btnNotaDespacho.setVisibility(View.GONE);
+                                btnSeleccionCliente.setVisibility(View.VISIBLE);
+
+                            }
+                        });
+
+                        /**
+                         * @AGREGAR:NotaDespacho
+                         */
+                        btnAgregarNotaDespacho.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                GlobalInfo.getMarketClienteID       = inputCliente.getText().toString();
+                                GlobalInfo.getMarketClienteRZ       = inputRazSocial.getText().toString();
+                                GlobalInfo.getMarketPlaca           = inputPlaca.getText().toString();
+                                GlobalInfo.getMarketClienteDR       = inputDireccion.getText().toString();
+                                GlobalInfo.getMarketObservacion     = inputObservacion.getText().toString();
+                                GlobalInfo.getMarketnroTarjetaNotaD = inputTarjeta.getText().toString();
+
+                                if(GlobalInfo.getMarketClienteID.isEmpty()){
+                                    alertCliente.setError("* Seleccionar Cliente");
+                                    return;
+                                }else if(GlobalInfo.getMarketClienteRZ.isEmpty()){
+                                    alertRazSocial.setError("* La Razon Social es obligatorio");
+                                    return;
+                                }else if(GlobalInfo.getMarketPlaca.isEmpty()){
+                                    alertPlaca.setError("* El campo Placa es obligatorio");
+                                    return;
+                                }
+
+                                GlobalInfo.getMarketTarjetaCredito = "";
+                                GlobalInfo.getMarketOperacion = "";
+                                GlobalInfo.getMarketPEfectivo = "0.00";
+                                GlobalInfo.getMarketFormaPago = "C";
+
+                                alertPlaca.setErrorEnabled(false);
+                                alertCliente.setErrorEnabled(false);
+                                alertRazSocial.setErrorEnabled(false);
+
+                                Toast.makeText(getContext(), "Se agrego correctamente", Toast.LENGTH_SHORT).show();
+
+                                modalNotaDespacho.dismiss();
+
+                                if (!GlobalInfo.getMarketClienteRZ.equals("CLIENTE VARIOS")) {
+                                    textCliente.setVisibility(View.GONE);
+                                    nombreCliente.setVisibility(View.VISIBLE);
+                                    nombreCliente.setText("Venta a: " + GlobalInfo.getMarketClienteRZ);
+                                }else{
+                                    textCliente.setVisibility(View.VISIBLE);
+                                    nombreCliente.setVisibility(View.GONE);
+                                    nombreCliente.setText("Venta a: " + GlobalInfo.getMarketClienteRZ);
+                                }
+
+                                /** Limpiar el Formulario - Nota de Despacho*/
+                                inputPlaca.setText("000-0000");
+                                inputTarjeta.getText().clear();
+                                inputCliente.getText().clear();
+                                inputRazSocial.getText().clear();
+                                inputDireccion.getText().clear();
+                                inputKilometraje.getText().clear();
+                                inputObservacion.getText().clear();
+
+                                btnBoleta.setVisibility(View.GONE);
+                                btnFactura.setVisibility(View.GONE);
+                                btnNotaDespacho.setVisibility(View.GONE);
+                                btnSeleccionCliente.setVisibility(View.VISIBLE);
+
+                            }
+                        });
+
+                    }
                 });
 
                 /**
@@ -1295,99 +1584,133 @@ public class ArticuloFragment extends Fragment {
                             @Override
                             public void onClick(View v) {
 
-                                /** Variables de Detalle Venta **/
+                                Context context = requireContext();
 
-                                mnTipoPago        = GlobalInfo.getMarketFormaPago;
-                                mnNroPlaca        = GlobalInfo.getMarketPlaca;
-                                mnClienteID       = GlobalInfo.getMarketClienteID;
-                                mnClienteRUC      = "";
-                                mnClienteRS       = GlobalInfo.getMarketClienteRZ;
-                                mnCliernteDR      = GlobalInfo.getMarketClienteDR;
-                                mnTarjetaCredito  = GlobalInfo.getMarketTarjetaCredito;
-                                mnOperacionREF    = GlobalInfo.getMarketOperacion;
-                                mnMontoSoles      = Double.valueOf(GlobalInfo.getMarketPEfectivo);
-                                mnMtoSaldoCredito = 0.00;
-                                mnPtosDisponibles = 0.00;
+                                ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-                                /** Consultando datos del DOCUMENTO **/
-                                mnPagoID = 1;
-                                mnTarjetaCreditoID = 0;
-                                mnobservacionPag = "CONTADO";
-                                mnTipoDocumento = "03";
+                                if (networkInfo != null && networkInfo.isConnected()) {
 
-                                switch (mnTipoPago) {
-                                    case "E" : //Efectivo
-                                        if (mnClienteID != null && mnClienteID.length() == 11) {
-                                            mnTipoDocumento = "01";
-                                            mnClienteRUC = mnClienteID;
-                                        } else if (mnClienteID == null || mnClienteID.isEmpty()){
-                                            mnTipoDocumento = "03";
+                                    /** Variables de Detalle Venta **/
+
+                                    mnTipoPago        = GlobalInfo.getMarketFormaPago;
+                                    mnNroPlaca        = GlobalInfo.getMarketPlaca;
+                                    mnClienteID       = GlobalInfo.getMarketClienteID;
+                                    mnClienteRUC      = "";
+                                    mnClienteRS       = GlobalInfo.getMarketClienteRZ;
+                                    mnCliernteDR      = GlobalInfo.getMarketClienteDR;
+                                    mnTarjetaCredito  = GlobalInfo.getMarketTarjetaCredito;
+                                    mnOperacionREF    = GlobalInfo.getMarketOperacion;
+                                    mnMontoSoles      = Double.valueOf(GlobalInfo.getMarketPEfectivo);
+                                    mnTarjND          = GlobalInfo.getMarketnroTarjetaNotaD;
+                                    mnobservacion     = GlobalInfo.getMarketObservacion;
+                                    mnMtoSaldoCredito = 0.00;
+                                    mnPtosDisponibles = 0.00;
+
+                                    /** Consultando datos del DOCUMENTO **/
+                                    mnPagoID = 1;
+                                    mnTarjetaCreditoID = 0;
+                                    mnobservacionPag = "CONTADO";
+                                    mnTipoDocumento = "03";
+
+                                    switch (mnTipoPago) {
+                                        case "E" : //Efectivo
+                                            if (mnClienteID != null && mnClienteID.length() == 11) {
+                                                mnTipoDocumento = "01";
+                                                mnClienteRUC = mnClienteID;
+                                            } else if (mnClienteID == null || mnClienteID.isEmpty()){
+                                                mnTipoDocumento = "03";
+                                            }
+                                            break;
+                                        case "T" : //Tarjeta
+                                            if (mnClienteID != null && mnClienteID.length() == 11) {
+                                                mnTipoDocumento = "01";
+                                                mnClienteRUC = mnClienteID;
+                                            } else if (mnClienteID == null || mnClienteID.isEmpty()) {
+                                                mnTipoDocumento = "03";
+                                            }
+                                            mnPagoID = 2;
+                                            mnTarjetaCreditoID = Integer.valueOf(mnTarjetaCredito);
+                                            mnobservacionPag = "TARJETA";
+                                            break;
+
+                                        case "C" : //credito
+                                            mnPagoID = 4;
+                                            mnobservacionPag = "CREDITO";
+                                            mnTipoDocumento = "99";
+                                            if(mnTarjND == ""){
+                                                if (mnClienteRUC.length() == 11) {
+                                                    mnClienteID = mnClienteRUC;
+                                                    mnTipoDocumento = "01";
+                                                } else if (mnClienteRUC.length() == 0) {
+                                                    mnTipoDocumento = "03";
+                                                }
+                                            }
+                                            break;
+
+                                        case "G" : //Transferencia Gratuita
+                                            mnobservacionPag = "GRATUITA";
+                                            break;
+                                    }
+
+                                    if (mnClienteID != null && mnClienteID.isEmpty() && mnTipoDocumento == "03") {
+                                        mnTipoPago       = "E";
+                                        mnNroPlaca       = "000-0000";
+                                        mnClienteID      = "11111111";
+                                        mnClienteRUC     = "";
+                                        mnClienteRS      = "CLIENTE VARIOS";
+                                        mnCliernteDR     = "";
+                                        mnTarjetaCredito = "";
+                                        mnOperacionREF   = "";
+                                        mnMontoSoles     = Double.valueOf(" 0.00");
+                                    }
+
+                                    /** 4.- VALIDAR BOLETA MAYORES A 700 SOLES **/
+
+                                    if (mnClienteID != null && mnClienteID.equals(GlobalInfo.getsettingClienteID10)  && GlobalInfo.getMarketMontoTotal >= GlobalInfo.getsettingDNIMontoMinimo10 && mnTipoDocumento.equals("03")) {
+                                        Toast.makeText(getContext(), "Por montos mayores a 700.00 soles debe ingresar el DNI del cliente", Toast.LENGTH_SHORT).show();
+                                        return;
+                                    }
+
+                                    findCorrelativo(GlobalInfo.getterminalImei10, mnTipoDocumento, mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR,
+                                            mnNroPlaca, mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
+                                            mnobservacionPag, mnMontoSoles, GlobalInfo.getMarketMontoTotal,mnTarjND,mnobservacion);
+
+                                } else {
+
+                                    modal_ErrorWifi.show();
+                                    btnAceptarErrorWifi   = modal_ErrorWifi.findViewById(R.id.btnAceptarWifi);
+                                    btnAceptarErrorWifi.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            modal_ErrorWifi.dismiss();
                                         }
-                                        break;
-                                    case "T" : //Tarjeta
-                                        if (mnClienteID != null && mnClienteID.length() == 11) {
-                                            mnTipoDocumento = "01";
-                                            mnClienteRUC = mnClienteID;
-                                        } else if (mnClienteID == null || mnClienteID.isEmpty()) {
-                                            mnTipoDocumento = "03";
-                                        }
-                                        mnPagoID = 2;
-                                        mnTarjetaCreditoID = Integer.valueOf(mnTarjetaCredito);
-                                        mnobservacionPag = "TARJETA";
-                                        break;
-
-                                    case "G" : //Transferencia Gratuita
-                                        mnobservacionPag = "GRATUITA";
-                                        break;
+                                    });
+                                    modal_CV_Articulo.dismiss();
                                 }
 
-                                if (mnClienteID != null && mnClienteID.isEmpty() && mnTipoDocumento == "03") {
-                                    mnTipoPago       = "E";
-                                    mnNroPlaca       = "000-0000";
-                                    mnClienteID      = "11111111";
-                                    mnClienteRUC     = "";
-                                    mnClienteRS      = "CLIENTE VARIOS";
-                                    mnCliernteDR     = "";
-                                    mnTarjetaCredito = "";
-                                    mnOperacionREF   = "";
-                                    mnMontoSoles     = Double.valueOf(" 0.00");
-                                }
 
-                                /** 4.- VALIDAR BOLETA MAYORES A 700 SOLES **/
-
-                                if (mnClienteID != null && mnClienteID.equals(GlobalInfo.getsettingClienteID10)  && GlobalInfo.getMarketMontoTotal >= GlobalInfo.getsettingDNIMontoMinimo10 && mnTipoDocumento.equals("03")) {
-                                    Toast.makeText(getContext(), "Por montos mayores a 700.00 soles debe ingresar el DNI del cliente", Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-
-                                findCorrelativo(GlobalInfo.getterminalImei10,
-                                        mnTipoDocumento, mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR,
-                                        mnNroPlaca,mnPagoID, mnTarjetaCreditoID, mnOperacionREF,
-                                        mnobservacionPag, mnMontoSoles, GlobalInfo.getMarketMontoTotal);
-
-                                btnGuardarVenta.setVisibility(View.GONE);
-                                btnCancelarVenta.setVisibility(View.GONE);
-                                text_guardarC.setVisibility(View.GONE);
-                                titleconfirmar.setVisibility(View.GONE);
-                                btnImprimirVenta.setVisibility(View.VISIBLE);
-                                btnNuevaVenta.setVisibility(View.VISIBLE);
-                                text_inprimirC.setVisibility(View.VISIBLE);
-                                titleimprimir.setVisibility(View.VISIBLE);
-
-                                Toast.makeText(getContext(), "Se Guardo Venta Correctamente", Toast.LENGTH_SHORT).show();
                             }
+
                         });
 
                         btnCancelarVenta.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 modal_CV_Articulo.dismiss();
+
                             }
                         });
 
                         btnImprimirVenta.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+
+                                if (!isVentaGuardadaCorrectamente) {
+                                    Toast.makeText(getContext(), "La venta no se ha guardado correctamente. No se puede imprimir el comprobante.", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
 
                                 String NroComprobante = GlobalInfo.getCorrelativoMarketSerie + "-" + GlobalInfo.getCorrelativoMarketNumero;
 
@@ -1412,41 +1735,41 @@ public class ArticuloFragment extends Fragment {
                                         detTotal = 0.00;
                                     }
 
-                                    String linnesS = String.format(Locale.getDefault(), "%-46s\n%-9s %4s %8s %7s %10s", detArticuloDs, "", detUmedida, String.format("%.2f", detPrecio), detCantidad, String.format("%.2f", detTotal));
+                                    String linnesS = String.format(Locale.getDefault(), "%-48s\n%-9s %4s %8s %7s %10s", detArticuloDs, "", detUmedida, String.format("%.2f", detPrecio), detCantidad, String.format("%.2f", detTotal));
                                     MarketDABuilder.append(linnesS).append("\n");
 
                                 }
 
-                                    if (mnPagoID == 2) {
+                                if (mnPagoID == 2) {
 
-                                        /** @IMPRESION01 */
-                                        imprimirMarket(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
-                                                GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,mnMtoSubTotal1, mnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
-                                                xFechaDocumentoQR,mnPagoID,mnTarjetaCreditoID,mnOperacionREF, mnMontoSoles,MarketDABuilder);
+                                    /** @IMPRESION01 */
+                                    imprimirMarket(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
+                                            GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,mnMtoSubTotal1, mnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                            xFechaDocumentoQR,mnPagoID,mnTarjetaCreditoID,mnOperacionREF, mnMontoSoles,MarketDABuilder,mnobservacion,mnTarjND);
 
-                                        /** @IMPRESION02 */
-                                        Timer timerS = new Timer();
-                                        timerS.schedule(new TimerTask() {
-                                            @Override
-                                            public void run() {
-                                                imprimirMarket(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
-                                                        GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,mnMtoSubTotal1, mnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
-                                                        xFechaDocumentoQR,mnPagoID,mnTarjetaCreditoID,mnOperacionREF, mnMontoSoles,MarketDABuilder);
+                                    /** @IMPRESION02 */
+                                    Timer timerS = new Timer();
+                                    timerS.schedule(new TimerTask() {
+                                        @Override
+                                        public void run() {
+                                            imprimirMarket(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
+                                                    GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,mnMtoSubTotal1, mnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                                    xFechaDocumentoQR,mnPagoID,mnTarjetaCreditoID,mnOperacionREF, mnMontoSoles,MarketDABuilder,mnobservacion,mnTarjND);
 
-                                                timerS.cancel();
-                                            }
-                                        }, 3000);
+                                            timerS.cancel();
+                                        }
+                                    }, 3000);
 
-                                    } else {
+                                } else {
 
-                                        imprimirMarket(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
-                                                GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,mnMtoSubTotal1, mnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
-                                                xFechaDocumentoQR,mnPagoID,mnTarjetaCreditoID,mnOperacionREF, mnMontoSoles,MarketDABuilder);
-                                    }
+                                    imprimirMarket(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
+                                            GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,mnMtoSubTotal1, mnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                            xFechaDocumentoQR,mnPagoID,mnTarjetaCreditoID,mnOperacionREF, mnMontoSoles,MarketDABuilder,mnobservacion,mnTarjND);
+                                }
 
-                                  ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) linearLayoutRecyclerArticulo.getLayoutParams();
-                                  layoutParams.bottomMargin = 0;
-                                  linearLayoutRecyclerArticulo.setLayoutParams(layoutParams);
+                                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) linearLayoutRecyclerArticulo.getLayoutParams();
+                                layoutParams.bottomMargin = 0;
+                                linearLayoutRecyclerArticulo.setLayoutParams(layoutParams);
 
                                 limpiarDatos();
                                 getArticulo();
@@ -1462,7 +1785,7 @@ public class ArticuloFragment extends Fragment {
                                 recyclerFamilia.setEnabled(true);
                                 familiaAdapter.setTodosBotonesHabilitados(true);
 
-                                }
+                            }
                         });
 
                         btnNuevaVenta.setOnClickListener(new View.OnClickListener() {
@@ -1523,7 +1846,125 @@ public class ArticuloFragment extends Fragment {
         recyclerCarrito.setAdapter(carritoAdapter);
         carritoAdapter.notifyDataSetChanged();
 
+
+        /** Modal de Error al Servidor **/
+        modal_ErrorServidor = new Dialog(getContext());
+        modal_ErrorServidor.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        modal_ErrorServidor.setContentView(R.layout.alerta_servidor);
+        modal_ErrorServidor.setCancelable(false);
+
+        /** Modal de Error al Wifi **/
+        modal_ErrorWifi = new Dialog(getContext());
+        modal_ErrorWifi.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        modal_ErrorWifi.setContentView(R.layout.alerta_wifi);
+        modal_ErrorWifi.setCancelable(false);
+
+
         return view;
+    }
+
+    /**
+     * @OBTENER:LectorEtiquetaNFC
+     */
+    private void  insertNFC(){
+        nfcAdapter = NfcAdapter.getDefaultAdapter(getContext());
+
+        Intent intent = new Intent(getContext(), getActivity().getClass());
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        pendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        IntentFilter tagIntentFilter = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+        intentFilters = new IntentFilter[]{tagIntentFilter};
+        techLists = new String[][]{new String[]{NfcA.class.getName(), NfcB.class.getName(),
+                NfcF.class.getName(), NfcV.class.getName(), IsoDep.class.getName(),
+                MifareClassic.class.getName(), MifareUltralight.class.getName(),
+                Ndef.class.getName()}};
+    }
+
+    /**
+     * @APISERVICE:BuscarClienteRFID_DNI
+     */
+    private String findClientePrecioDNI(String rfid, String companyid) {
+
+        Call<List<ClientePrecio>> call = mAPIService.findDescuentos(rfid, companyid);
+
+        call.enqueue(new Callback<List<ClientePrecio>>() {
+            @Override
+            public void onResponse(Call<List<ClientePrecio>> call, Response<List<ClientePrecio>> response) {
+
+                try {
+
+                    if (!response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    clientePrecioList = response.body();
+
+                    if (clientePrecioList != null && !clientePrecioList.isEmpty()) {
+                        ClientePrecio clientePrecio = clientePrecioList.get(0);
+
+                        GlobalInfo.getRfIdCPrecio10      = clientePrecio.getRfid();
+                        GlobalInfo.getClienteIDPrecio10  = clientePrecio.getClienteID();
+                        GlobalInfo.getClienteRZPrecio10  = clientePrecio.getClienteRZ();
+                        GlobalInfo.getNroPlacaPrecio10   = clientePrecio.getNroPlaca();
+                        GlobalInfo.getArticuloIdPrecio10     = clientePrecio.getArticuloID();
+                        GlobalInfo.getTipClientePrecio10     = clientePrecio.getTipoCliente();
+                        GlobalInfo.getTipoDescuentoPrecio10  = clientePrecio.getTipoDescuento();
+                        GlobalInfo.getMontoDescuentoPrecio10 = clientePrecio.getMontoDescuento();
+
+                        if (GlobalInfo.getClienteIDPrecio10.length() == 8){
+                            inputPlaca.setText(GlobalInfo.getNroPlacaPrecio10);
+                            inputDNI.setText(GlobalInfo.getClienteIDPrecio10);
+                            inputNombre.setText(GlobalInfo.getClienteRZPrecio10);
+                            inputDireccion.getText().clear();
+
+                            inputDNI.setEnabled(false);
+                            inputNombre.setEnabled(false);
+
+                            alertDNI.setBoxBackgroundColorResource(R.color.colornew);
+                            alertNombre.setBoxBackgroundColorResource(R.color.colornew);
+
+                        }else{
+                            Toast.makeText(getContext(), "El NFC esta registrado con un RUC", Toast.LENGTH_SHORT).show();
+
+                            inputNFC.getText().clear();
+                            inputPlaca.setText("000-0000");
+                            inputDNI.getText().clear();
+                            inputNombre.getText().clear();
+                            inputDireccion.getText().clear();
+
+                            inputDNI.setEnabled(true);
+                            inputNombre.setEnabled(true);
+                            alertDNI.setBoxBackgroundColorResource(R.color.transparentenew);
+                            alertNombre.setBoxBackgroundColorResource(R.color.transparentenew);
+                        }
+
+                    } else {
+                        Toast.makeText(getContext(), "No se encontraron datos del cliente.", Toast.LENGTH_SHORT).show();
+                        inputNFC.getText().clear();
+                        inputPlaca.setText("000-0000");
+                        inputDNI.getText().clear();
+                        inputNombre.getText().clear();
+                        inputDireccion.getText().clear();
+
+                        inputDNI.setEnabled(true);
+                        inputNombre.setEnabled(true);
+                        alertDNI.setBoxBackgroundColorResource(R.color.transparentenew);
+                        alertNombre.setBoxBackgroundColorResource(R.color.transparentenew);
+                    }
+
+                } catch (Exception ex) {
+                    Toast.makeText(getContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ClientePrecio>> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de conexión APICORE Cliente Precio - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
+        return rfid;
     }
 
     private void limpiarDatos(){
@@ -1536,8 +1977,11 @@ public class ArticuloFragment extends Fragment {
         GlobalInfo.getMarketTarjetaCredito  = "";
         GlobalInfo.getMarketOperacion    = "";
         GlobalInfo.getMarketPEfectivo    = "0.00";
+        GlobalInfo.getMarketnroTarjetaNotaD = "";
+        GlobalInfo.getMarketObservacion  = "";
         mnMtoSaldoCredito                = 0.00;
         mnPtosDisponibles                = 0.00;
+
     }
 
     private void actualizarBoton(){
@@ -1568,9 +2012,10 @@ public class ArticuloFragment extends Fragment {
      */
     private void findCorrelativo(String imei, String mnTipoDocumento, String mnClienteID, String mnClienteRUC, String mnClienteRS, String mnCliernteDR,
                                  String mnNroPlaca, Integer mnPagoID, Integer mnTarjetaCreditoID, String mnOperacionREF,
-                                 String mnobservacionPag, Double mnMontoSoles, Double mnMtoTotal) {
+                                 String mnobservacionPag, Double mnMontoSoles, Double mnMtoTotal,String mnTarjND,String mnobservacion) {
 
-        Call<List<Correlativo>> call = mAPIService.findCorrelativosinrfid(imei, mnTipoDocumento, "-", "-", "0");
+
+        Call<List<Correlativo>> call = mAPIService.findCorrelativomarket(imei, mnTipoDocumento);
 
         call.enqueue(new Callback<List<Correlativo>>() {
             @Override
@@ -1584,6 +2029,11 @@ public class ArticuloFragment extends Fragment {
                     }
 
                     List<Correlativo> correlativoList = response.body();
+
+                    if (correlativoList == null || correlativoList.isEmpty()) {
+                        Toast.makeText(getContext(), "No se encontró correlativo.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     for(Correlativo correlativo: correlativoList) {
                         GlobalInfo.getCorrelativoMarketFecha      = String.valueOf(correlativo.getFechaProceso());
@@ -1638,14 +2088,6 @@ public class ArticuloFragment extends Fragment {
                     mnMtoImpuesto0 = mnMtoTotal - mnMtoSubTotal1;
                     mnMtoImpuesto1 = Math.round(mnMtoImpuesto0*100.0)/100.0;
 
-                    /** GRABAR VENTA CAB. EN BASE DE DATOS **/
-
-                    grabarVentaMarketCA(mnTipoDocumento, GRNumeroSerie, GRNumeroDocumento, GlobalInfo.getterminalID10,
-                            mnClienteID, mnClienteRUC,mnClienteRS, mnCliernteDR, xFechaDocumento,
-                            mnMtoSubTotal1, mnMtoImpuesto1, mnMtoTotal, mnNroPlaca, GlobalInfo.getuserID10,
-                            mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoTotal, mnMontoSoles,
-                            mnobservacionPag);
-
                     /** GRABAR VENTA DETALLE EN BASE DE DATOS **/
 
                     for (Articulo articulo : articuloSeleccionados) {
@@ -1673,12 +2115,33 @@ public class ArticuloFragment extends Fragment {
                         mnItem += 1;
 
                         grabarVentaMarketDA(mnTipoDocumento, GRNumeroSerie, GRNumeroDocumento, mnItem,
-                                            detArticuloId, detArticuloDs, detUmedida, GlobalInfo.getterminalID10, xFechaDocumento,
-                                            detPrecio, detCantidad, detSubtotal1, detImpuesto1, detTotal1);
+                                detArticuloId, detArticuloDs, detUmedida, GlobalInfo.getterminalID10, xFechaDocumento,
+                                detPrecio, detCantidad, detSubtotal1, detImpuesto1, detTotal1);
 
                     }
 
+                    /** GRABAR VENTA CAB. EN BASE DE DATOS **/
+
+                    grabarVentaMarketCA(mnTipoDocumento, GRNumeroSerie, GRNumeroDocumento, GlobalInfo.getterminalID10,
+                            mnClienteID, mnClienteRUC, mnClienteRS, mnCliernteDR, xFechaDocumento,
+                            mnMtoSubTotal1, mnMtoImpuesto1, mnMtoTotal, mnNroPlaca, GlobalInfo.getuserID10,
+                            mnPagoID, mnTarjetaCreditoID, mnOperacionREF, mnMtoTotal, mnMontoSoles,
+                            mnobservacionPag, mnTarjND, mnobservacion, mnItem);
+
                     /** FIN GRABAR VENTA EN BASE DE DATOS **/
+
+                    isVentaGuardadaCorrectamente = true;
+
+                    Toast.makeText(getContext(), "Se Guardo Venta Correctamente", Toast.LENGTH_SHORT).show();
+
+                    btnGuardarVenta.setVisibility(View.GONE);
+                    btnCancelarVenta.setVisibility(View.GONE);
+                    text_guardarC.setVisibility(View.GONE);
+                    titleconfirmar.setVisibility(View.GONE);
+                    btnImprimirVenta.setVisibility(View.VISIBLE);
+                    btnNuevaVenta.setVisibility(View.VISIBLE);
+                    text_inprimirC.setVisibility(View.VISIBLE);
+                    titleimprimir.setVisibility(View.VISIBLE);
 
                 }catch (Exception ex){
                     Toast.makeText(getActivity(),ex.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1687,7 +2150,17 @@ public class ArticuloFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<Correlativo>> call, Throwable t) {
-                Toast.makeText(getContext(), "Error de conexión APICORE Correlativo - RED - WIFI", Toast.LENGTH_SHORT).show();
+
+                modal_ErrorServidor.show();
+                btnAceptarError   = modal_ErrorServidor.findViewById(R.id.btnAceptarError);
+                btnAceptarError.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        modal_ErrorServidor.dismiss();
+                    }
+                });
+                modal_CV_Articulo.dismiss();
+
             }
         });
 
@@ -1706,7 +2179,7 @@ public class ArticuloFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error Articulo Gratuito: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -1760,7 +2233,7 @@ public class ArticuloFragment extends Fragment {
                     });
 
                     /**
-                     * @MOSTRARPEODUCTOS:Columnas3
+                     * @MOSTRARPEODUCTOS:Columnas8
                      */
                     GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 8);
                     recyclerArticulo.setLayoutManager(layoutManager);
@@ -1792,7 +2265,7 @@ public class ArticuloFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error Articulo: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -1846,7 +2319,7 @@ public class ArticuloFragment extends Fragment {
                     });
 
                     /**
-                     * @MOSTRARPEODUCTOS:Columnas3
+                     * @MOSTRARPEODUCTOS:Columnas8
                      */
                     GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 8);
                     recyclerArticulo.setLayoutManager(layoutManager);
@@ -1878,7 +2351,7 @@ public class ArticuloFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error Familia: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -1933,6 +2406,54 @@ public class ArticuloFragment extends Fragment {
     }
 
     /**
+     * @APISERVICE:ListadoClienteCredito
+     */
+    private void ClienteCredito(){
+
+        Call<List<ClienteCredito>> call = mAPIService.getClienteCredito();
+
+        call.enqueue(new Callback<List<ClienteCredito>>() {
+            @Override
+            public void onResponse(Call<List<ClienteCredito>> call, Response<List<ClienteCredito>> response) {
+                try {
+
+                    if(!response.isSuccessful()){
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    GlobalInfo.getlclientesCreditoList10 = response.body();
+
+                    clienteCreditoAdapter = new ClienteCreditoAdapter(GlobalInfo.getlclientesCreditoList10, getContext(), new ClienteCreditoAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(ClienteCredito item) {
+
+                            inputPlaca.setText(item.getNroPLaca());
+                            inputTarjeta.setText(item.getTarjetaID());
+                            inputCliente.setText(item.getClienteID());
+                            inputRazSocial.setText(item.getClienteRZ());
+                            inputDireccion.setText(item.getClienteDR());
+                            monto = item.getSaldo();
+
+                            btnBuscadorClienteRZ.setQuery("", false);
+                            modalClienteCredito.dismiss();
+                        }
+                    });
+                    recyclerLClienteCredito.setAdapter(clienteCreditoAdapter);
+
+                }catch (Exception ex){
+                    Toast.makeText(getContext(),ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ClienteCredito>> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de conexión APICORE Cliente Credito - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
      * @Spinner:TipoPago
      */
     private void  TipoPago_Doc(){
@@ -1954,7 +2475,7 @@ public class ArticuloFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error Cliente DNI: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -2000,7 +2521,7 @@ public class ArticuloFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error Cliente DNI: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -2040,7 +2561,7 @@ public class ArticuloFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error Cliente Ruc: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -2087,7 +2608,7 @@ public class ArticuloFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error Cliente Ruc: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -2122,7 +2643,9 @@ public class ArticuloFragment extends Fragment {
                                      String _clienteID, String _clienteRUC, String _clienteRZ, String _clienteDR, String _fechadocumento,
                                      Double _mtoSubTotal, Double _mtoImpuesto, Double _mtoTotal, String _nroPlaca, String _userID,
                                      Integer _pagoID, Integer _tarjetaID, String _TarjetaDS, Double _mtoPagoPEN, Double _mtoPagoUSD,
-                                     String _observacionPag){
+                                     String _observacionPag, String _nroTarjetaNotaD, String _observacion, Integer _nroItem){
+
+        /** Cuando los datos se envian vacio se replazara con un ' - ' */
 
         if (_clienteRUC.isEmpty()) {_clienteRUC = "-";}
 
@@ -2130,10 +2653,14 @@ public class ArticuloFragment extends Fragment {
 
         if (_TarjetaDS.isEmpty()) {_TarjetaDS = "-";}
 
+        if (_nroTarjetaNotaD.isEmpty()) {_nroTarjetaNotaD = "-";}
+
+        if (_observacion.isEmpty()) {_observacion = "-";}
+
         Call<List<VentaMarketCA>> call = mAPIService.getMarketCA(_tipoDocumento, _serieDocumento, _nroDocumento, _terminalID,
                 _clienteID, _clienteRUC, _clienteRZ, _clienteDR, _fechadocumento,
                 _mtoSubTotal, _mtoImpuesto, _mtoTotal, _nroPlaca, _userID,
-                _pagoID, _tarjetaID, _TarjetaDS, _mtoPagoPEN, _mtoPagoUSD, _observacionPag);
+                _pagoID, _tarjetaID, _TarjetaDS, _mtoPagoPEN, _mtoPagoUSD, _observacionPag, _nroTarjetaNotaD, _observacion, _nroItem);
 
         call.enqueue(new Callback<List<VentaMarketCA>>() {
             @Override
@@ -2170,9 +2697,8 @@ public class ArticuloFragment extends Fragment {
                                      Double _precio1, Double _cantidad, Double _mtoSubTotal, Double _mtoImpuesto, Double _mtoTotal){
 
         Call<List<VentaMarketDA>> call = mAPIService.getMarketDA(_tipoDocumento, _serieDocumento, _nroDocumento, _nroItem,
-                                                                 _articuloID, _productoDs, _uniMed, _terminalID, _fechadocumento,
-                                                                 _precio1, _cantidad, _mtoSubTotal, _mtoImpuesto, _mtoTotal);
-
+                _articuloID, _productoDs, _uniMed, _terminalID, _fechadocumento,
+                _precio1, _cantidad, _mtoSubTotal, _mtoImpuesto, _mtoTotal);
 
         call.enqueue(new Callback<List<VentaMarketDA>>() {
             @Override
@@ -2204,7 +2730,7 @@ public class ArticuloFragment extends Fragment {
     private void imprimirMarket(String tipopapel, String _TipoDocumento, String _NroDocumento, String _FechaDocumento, Integer _Turno,
                                 String _Cajero, Double _MtoTotal, Double _MtoSubTotal, Double _MtoImpuesto,
                                 String _ClienteID, String _ClienteRZ, String _ClienteDR, String _NroPlaca,
-                                String _FechaQR, Integer _PagoID, Integer _TarjetaCreditoID, String _OperacionREF, Double _mtoSoles, StringBuilder MarketDABuilder){
+                                String _FechaQR, Integer _PagoID, Integer _TarjetaCreditoID, String _OperacionREF, Double _mtoSoles, StringBuilder MarketDABuilder,String _obervacion,String _NTarjND){
 
         String rutaImagen = "/storage/emulated/0/appSven/";
 
@@ -2226,20 +2752,6 @@ public class ArticuloFragment extends Fragment {
         String NameCompany = GlobalInfo.getNameCompany10;
         String RUCCompany = GlobalInfo.getRucCompany10;
 
-        /** Branch Company **/
-
-        String BranchCompany = (GlobalInfo.getBranchCompany10 != null) ? GlobalInfo.getBranchCompany10 : "";
-        String finalBranch = "";
-        String finalBranch1 = "";
-
-        if (!BranchCompany.isEmpty()) {
-            String[] partesBranch = BranchCompany.split(" - ", 2);
-            finalBranch = partesBranch[0];
-            finalBranch1 = partesBranch[1];
-        }
-        String Branch1 = finalBranch;
-        String Branch2 = finalBranch1;
-
         /** Address Company **/
 
         String AddressCompany = (GlobalInfo.getAddressCompany10 != null) ? GlobalInfo.getAddressCompany10 : "";
@@ -2249,10 +2761,46 @@ public class ArticuloFragment extends Fragment {
         if (!AddressCompany.isEmpty()) {
             String[] partesAddress = AddressCompany.split(" - " , 2);
             finalAddress = partesAddress[0];
-            finalAddress1 = partesAddress[1];
+            finalAddress1 = (partesAddress.length > 1) ? partesAddress[1] : "";
         }
         String Address1 = finalAddress;
         String Address2 = finalAddress1;
+
+        String Address1Part1 = Address1.substring(0, Math.min(Address1.length(), 36));
+        String Address1Part2 = "";
+
+        if (!Address1Part1.isEmpty()) {
+            if (Address1.length() > 36) {
+                Address1Part2 = Address1.substring(36);
+            }
+        }
+        String finalAddress1Part = Address1Part2;
+
+        /** Branch Company **/
+
+        String BranchCompany = (GlobalInfo.getBranchCompany10 != null) ? GlobalInfo.getBranchCompany10 : "";
+        String finalBranch = "";
+        String finalBranch1 = "";
+
+        if (!BranchCompany.isEmpty()) {
+            String[] partesBranch = BranchCompany.split(" - ", 2);
+            finalBranch = partesBranch[0];
+            finalBranch1 = (partesBranch.length > 1) ? partesBranch[1] : "";
+        }
+        String Branch1 = finalBranch;
+        String Branch2 = finalBranch1;
+
+        String Branch1Part1 = Branch1.substring(0, Math.min(Branch1.length(), 37));
+        String Branch1Part2 = "";
+
+        if (!Branch1Part1.isEmpty()) {
+            if (Branch1.length() > 37) {
+                Branch1Part2 = Branch1.substring(37);
+            }
+        }
+        String finalBranch1Part = Branch1Part2;
+
+        /** Tipo de Documento **/
 
         switch (_TipoDocumento) {
             case "01" :
@@ -2317,19 +2865,61 @@ public class ArticuloFragment extends Fragment {
                             }else {
                                 printama.printTextlnBold(" ");
                             }
-
-                            if (!Address1.isEmpty() && !Address2.isEmpty()) {
-                                printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
-                                printama.printTextlnBold(Address2, Printama.CENTER);
+                            if (!Address1.isEmpty()) {
+                                if (!Address1Part1.isEmpty() && !Address2.isEmpty()) {
+                                    printama.printTextlnBold("PRINCIPAL: " + Address1Part1, Printama.CENTER);
+                                    if (!finalAddress1Part.isEmpty()) {
+                                        printama.printTextlnBold(finalAddress1Part + " - " + Address2, Printama.CENTER);
+                                    } else {
+                                        printama.printTextlnBold(Address2, Printama.CENTER);
+                                    }
+                                }
                             }
 
-                            if (!Branch1.isEmpty() && !Branch2.isEmpty()) {
-                                printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            if (!Branch1.isEmpty()) {
+                                if (!Branch1Part1.isEmpty() && !Branch2.isEmpty()) {
+                                    printama.printTextlnBold("SUCURSAL: " + Branch1Part1, Printama.CENTER);
+                                    if (!finalBranch1Part.isEmpty()) {
+                                        printama.printTextlnBold(finalBranch1Part + " - " + Branch2, Printama.CENTER);
+                                    } else {
+                                        printama.printTextlnBold(Branch2, Printama.CENTER);
+                                    }
+                                }
                             }
-
                             printama.printTextlnBold("RUC: " + RUCCompany, Printama.CENTER);
 
+                            break;
+                        case "99" :
+                            printama.printTextln("                 ", Printama.CENTER);
+                            printama.printImage(logoRobles, logoSize);
+                            printama.setSmallText();
+                            if(GlobalInfo.getTerminalNameCompany10){
+                                printama.printTextlnBold(NameCompany, Printama.CENTER);
+                            }else {
+                                printama.printTextlnBold(" ");
+                            }
+
+                            if (!Branch1.isEmpty()) {
+                                if (!Branch1Part1.isEmpty() && !Branch2.isEmpty()) {
+                                    printama.printTextlnBold("SUCURSAL: " + Branch1Part1, Printama.CENTER);
+                                    if (!finalBranch1Part.isEmpty()) {
+                                        printama.printTextlnBold(finalBranch1Part + " - " + Branch2, Printama.CENTER);
+                                    } else {
+                                        printama.printTextlnBold(Branch2, Printama.CENTER);
+                                    }
+                                }
+                            }else{
+                                if (!Address1.isEmpty()) {
+                                    if (!Address1Part1.isEmpty() && !Address2.isEmpty()) {
+                                        printama.printTextlnBold("PRINCIPAL: " + Address1Part1, Printama.CENTER);
+                                        if (!finalAddress1Part.isEmpty()) {
+                                            printama.printTextlnBold(finalAddress1Part + " - " + Address2, Printama.CENTER);
+                                        } else {
+                                            printama.printTextlnBold(Address2, Printama.CENTER);
+                                        }
+                                    }
+                                }
+                            }
                             break;
 
                     }
@@ -2345,6 +2935,10 @@ public class ArticuloFragment extends Fragment {
                                 printama.printTextlnBold("***** TRANSFERENCIA GRATUITA *****", Printama.CENTER);
                             }
                             printama.printTextlnBold("BOLETA DE VENTA ELECTRONICA", Printama.CENTER);
+                            break;
+
+                        case "99" :
+                            printama.printTextlnBold("NOTA DE DESPACHO", Printama.CENTER);
                             break;
 
                     }
@@ -2385,6 +2979,17 @@ public class ArticuloFragment extends Fragment {
                                 }
 
                             }
+
+                            break;
+
+                        case "99" :
+
+                            if (!_obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : " + _obervacion, Printama.LEFT);
+                            }
+                            printama.printTextln("RUC/DNI      : " + _ClienteID, Printama.LEFT);
+                            printama.printTextln("Cliente      : " + _ClienteRZ, Printama.LEFT);
+                            printama.printTextln("#Contrato    : " + _NTarjND , Printama.LEFT);
 
                             break;
                     }
@@ -2603,6 +3208,19 @@ public class ArticuloFragment extends Fragment {
                             printama.setSmallText();
                             printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
                             break;
+
+                        case "99" :
+                            printama.printTextlnBold("TOTAL VENTA: S/ "+ MtoTotalFF , Printama.RIGHT);
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.printTextlnBold("NOMBRE :" , Printama.LEFT);
+                            printama.printTextlnBold("DNI    :" , Printama.LEFT);
+                            printama.printTextlnBold("FIRMA  :" , Printama.LEFT);
+                            break;
                     }
 
                     break;
@@ -2618,18 +3236,61 @@ public class ArticuloFragment extends Fragment {
                             }else {
                                 printama.printTextlnBold(" ");
                             }
-
-                            if (!Address1.isEmpty() && !Address2.isEmpty()) {
-                                printama.printTextlnBold("PRINCIPAL: " + Address1, Printama.CENTER);
-                                printama.printTextlnBold(Address2, Printama.CENTER);
+                            if (!Address1.isEmpty()) {
+                                if (!Address1Part1.isEmpty() && !Address2.isEmpty()) {
+                                    printama.printTextlnBold("PRINCIPAL: " + Address1Part1, Printama.CENTER);
+                                    if (!finalAddress1Part.isEmpty()) {
+                                        printama.printTextlnBold(finalAddress1Part + " - " + Address2, Printama.CENTER);
+                                    } else {
+                                        printama.printTextlnBold(Address2, Printama.CENTER);
+                                    }
+                                }
                             }
 
-                            if (!Branch1.isEmpty() && !Branch2.isEmpty()) {
-                                printama.printTextlnBold("SUCURSAL: " + Branch1, Printama.CENTER);
-                                printama.printTextlnBold(Branch2, Printama.CENTER);
+                            if (!Branch1.isEmpty()) {
+                                if (!Branch1Part1.isEmpty() && !Branch2.isEmpty()) {
+                                    printama.printTextlnBold("SUCURSAL: " + Branch1Part1, Printama.CENTER);
+                                    if (!finalBranch1Part.isEmpty()) {
+                                        printama.printTextlnBold(finalBranch1Part + " - " + Branch2, Printama.CENTER);
+                                    } else {
+                                        printama.printTextlnBold(Branch2, Printama.CENTER);
+                                    }
+                                }
                             }
-
                             printama.printTextln("RUC: " + RUCCompany, Printama.CENTER);
+                            break;
+
+                        case "99" :
+                            printama.printTextln("                 ", Printama.CENTER);
+                            printama.printImage(logoRobles, logoSize);
+                            printama.setSmallText();
+                            if(GlobalInfo.getTerminalNameCompany10){
+                                printama.printTextlnBold(NameCompany, Printama.CENTER);
+                            }else {
+                                printama.printTextlnBold(" ");
+                            }
+
+                            if (!Branch1.isEmpty()) {
+                                if (!Branch1Part1.isEmpty() && !Branch2.isEmpty()) {
+                                    printama.printTextlnBold("SUCURSAL: " + Branch1Part1, Printama.CENTER);
+                                    if (!finalBranch1Part.isEmpty()) {
+                                        printama.printTextlnBold(finalBranch1Part + " - " + Branch2, Printama.CENTER);
+                                    } else {
+                                        printama.printTextlnBold(Branch2, Printama.CENTER);
+                                    }
+                                }
+                            }else{
+                                if (!Address1.isEmpty()) {
+                                    if (!Address1Part1.isEmpty() && !Address2.isEmpty()) {
+                                        printama.printTextlnBold("PRINCIPAL: " + Address1Part1, Printama.CENTER);
+                                        if (!finalAddress1Part.isEmpty()) {
+                                            printama.printTextlnBold(finalAddress1Part + " - " + Address2, Printama.CENTER);
+                                        } else {
+                                            printama.printTextlnBold(Address2, Printama.CENTER);
+                                        }
+                                    }
+                                }
+                            }
                             break;
                     }
                     switch (_TipoDocumento) {
@@ -2643,6 +3304,10 @@ public class ArticuloFragment extends Fragment {
                                 printama.printTextlnBold("***** TRANSFERENCIA GRATUITA *****", Printama.CENTER);
                             }
                             printama.printTextlnBold("BOLETA DE VENTA ELECTRONICA", Printama.CENTER);
+                            break;
+
+                        case "99" :
+                            printama.printTextlnBold("NOTA DE DESPACHO", Printama.CENTER);
                             break;
 
                     }
@@ -2683,6 +3348,17 @@ public class ArticuloFragment extends Fragment {
                                 }
 
                             }
+
+                            break;
+
+                        case "99" :
+
+                            if (!_obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : " + _obervacion, Printama.LEFT);
+                            }
+                            printama.printTextln("RUC/DNI      : " + _ClienteID, Printama.LEFT);
+                            printama.printTextln("Cliente      : " + _ClienteRZ, Printama.LEFT);
+                            printama.printTextln("#Contrato    : " + _NTarjND , Printama.LEFT);
 
                             break;
                     }
@@ -2801,15 +3477,15 @@ public class ArticuloFragment extends Fragment {
                             break;
                         case "03" :
 
-                                if (mnTipoPago.equals("G")){
-                                    printama.printTextln("OP. GRATUITAS: S/ " + opGratruitas, Printama.RIGHT);
+                            if (mnTipoPago.equals("G")){
+                                printama.printTextln("OP. GRATUITAS: S/ " + opGratruitas, Printama.RIGHT);
 
-                                }
-                                printama.printTextln("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
-                                printama.setSmallText();
-                                printSeparatorLine(printama, tipopapel);
-                                printama.addNewLine(1);
-                                printama.setSmallText();
+                            }
+                            printama.printTextln("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
 
                             switch (_PagoID) {
                                 case 1 :
@@ -2901,12 +3577,24 @@ public class ArticuloFragment extends Fragment {
                             printama.setSmallText();
                             printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "http://4-fact.com/sven/auth/consulta");
                             break;
+
+                        case "99" :
+                            printama.printTextlnBold("TOTAL VENTA: S/ "+ MtoTotalFF , Printama.RIGHT);
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.printTextlnBold("NOMBRE :" , Printama.LEFT);
+                            printama.printTextlnBold("DNI    :" , Printama.LEFT);
+                            printama.printTextlnBold("FIRMA  :" , Printama.LEFT);
+                            break;
                     }
 
                     break;
 
             }
-
             printama.feedPaper();
             printama.cutPaper();
             printama.close();
@@ -2946,16 +3634,55 @@ public class ArticuloFragment extends Fragment {
     public void onResume() {
         super.onResume();
         nfcUtil.onResume();
+
+        if (nfcAdapter != null) {
+            nfcAdapter.enableReaderMode(getActivity(), this,
+                    NfcAdapter.FLAG_READER_NFC_A | NfcAdapter.FLAG_READER_NFC_B |
+                            NfcAdapter.FLAG_READER_NFC_F | NfcAdapter.FLAG_READER_NFC_V, null);
+            return;
+        }
+
     }
 
     @Override
     public void onPause() {
         super.onPause();
         nfcUtil.onPause();
+        if (nfcAdapter != null) {
+            nfcAdapter.disableReaderMode(getActivity());
+        }
     }
 
-    private void onBackPressed() {
+    /**
+     * @OBTENER:NFC
+     */
+    @Override
+    public void onTagDiscovered(Tag tag) {
+        String nfcTag = ByteArrayToHexString(tag.getId());
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                inputNFC.setText(nfcTag);
+            }
+        });
+    }
 
+    private String ByteArrayToHexString(byte[] byteArray) {
+
+        StringBuilder sb = new StringBuilder(byteArray.length * 2);
+
+        for (byte b : byteArray) {
+            sb.append(String.format("%02X", b));
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * @SCANNEAR:CódigoProductos
+     */
+
+    private void onBackPressed() {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Confirmación")
                 .setMessage("¿Realmente deseas retroceder?")
@@ -2967,9 +3694,6 @@ public class ArticuloFragment extends Fragment {
                 .show();
     }
 
-    /**
-     * @SCANNEAR:CódigoProductos
-     */
     private void startScanner() {
         ScanOptions options = new ScanOptions();
         options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES);
@@ -2981,4 +3705,5 @@ public class ArticuloFragment extends Fragment {
         options.setBarcodeImageEnabled(false);
         barcodeLauncher.launch(options);
     }
+
 }

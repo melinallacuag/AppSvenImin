@@ -339,7 +339,7 @@ public class DasboardFragment extends Fragment{
 
                     Boolean xPase                 = false;
 
-                    if (FechaActual == 1) {
+                    if (FechaActual == 1 && GlobalInfo.getTerminalInicioDiaValidar10) {
 
                         if (GlobalInfo.getSettingTurno10.equals(0) && GlobalInfo.getterminalTurno10.equals(1)) {
 
@@ -735,7 +735,7 @@ public class DasboardFragment extends Fragment{
                             String FechasImpresion    = formatfecha.format(calendarfecha.getTime());
                             Integer FechaActual = Integer.valueOf(FechasImpresion);
 
-                            if (FechaActual == 1) {
+                            if (FechaActual == 1 && GlobalInfo.getTerminalInicioDiaValidar10) {
 
                                 if (HoraActual >= 0 && HoraActual <= 3000) {
                                     findOptranDia(GlobalInfo.getterminalImei10);
