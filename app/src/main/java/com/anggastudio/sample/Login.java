@@ -1,14 +1,18 @@
 package com.anggastudio.sample;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.nfc.Tag;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
 import com.anggastudio.sample.WebApiSVEN.Models.Company;
@@ -23,7 +27,11 @@ import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,7 +46,7 @@ public class Login extends AppCompatActivity{
     Button btniniciar;
     TextInputEditText inputUsuario, inputContraseña;
     TextInputLayout alertuser,alertpassword;
-    TextView imeii;
+    TextView imeii,terminalId;
     String usuarioUser,contraseñaUser;
 
     List<Users> usersList;
@@ -63,6 +71,7 @@ public class Login extends AppCompatActivity{
         configuracion   = findViewById(R.id.btnconfiguracion);
         btnConfigurarLados = findViewById(R.id.btnConfigurarLados);
         imeii           = findViewById(R.id.imei);
+        terminalId     = findViewById(R.id.terminalId);
 
         configuracion.setColorFilter(getResources().getColor(R.color.white));
         btnConfigurarLados.setColorFilter(getResources().getColor(R.color.white));
@@ -96,31 +105,78 @@ public class Login extends AppCompatActivity{
         /**
          * @INGRESAR:Login
          */
+        btniniciar.setEnabled(true);
         btniniciar.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
 
-                usuarioUser    = inputUsuario.getText().toString();
-                contraseñaUser = inputContraseña.getText().toString();
+                try {
+                    Calendar calendarPrint = Calendar.getInstance(TimeZone.getTimeZone("America/Lima"));
+                    SimpleDateFormat formatDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                    String xFechaHoraImpresion = formatDate.format(calendarPrint.getTime());
 
-                if(usuarioUser.isEmpty()){
-                    alertuser.setError("El campo usuario es obligatorio");
-                    return;
-                }else if(contraseñaUser.isEmpty()){
-                    alertpassword.setError("El campo contraseña es obligatorio");
+                    String providedDateTime = GlobalInfo.getTerminalValidarFechaHora10;
+
+                    if (providedDateTime == null) {
+                        Toast.makeText(getApplicationContext(), "Terminal no configurado, comuniquese con el administrador.", Toast.LENGTH_SHORT).show();
+                        btniniciar.setEnabled(false);
+                        btniniciar.setBackgroundColor(getResources().getColor(R.color.colorHumo));
+                        return;
+                    }
+
+                    Date currentDate = formatDate.parse(xFechaHoraImpresion);
+                    Date providedDate = formatDate.parse(providedDateTime);
+
+                    if (currentDate != null && providedDate != null) {
+
+                        long diffInMillis = Math.abs(currentDate.getTime() - providedDate.getTime());
+                        long diffInMinutes = diffInMillis / (1000 * 60);
+
+                        if (diffInMinutes <= 10) {
+                            btniniciar.setEnabled(true);
+                            btniniciar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                        } else {
+                            btniniciar.setEnabled(false);
+                            btniniciar.setBackgroundColor(getResources().getColor(R.color.colorHumo));
+                            showAlert();
+                            return;
+                        }
+
+                    } else {
+                        btniniciar.setEnabled(false);
+                        btniniciar.setBackgroundColor(getResources().getColor(R.color.colorHumo));
+                        showAlert();
+                        return;
+                    }
+
+                    usuarioUser    = inputUsuario.getText().toString();
+                    contraseñaUser = inputContraseña.getText().toString();
+
+                    if(usuarioUser.isEmpty()){
+                        alertuser.setError("El campo usuario es obligatorio");
+                        return;
+                    }else if(contraseñaUser.isEmpty()){
+                        alertpassword.setError("El campo contraseña es obligatorio");
+                        return;
+                    }
+
+                    alertuser.setErrorEnabled(false);
+                    alertpassword.setErrorEnabled(false);
+
+                    GlobalInfo.getuserID10 = "";
+                    GlobalInfo.getuserName10 = "";
+                    GlobalInfo.getuserPass10 = "";
+                    GlobalInfo.getuseridentFID10 = "";
+
+                    findUsers(usuarioUser);
+
+                }catch (Exception ex){
+                    Toast.makeText( getApplicationContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                    btniniciar.setEnabled(false);
+                    btniniciar.setBackgroundColor(getResources().getColor(R.color.colorHumo));
                     return;
                 }
-
-                alertuser.setErrorEnabled(false);
-                alertpassword.setErrorEnabled(false);
-
-                GlobalInfo.getuserID10 = "";
-                GlobalInfo.getuserName10 = "";
-                GlobalInfo.getuserPass10 = "";
-                GlobalInfo.getuseridentFID10 = "";
-
-                findUsers(usuarioUser);
 
             }
         });
@@ -151,7 +207,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText( getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText( getApplicationContext(), "Codigo de error User: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -214,11 +270,13 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText( getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText( getApplicationContext(), "Codigo de error Terminal: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     terminalList = response.body();
+
+                    boolean imeiFound = false;
 
                     for(Terminal terminal: terminalList) {
 
@@ -242,6 +300,11 @@ public class Login extends AppCompatActivity{
                         GlobalInfo.getterminalCvariosPrinter10  = terminal.getcVarios_Printer();
                         GlobalInfo.getTerminaltimerAppVenta10    = String.valueOf(terminal.getTimerAppVenta());
                         GlobalInfo.getTerminalInicioDiaValidar10 = terminal.getInicio_Dia_Validar();
+                        GlobalInfo.getTerminalValidarFechaHora10 = terminal.getValidar_Fecha_Hora();
+                        GlobalInfo.getterminalNDespacho          = terminal.getNota_Despacho_Default();
+                        GlobalInfo.getterminalFCabecera          = terminal.getFeed_Cabecera();
+                        GlobalInfo.getTerminalSoloPuntos10       = terminal.getSoloPuntos();
+                        GlobalInfo.getTerminalLecturar10         = terminal.getLecturar();
 
                         /** Mostrar el listado de Datos*/
                         findCompany(GlobalInfo.getterminalCompanyID10);
@@ -254,16 +317,19 @@ public class Login extends AppCompatActivity{
 
                         getManguerasByTerminal(GlobalInfo.getterminalID10);
 
+                        if (GlobalInfo.getterminalImei10.equals(terminal.getImei())) {
+                            imeiFound = true;
+                            terminalId.setVisibility(View.VISIBLE);
+                            terminalId.setText(GlobalInfo.getterminalID10);
+                            return;
+                        }
+
                     }
 
-                    if (GlobalInfo.getterminalID10.isEmpty() || GlobalInfo.getterminalID10 == null) {
-
+                    if (!imeiFound) {
+                        terminalId.setVisibility(View.GONE);
                         imeii.setTextColor(getResources().getColor(R.color.colorError));
-
                         Toast.makeText( getApplicationContext(), "Terminal no configurado, comuniquese con el administrador.", Toast.LENGTH_SHORT).show();
-
-                        return;
-
                     }
 
                 }catch (Exception ex){
@@ -280,6 +346,14 @@ public class Login extends AppCompatActivity{
 
     }
 
+    private void showAlert() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Alerta");
+        builder.setMessage("La fecha no coincide o la diferencia de tiempo es mayor a 10 minutos.");
+        builder.setPositiveButton("OK", null);
+        builder.show();
+    }
+
     /**
      *  @APISERVICE:Empresa
      */
@@ -294,7 +368,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error Company: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -338,7 +412,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error Lados: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -371,7 +445,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error Setting: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -394,7 +468,7 @@ public class Login extends AppCompatActivity{
                         GlobalInfo.getsettingClienteRZ10       = String.valueOf(setting.getClienteRZ());
                         GlobalInfo.getsettingNroPlaca10        = String.valueOf(setting.getNroplaca());
                         GlobalInfo.getsettingDNIMontoMinimo10  = Double.valueOf(setting.getDnI_Monto_Minimo());
-                        //GlobalInfo.getsettingtimerAppVenta10   = String.valueOf(setting.getTimerAppVenta());
+                        // GlobalInfo.getsettingtimerAppVenta10   = String.valueOf(setting.getTimerAppVenta());
                         GlobalInfo.getsettingRutaLogo110       = String.valueOf(setting.getRutaLogo1());
                         GlobalInfo.getsettingRutaLogo210       = String.valueOf(setting.getRutaLogo2());
                         GlobalInfo.getsettingDescuentoRFID10   = setting.getDescuentoRFID();
@@ -426,7 +500,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error DetalleVenta: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -457,7 +531,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error MTerminal: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -488,7 +562,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error Tipo Pago: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 

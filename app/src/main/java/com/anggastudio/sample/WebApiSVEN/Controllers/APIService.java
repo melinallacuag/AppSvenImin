@@ -10,6 +10,7 @@ import com.anggastudio.sample.WebApiSVEN.Models.Correlativo;
 import com.anggastudio.sample.WebApiSVEN.Models.DetalleVenta;
 import com.anggastudio.sample.WebApiSVEN.Models.Familia;
 import com.anggastudio.sample.WebApiSVEN.Models.Gratuita;
+import com.anggastudio.sample.WebApiSVEN.Models.LClientePuntos;
 import com.anggastudio.sample.WebApiSVEN.Models.LClientes;
 import com.anggastudio.sample.WebApiSVEN.Models.Lados;
 import com.anggastudio.sample.WebApiSVEN.Models.ListaComprobante;
@@ -313,8 +314,8 @@ public interface APIService {
     /**
      * @VentaMarketDA
      */
-    @POST("api/ventamarketda/listado")
-    Call<VentaMarketDA> postVentaMarketDA(@Body VentaMarketDA ventaMarketDA);
+    /** @POST("api/ventamarketda/listado")
+    Call<VentaMarketDA> postVentaMarketDA(@Body VentaMarketDA ventaMarketDA);**/
 
     @GET("api/ventamarketda/listado/{tipodoc}/{seriedoc}/{nrodoc}/{nroItem}/{articuloID}/{articuloDS}/{uniMed}/{terminalID}/{fechaDocumento}/{precio1}/{cantidad}/{mtoSubTotal}/{mtoImpuesto}/{mtoTotal}")
     Call<List<VentaMarketDA>> getMarketDA(@Path("tipodoc") String tipodoc, @Path("seriedoc") String seriedoc, @Path("nrodoc") String nrodoc, @Path("nroItem") Integer nroItem, @Path("articuloID") String articuloID, @Path("articuloDS") String articuloDS, @Path("uniMed") String uniMed, @Path("terminalID") String terminalID, @Path("fechaDocumento") String fechaDocumento, @Path("precio1") Double precio1, @Path("cantidad") Double cantidad, @Path("mtoSubTotal") Double mtoSubTotal, @Path("mtoImpuesto") Double mtoImpuesto, @Path("mtoTotal") Double mtoTotal);
@@ -322,10 +323,19 @@ public interface APIService {
     /**
      * @VentaMarketCA
      */
-    @POST("api/ventamarketca/listado")
-    Call<VentaMarketCA> postVentaMarketCA(@Body VentaMarketCA ventaMarketCA);
+    /** @POST("api/ventamarketca/listado")
+    Call<VentaMarketCA> postVentaMarketCA(@Body VentaMarketCA ventaMarketCA);**/
 
     @GET("api/ventamarketca/listado/{tipodoc}/{seriedoc}/{nrodoc}/{terminalID}/{clienteID}/{clienteRUC}/{clienteRZ}/{clienteDR}/{fechaDocumento}/{mtoSubTotal}/{mtoImpuesto}/{mtoTotal}/{nroPlaca}/{userID}/{pagoID}/{tarjetaID}/{tarjetaDS}/{mtoPagoPEN}/{mtoPagoUSD}/{observacionPag}/{nroTarjetaNotaD}/{observacion}/{nroItem}")
     Call<List<VentaMarketCA>> getMarketCA(@Path("tipodoc") String tipodoc, @Path("seriedoc") String seriedoc, @Path("nrodoc") String nrodoc, @Path("terminalID") String terminalID,@Path("clienteID") String clienteID, @Path("clienteRUC") String clienteRUC, @Path("clienteRZ") String clienteRZ, @Path("clienteDR") String clienteDR, @Path("fechaDocumento") String fechaDocumento,@Path("mtoSubTotal") Double mtoSubTotal,@Path("mtoImpuesto") Double mtoImpuesto,@Path("mtoTotal") Double mtoTotal, @Path("nroPlaca") String nroPlaca, @Path("userID") String userID, @Path("pagoID") Integer pagoID, @Path("tarjetaID") Integer tarjetaID,@Path("tarjetaDS") String tarjetaDS,@Path("mtoPagoPEN") Double mtoPagoPEN,@Path("mtoPagoUSD") Double mtoPagoUSD,@Path("observacionPag") String observacionPag,@Path("nroTarjetaNotaD") String nroTarjetaNotaD,@Path("observacion") String observacion, @Path("nroItem") Integer nroItem);
+
+
+    /**
+     * @ClientePuntos-Listado
+     * @ListadoClientesPuntos
+     */
+
+    @GET("api/ClientePuntos/Listado/{RFID}/{CompanyId}")
+    Call<List<LClientePuntos>> findClienteArticulosPuntos(@Path("RFID") String RFID, @Path("CompanyId") Integer CompanyId);
 
 }

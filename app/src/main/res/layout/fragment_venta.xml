@@ -34,10 +34,9 @@
 
             <Button
                 android:id="@+id/btnListadoComprobante"
-                android:layout_width="800sp"
+                android:layout_width="250sp"
                 android:layout_height="wrap_content"
                 android:layout_margin="2sp"
-                android:layout_weight="1"
                 android:backgroundTint="@color/colorSuccess"
                 android:fontFamily="@font/nunito_black"
                 android:gravity="center"

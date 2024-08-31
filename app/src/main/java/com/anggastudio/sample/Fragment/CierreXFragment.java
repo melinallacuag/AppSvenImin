@@ -1,14 +1,37 @@
 package com.anggastudio.sample.Fragment;
 
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.nfc.NfcAdapter;
+import android.nfc.tech.IsoDep;
+import android.nfc.tech.MifareClassic;
+import android.nfc.tech.MifareUltralight;
+import android.nfc.tech.Ndef;
+import android.nfc.tech.NfcA;
+import android.nfc.tech.NfcB;
+import android.nfc.tech.NfcF;
+import android.nfc.tech.NfcV;
+import android.os.Build;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -16,11 +39,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.anggastudio.printama.Printama;
+import com.anggastudio.sample.Adapter.LadosAdapter;
 import com.anggastudio.sample.Adapter.ReporteTarjetasAdapter;
 import com.anggastudio.sample.Adapter.ReporteVendedorAdapter;
 import com.anggastudio.sample.Adapter.VContometroAdapter;
@@ -29,7 +49,9 @@ import com.anggastudio.sample.Adapter.VTipoPagoAdapter;
 import com.anggastudio.sample.NFCUtil;
 import com.anggastudio.sample.R;
 import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
+import com.anggastudio.sample.WebApiSVEN.Models.Company;
 import com.anggastudio.sample.WebApiSVEN.Models.Gratuita;
+import com.anggastudio.sample.WebApiSVEN.Models.Lados;
 import com.anggastudio.sample.WebApiSVEN.Models.Optran;
 import com.anggastudio.sample.WebApiSVEN.Models.RAnulados;
 import com.anggastudio.sample.WebApiSVEN.Models.ReporteTarjetas;
@@ -38,12 +60,18 @@ import com.anggastudio.sample.WebApiSVEN.Models.VContometro;
 import com.anggastudio.sample.WebApiSVEN.Models.VProducto;
 import com.anggastudio.sample.WebApiSVEN.Models.VTipoPago;
 import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.StringJoiner;
 import java.util.TimeZone;
 
 import retrofit2.Call;
@@ -262,7 +290,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error Gratuito: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -300,7 +328,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error R. Despacho: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -343,7 +371,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error Anulados: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -386,7 +414,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error V. Contometro: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -418,7 +446,7 @@ public class CierreXFragment extends Fragment {
 
     }
 
-    /** API SERVICE - Venta por Productos */
+    /** API SERVICE - Venta por Contrometro */
     private void findVProducto(String id,Integer turno){
 
         Call<List<VProducto>> call = mAPIService.findVProducto(id,turno);
@@ -429,7 +457,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error V. Producto: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -498,7 +526,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error V. Tipo Pago: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -546,7 +574,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error RTarjetas(: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -591,13 +619,13 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error RVendedor: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     reporteVendedorList = response.body();
 
-                     for(ReporteVendedor reporteVendedor: reporteVendedorList) {
+                    for(ReporteVendedor reporteVendedor: reporteVendedorList) {
 
                         RVendedorTotal += reporteVendedor.getSoles();
 
@@ -637,7 +665,7 @@ public class CierreXFragment extends Fragment {
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getContext(), "Codigo de error OptranTurno: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -693,7 +721,6 @@ public class CierreXFragment extends Fragment {
         Bitmap logoRobles = BitmapFactory.decodeFile(rutaImagen);
 
         String NameCompany   = GlobalInfo.getNameCompany10;
-
 
         /** Address Company **/
 
@@ -807,7 +834,7 @@ public class CierreXFragment extends Fragment {
 
         }
 
-       /** Ventas por Tipo de Pago **/
+        /** Ventas por Tipo de Pago **/
         StringBuilder VTipoPagoBuilder = new StringBuilder();
 
         for(VTipoPago vTipoPago: vTipoPagoList) {
@@ -970,7 +997,7 @@ public class CierreXFragment extends Fragment {
         switch (tipopapel) {
             case "65mm":
             case "80mm":
-                String linesS = String.format(Locale.getDefault(), "%-35s  %10s", RTarjetaTotalC, TotalRTarjetasSoles);
+                String linesS = String.format(Locale.getDefault(), "%-36s  %10s", RTarjetaTotalC, TotalRTarjetasSoles);
                 RTarjetaTotal.append(linesS);
                 break;
             case "58mm":
@@ -990,7 +1017,7 @@ public class CierreXFragment extends Fragment {
             switch (tipopapel) {
                 case "65mm":
                 case "80mm":
-                    String linnesS = String.format(Locale.getDefault(), "%-21s %4s %20s", nombreV, ndespachosV,solesV);
+                    String linnesS = String.format(Locale.getDefault(), "%-22s %4s %20s", nombreV, ndespachosV,solesV);
                     ReporteVendedorBuilder.append(linnesS).append("\n");
                     break;
                 case "58mm":
@@ -1010,7 +1037,7 @@ public class CierreXFragment extends Fragment {
         switch (tipopapel) {
             case "65mm":
             case "80mm":
-                String linneesS = String.format(Locale.getDefault(),"%-35s %11s", GranRVendedorTotalC, TotalSolesC);
+                String linneesS = String.format(Locale.getDefault(),"%-36s %11s", GranRVendedorTotalC, TotalSolesC);
                 GranRVendedorTotal.append(linneesS);
                 break;
             case "58mm":
@@ -1019,9 +1046,10 @@ public class CierreXFragment extends Fragment {
                 break;
         }
 
-        int logoSize = (tipopapel.equals("80mm")) ? GlobalInfo.getTerminalImageW10 : (tipopapel.equals("65mm") ? GlobalInfo.getTerminalImageW10 : 400);
+        int logoSize = (tipopapel.equals("80mm")) ? GlobalInfo.getTerminalImageW10 : (tipopapel.equals("58mm")) ? GlobalInfo.getTerminalImageW10 : (tipopapel.equals("65mm") ? GlobalInfo.getTerminalImageW10 : 400);
 
         /** Imprimir Cierre X**/
+
         Printama.with(getContext()).connect(printama -> {
 
             switch (tipopapel) {
@@ -1029,7 +1057,7 @@ public class CierreXFragment extends Fragment {
                 case "58mm":
                     printama.printTextln("                 ", Printama.CENTER);
                     printama.printImage(logoRobles, logoSize);
-
+                    printama.addNewLine(GlobalInfo.getterminalFCabecera);
                     printama.setSmallText();
                     if(GlobalInfo.getTerminalNameCompany10){
                         printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -1161,13 +1189,13 @@ public class CierreXFragment extends Fragment {
 
                     printama.printTextln("                 ", Printama.CENTER);
                     printama.printImage(logoRobles, logoSize);
+                    printama.addNewLine(GlobalInfo.getterminalFCabecera);
                     printama.setSmallText();
                     if(GlobalInfo.getTerminalNameCompany10){
                         printama.printTextlnBold(NameCompany, Printama.CENTER);
                     }else {
                         printama.addNewLine();
                     }
-
                     if (!Branch1.isEmpty()) {
                         if (!Branch1Part1.isEmpty() && !Branch2.isEmpty()) {
                             printama.printTextlnBold("SUCURSAL: " + Branch1Part1, Printama.CENTER);
@@ -1245,8 +1273,8 @@ public class CierreXFragment extends Fragment {
                         printama.printTextlnBold("VENTAS POR TIPO DE PAGO",Printama.CENTER);
                         printama.addNewLine(1);
                         printama.printTextlnBold( VTipoPagoBuilder.toString(), Printama.RIGHT);
-                        printama.printTextlnBold("Transferencia Gratuito                   " + TGratuita,Printama.RIGHT);
-                        printama.printTextlnBold("Promociones                              " + "0.00",Printama.RIGHT);
+                        printama.printTextlnBold("Transferencia Gratuito                   "+ TGratuita,Printama.RIGHT);
+                        printama.printTextlnBold("Promociones                              "+"  0.00",Printama.RIGHT);
                         printama.printTextlnBold("---------",Printama.RIGHT);
                         printama.printTextlnBold(MontoNetoTotal.toString(),Printama.RIGHT);
                         printama.addNewLine(1);
@@ -1266,7 +1294,7 @@ public class CierreXFragment extends Fragment {
                         printama.setSmallText();
                         printama.printTextlnBold("REPORTE POR TARJETAS",Printama.CENTER);
                         printama.addNewLine(1);
-                        printama.printTextlnBold("NRO DOCUMENTO    "+"TIPO         "+"REF.      "+"  MONTO",Printama.RIGHT);
+                        printama.printTextlnBold("NRO DOCUMENTO     "+"TIPO         "+"REF.      "+"  MONTO",Printama.RIGHT);
                         printama.printTextlnBold( ReporteTarjetasBuilder.toString() + "---------", Printama.RIGHT);
                         printama.printTextlnBold(RTarjetaTotal.toString(),Printama.RIGHT);
 
@@ -1291,7 +1319,7 @@ public class CierreXFragment extends Fragment {
                 case "65mm":
 
                     printama.printImage(Printama.RIGHT,logoRobles, logoSize);
-
+                    printama.addNewLine(GlobalInfo.getterminalFCabecera);
                     printama.setSmallText();
                     if(GlobalInfo.getTerminalNameCompany10){
                         printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -1413,6 +1441,7 @@ public class CierreXFragment extends Fragment {
                         printama.printTextlnBold("NOMBRES             " + "NRO DESPACHOS         " + " SOLES", Printama.RIGHT);
                         printama.printTextln(ReporteVendedorBuilder.toString() + "---------", Printama.RIGHT);
                         printama.printTextln(GranRVendedorTotal.toString(), Printama.RIGHT);
+
                     }
 
                     break;

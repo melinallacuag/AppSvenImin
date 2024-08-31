@@ -1,11 +1,15 @@
 package com.anggastudio.sample.Fragment;
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,12 +18,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import com.anggastudio.sample.Login;
 import com.anggastudio.sample.NFCUtil;
 import com.anggastudio.sample.PasswordChecker;
@@ -34,13 +32,11 @@ import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -715,247 +711,247 @@ public class DasboardFragment extends Fragment{
             @Override
             public void onClick(View view) {
 
-                    for (SettingTurno settingTurno : GlobalInfo.getsettingTurnoList10 ) {
+                for (SettingTurno settingTurno : GlobalInfo.getsettingTurnoList10 ) {
 
-                        GlobalInfo.getSettingCompanyId10 = settingTurno.getCompanyID();
-                        GlobalInfo.getSettingTurno10     = settingTurno.getTurno();
-                        GlobalInfo.getSettingRango110    = settingTurno.getRango1();
-                        GlobalInfo.getSettingRango210    = settingTurno.getRango2();
+                    GlobalInfo.getSettingCompanyId10 = settingTurno.getCompanyID();
+                    GlobalInfo.getSettingTurno10     = settingTurno.getTurno();
+                    GlobalInfo.getSettingRango110    = settingTurno.getRango1();
+                    GlobalInfo.getSettingRango210    = settingTurno.getRango2();
 
-                        if (GlobalInfo.getSettingTurno10 .equals(0)) {
+                    if (GlobalInfo.getSettingTurno10 .equals(0)) {
 
-                            Calendar calendarprint = Calendar.getInstance(TimeZone.getTimeZone("America/Lima"));
-                            SimpleDateFormat formatdate = new SimpleDateFormat("HHmmss");
-                            String FechaHoraImpresion = formatdate.format(calendarprint.getTime());
-                            Integer HoraActual = Integer.valueOf(FechaHoraImpresion);
+                        Calendar calendarprint = Calendar.getInstance(TimeZone.getTimeZone("America/Lima"));
+                        SimpleDateFormat formatdate = new SimpleDateFormat("HHmmss");
+                        String FechaHoraImpresion = formatdate.format(calendarprint.getTime());
+                        Integer HoraActual = Integer.valueOf(FechaHoraImpresion);
 
 
-                            Calendar calendarfecha      = Calendar.getInstance(TimeZone.getTimeZone("America/Lima"));
-                            SimpleDateFormat formatfecha  = new SimpleDateFormat("dd");
-                            String FechasImpresion    = formatfecha.format(calendarfecha.getTime());
-                            Integer FechaActual = Integer.valueOf(FechasImpresion);
+                        Calendar calendarfecha      = Calendar.getInstance(TimeZone.getTimeZone("America/Lima"));
+                        SimpleDateFormat formatfecha  = new SimpleDateFormat("dd");
+                        String FechasImpresion    = formatfecha.format(calendarfecha.getTime());
+                        Integer FechaActual = Integer.valueOf(FechasImpresion);
 
-                            if (FechaActual == 1 && GlobalInfo.getTerminalInicioDiaValidar10) {
+                        if (FechaActual == 1 && GlobalInfo.getTerminalInicioDiaValidar10) {
 
-                                if (HoraActual >= 0 && HoraActual <= 3000) {
-                                    findOptranDia(GlobalInfo.getterminalImei10);
-                                } else {
-
-                                    if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
-
-                                        /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
-                                        modalInicioDiaGenerado.show();
-
-                                    }else {
-
-                                        findOptranDiaFE(GlobalInfo.getterminalImei10);
-
-                                        modalAlertaDiaActual.show();
-
-                                        btnIngresarIDFEntrada = modalAlertaDiaActual.findViewById(R.id.btnIngresarIDFEntrada);
-
-                                        modalForzarEntrada = new Dialog(getContext());
-                                        modalForzarEntrada.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                        modalForzarEntrada.setContentView(R.layout.modal_forzarentrada);
-                                        modalForzarEntrada.setCancelable(false);
-
-                                        btnIngresarIDFEntrada.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-
-                                                if (!modalForzarEntrada.isShowing()) {
-                                                    modalForzarEntrada.show();
-                                                }
-
-                                                btnCancelarIDFEntrada = modalForzarEntrada.findViewById(R.id.btnCancelarFEntrada);
-                                                btnAceptarCIDEntrada  = modalForzarEntrada.findViewById(R.id.btnAceptarFEntrada);
-                                                usuario               = modalForzarEntrada.findViewById(R.id.inputUserFEntrada);
-                                                contraseña            = modalForzarEntrada.findViewById(R.id.inputContraseñaFEntrada);
-                                                alertuser             = modalForzarEntrada.findViewById(R.id.alertUserFEntrada);
-                                                alertpassword         = modalForzarEntrada.findViewById(R.id.alertContraseñaFEntrada);
-
-                                                btnCancelarIDFEntrada.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
-
-                                                        modalForzarEntrada.dismiss();
-
-                                                        usuario.getText().clear();
-                                                        contraseña.getText().clear();
-
-                                                        alertuser.setErrorEnabled(false);
-                                                        alertpassword.setErrorEnabled(false);
-
-                                                    }
-                                                });
-
-                                                btnAceptarCIDEntrada.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
-
-                                                        usuarioUser = usuario.getText().toString();
-                                                        contraseñaUser = contraseña.getText().toString();
-
-                                                        if (usuarioUser.isEmpty()) {
-                                                            alertuser.setError("El campo usuario es obligatorio");
-                                                            return;
-                                                        } else if (contraseñaUser.isEmpty()) {
-                                                            alertpassword.setError("El campo contraseña es obligatorio");
-                                                            return;
-                                                        }
-
-                                                        findUsersID(usuarioUser);
-
-                                                        alertuser.setErrorEnabled(false);
-                                                        alertpassword.setErrorEnabled(false);
-
-                                                    }
-                                                });
-
-                                            }
-                                        });
-
-                                        return;
-                                    }
-
-                                }
-
+                            if (HoraActual >= 0 && HoraActual <= 3000) {
+                                findOptranDia(GlobalInfo.getterminalImei10);
                             } else {
 
-                                if (HoraActual >= GlobalInfo.getSettingRango110 && HoraActual <= GlobalInfo.getSettingRango210) {
-                                    findOptranDia(GlobalInfo.getterminalImei10);
-                                } else {
+                                if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
 
-                                    if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
+                                    /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
+                                    modalInicioDiaGenerado.show();
 
-                                        /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
-                                        modalInicioDiaGenerado.show();
+                                }else {
 
-                                    }else {
+                                    findOptranDiaFE(GlobalInfo.getterminalImei10);
 
-                                        findOptranDiaFE(GlobalInfo.getterminalImei10);
+                                    modalAlertaDiaActual.show();
 
-                                        modalAlertaDiaActual.show();
+                                    btnIngresarIDFEntrada = modalAlertaDiaActual.findViewById(R.id.btnIngresarIDFEntrada);
 
-                                        btnIngresarIDFEntrada = modalAlertaDiaActual.findViewById(R.id.btnIngresarIDFEntrada);
+                                    modalForzarEntrada = new Dialog(getContext());
+                                    modalForzarEntrada.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    modalForzarEntrada.setContentView(R.layout.modal_forzarentrada);
+                                    modalForzarEntrada.setCancelable(false);
 
-                                        modalForzarEntrada = new Dialog(getContext());
-                                        modalForzarEntrada.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                        modalForzarEntrada.setContentView(R.layout.modal_forzarentrada);
-                                        modalForzarEntrada.setCancelable(false);
+                                    btnIngresarIDFEntrada.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
 
-                                        btnIngresarIDFEntrada.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-
-                                                if (!modalForzarEntrada.isShowing()) {
-                                                    modalForzarEntrada.show();
-                                                }
-
-                                                btnCancelarIDFEntrada = modalForzarEntrada.findViewById(R.id.btnCancelarFEntrada);
-                                                btnAceptarCIDEntrada  = modalForzarEntrada.findViewById(R.id.btnAceptarFEntrada);
-                                                usuario               = modalForzarEntrada.findViewById(R.id.inputUserFEntrada);
-                                                contraseña            = modalForzarEntrada.findViewById(R.id.inputContraseñaFEntrada);
-                                                alertuser             = modalForzarEntrada.findViewById(R.id.alertUserFEntrada);
-                                                alertpassword         = modalForzarEntrada.findViewById(R.id.alertContraseñaFEntrada);
-
-                                                btnCancelarIDFEntrada.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
-
-                                                        modalForzarEntrada.dismiss();
-
-                                                        usuario.getText().clear();
-                                                        contraseña.getText().clear();
-
-                                                        alertuser.setErrorEnabled(false);
-                                                        alertpassword.setErrorEnabled(false);
-
-                                                    }
-                                                });
-
-                                                btnAceptarCIDEntrada.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
-
-                                                        usuarioUser = usuario.getText().toString();
-                                                        contraseñaUser = contraseña.getText().toString();
-
-                                                        if (usuarioUser.isEmpty()) {
-                                                            alertuser.setError("El campo usuario es obligatorio");
-                                                            return;
-                                                        } else if (contraseñaUser.isEmpty()) {
-                                                            alertpassword.setError("El campo contraseña es obligatorio");
-                                                            return;
-                                                        }
-
-                                                        findUsersID(usuarioUser);
-
-                                                        alertuser.setErrorEnabled(false);
-                                                        alertpassword.setErrorEnabled(false);
-
-                                                    }
-                                                });
-
+                                            if (!modalForzarEntrada.isShowing()) {
+                                                modalForzarEntrada.show();
                                             }
-                                        });
 
-                                        return;
-                                    }
+                                            btnCancelarIDFEntrada = modalForzarEntrada.findViewById(R.id.btnCancelarFEntrada);
+                                            btnAceptarCIDEntrada  = modalForzarEntrada.findViewById(R.id.btnAceptarFEntrada);
+                                            usuario               = modalForzarEntrada.findViewById(R.id.inputUserFEntrada);
+                                            contraseña            = modalForzarEntrada.findViewById(R.id.inputContraseñaFEntrada);
+                                            alertuser             = modalForzarEntrada.findViewById(R.id.alertUserFEntrada);
+                                            alertpassword         = modalForzarEntrada.findViewById(R.id.alertContraseñaFEntrada);
 
+                                            btnCancelarIDFEntrada.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+
+                                                    modalForzarEntrada.dismiss();
+
+                                                    usuario.getText().clear();
+                                                    contraseña.getText().clear();
+
+                                                    alertuser.setErrorEnabled(false);
+                                                    alertpassword.setErrorEnabled(false);
+
+                                                }
+                                            });
+
+                                            btnAceptarCIDEntrada.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+
+                                                    usuarioUser = usuario.getText().toString();
+                                                    contraseñaUser = contraseña.getText().toString();
+
+                                                    if (usuarioUser.isEmpty()) {
+                                                        alertuser.setError("El campo usuario es obligatorio");
+                                                        return;
+                                                    } else if (contraseñaUser.isEmpty()) {
+                                                        alertpassword.setError("El campo contraseña es obligatorio");
+                                                        return;
+                                                    }
+
+                                                    findUsersID(usuarioUser);
+
+                                                    alertuser.setErrorEnabled(false);
+                                                    alertpassword.setErrorEnabled(false);
+
+                                                }
+                                            });
+
+                                        }
+                                    });
+
+                                    return;
                                 }
 
                             }
 
-                            if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
+                        } else {
 
-                                /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
-                                modalInicioDiaGenerado.show();
+                            if (HoraActual >= GlobalInfo.getSettingRango110 && HoraActual <= GlobalInfo.getSettingRango210) {
+                                findOptranDia(GlobalInfo.getterminalImei10);
+                            } else {
 
-                            }else {
+                                if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
 
-                                modalInicioDia.show();
+                                    /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
+                                    modalInicioDiaGenerado.show();
 
-                                btnCancelarInicio = modalInicioDia.findViewById(R.id.btncancelariniciodia);
-                                btnAceptarInicio  = modalInicioDia.findViewById(R.id.btnagregariniciodia);
+                                }else {
 
-                                btnCancelarInicio.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        modalInicioDia.dismiss();
-                                    }
-                                });
+                                    findOptranDiaFE(GlobalInfo.getterminalImei10);
 
-                                btnAceptarInicio.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
+                                    modalAlertaDiaActual.show();
 
-                                        modalAlertaVentaPendiente.show();
+                                    btnIngresarIDFEntrada = modalAlertaDiaActual.findViewById(R.id.btnIngresarIDFEntrada);
 
-                                        try {
-                                            Intent intent = new Intent(getContext(), Login.class);
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    modalForzarEntrada = new Dialog(getContext());
+                                    modalForzarEntrada.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    modalForzarEntrada.setContentView(R.layout.modal_forzarentrada);
+                                    modalForzarEntrada.setCancelable(false);
 
-                                            iniciarDia(GlobalInfo.getterminalID10);
+                                    btnIngresarIDFEntrada.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
 
-                                            startActivity(intent);
-                                            finalize();
+                                            if (!modalForzarEntrada.isShowing()) {
+                                                modalForzarEntrada.show();
+                                            }
 
-                                            Toast.makeText(getContext(), "SE GENERO EL INICIO DE DÍA", Toast.LENGTH_SHORT).show();
-                                        } catch (Throwable e) {
-                                            e.printStackTrace();
+                                            btnCancelarIDFEntrada = modalForzarEntrada.findViewById(R.id.btnCancelarFEntrada);
+                                            btnAceptarCIDEntrada  = modalForzarEntrada.findViewById(R.id.btnAceptarFEntrada);
+                                            usuario               = modalForzarEntrada.findViewById(R.id.inputUserFEntrada);
+                                            contraseña            = modalForzarEntrada.findViewById(R.id.inputContraseñaFEntrada);
+                                            alertuser             = modalForzarEntrada.findViewById(R.id.alertUserFEntrada);
+                                            alertpassword         = modalForzarEntrada.findViewById(R.id.alertContraseñaFEntrada);
+
+                                            btnCancelarIDFEntrada.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+
+                                                    modalForzarEntrada.dismiss();
+
+                                                    usuario.getText().clear();
+                                                    contraseña.getText().clear();
+
+                                                    alertuser.setErrorEnabled(false);
+                                                    alertpassword.setErrorEnabled(false);
+
+                                                }
+                                            });
+
+                                            btnAceptarCIDEntrada.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+
+                                                    usuarioUser = usuario.getText().toString();
+                                                    contraseñaUser = contraseña.getText().toString();
+
+                                                    if (usuarioUser.isEmpty()) {
+                                                        alertuser.setError("El campo usuario es obligatorio");
+                                                        return;
+                                                    } else if (contraseñaUser.isEmpty()) {
+                                                        alertpassword.setError("El campo contraseña es obligatorio");
+                                                        return;
+                                                    }
+
+                                                    findUsersID(usuarioUser);
+
+                                                    alertuser.setErrorEnabled(false);
+                                                    alertpassword.setErrorEnabled(false);
+
+                                                }
+                                            });
+
                                         }
+                                    });
 
-                                    }
-                                });
+                                    return;
+                                }
 
                             }
 
                         }
 
-                        break;
+                        if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
+
+                            /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
+                            modalInicioDiaGenerado.show();
+
+                        }else {
+
+                            modalInicioDia.show();
+
+                            btnCancelarInicio = modalInicioDia.findViewById(R.id.btncancelariniciodia);
+                            btnAceptarInicio  = modalInicioDia.findViewById(R.id.btnagregariniciodia);
+
+                            btnCancelarInicio.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    modalInicioDia.dismiss();
+                                }
+                            });
+
+                            btnAceptarInicio.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                    modalAlertaVentaPendiente.show();
+
+                                    try {
+                                        Intent intent = new Intent(getContext(), Login.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                                        iniciarDia(GlobalInfo.getterminalID10);
+
+                                        startActivity(intent);
+                                        finalize();
+
+                                        Toast.makeText(getContext(), "SE GENERO EL INICIO DE DÍA", Toast.LENGTH_SHORT).show();
+                                    } catch (Throwable e) {
+                                        e.printStackTrace();
+                                    }
+
+                                }
+                            });
+
+                        }
+
                     }
+
+                    break;
                 }
+            }
 
         });
 
@@ -1032,7 +1028,7 @@ public class DasboardFragment extends Fragment{
                         return;
                     }
 
-                        GlobalInfo.getCDiaList10 = response.body();
+                    GlobalInfo.getCDiaList10 = response.body();
 
                 } catch (Exception ex) {
                     Toast.makeText(getContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();

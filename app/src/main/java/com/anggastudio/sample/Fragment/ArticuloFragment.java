@@ -142,10 +142,9 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
     RecyclerView recyclerFamilia, recyclerArticulo, recyclerCarrito, recyclerLCliente,recyclerLClienteCredito;
     Button btnAceptarErrorWifi,btnAceptarError,
             btnTodoArticulo,
-            buscarListNFC,
             btnBoleta,btnCancelarBoleta,btnAgregarBoleta,btnGenerarBoleta,buscarPlacaBoleta,buscarDNIBoleta,btnCancelarLCliente,
             btnFactura,buscarRUCFactura,buscarPlacaFactura,btnCancelarFactura,btnAgregarFactura,
-            btnNotaDespacho,btnCancelarNotaDespacho,btnAgregarNotaDespacho;
+            btnNotaDespacho,btnCancelarNotaDespacho,btnAgregarNotaDespacho,buscarListNFC,buscarListPuntosNFC;
 
     CardView btncarritocompra;
 
@@ -179,7 +178,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
     ImageButton btnfiltrar,btnscanear,btnpromociones;
 
-    TextView nombreCliente,textCliente;
+    TextView nombreCliente,textCliente,textNumPuntos;
 
     private String mnTipoDocumento,mnTipoPago,mnNroPlaca,mnClienteID,mnClienteRUC,mnClienteRS,mnCliernteDR,mnTarjetaCredito,mnOperacionREF,mnobservacionPag,
             detArticuloId,detArticuloDs,detUmedida,opGratruitas,mnTarjND,mnobservacion;
@@ -550,6 +549,8 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                     @Override
                     public void onClick(View view) {
 
+                        limpiarCamposBoletaFacturaNDespacho();
+
                         modalBoleta.show();
 
                         alertPlaca        = modalBoleta.findViewById(R.id.alertPlaca);
@@ -588,8 +589,12 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         btnCancelarBoleta = modalBoleta.findViewById(R.id.btnCancelarBoleta);
                         btnAgregarBoleta  = modalBoleta.findViewById(R.id.btnAgregarBoleta);
                         buscarListNFC     = modalBoleta.findViewById(R.id.buscarListNFC);
+                        buscarListPuntosNFC  = modalBoleta.findViewById(R.id.buscarListPuntosNFC);
+                        textNumPuntos     = modalBoleta.findViewById(R.id.textNumPuntos);
 
+                        textNumPuntos.setVisibility(View.GONE);
                         buscarListNFC.setVisibility(View.GONE);
+                        buscarListPuntosNFC.setVisibility(View.GONE);
                         alertObservacion.setVisibility(View.GONE);
                         radioCredito.setVisibility(View.GONE);
                         radioGratuito.setVisibility(View.VISIBLE);
@@ -991,6 +996,8 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                     @Override
                     public void onClick(View view) {
 
+                        limpiarCamposBoletaFacturaNDespacho();
+
                         modalFactura.show();
 
                         alertPlaca        = modalFactura.findViewById(R.id.alertPlaca);
@@ -1025,8 +1032,12 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         btnCancelarFactura = modalFactura.findViewById(R.id.btnCancelarFactura);
                         btnAgregarFactura  = modalFactura.findViewById(R.id.btnAgregarFactura);
                         buscarListNFC      = modalFactura.findViewById(R.id.buscarListNFC);
+                        buscarListPuntosNFC  = modalFactura.findViewById(R.id.buscarListPuntosNFC);
+                        textNumPuntos       = modalFactura.findViewById(R.id.textNumPuntos);
 
+                        textNumPuntos.setVisibility(View.GONE);
                         textNFC.setVisibility(View.GONE);
+                        buscarListPuntosNFC.setVisibility(View.GONE);
                         buscarListNFC.setVisibility(View.GONE);
                         alertObservacion.setVisibility(View.GONE);
                         radioCredito.setVisibility(View.GONE);
@@ -1370,6 +1381,8 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                     @Override
                     public void onClick(View view) {
 
+                        limpiarCamposBoletaFacturaNDespacho();
+
                         modalNotaDespacho.show();
 
                         btnCancelarNotaDespacho   = modalNotaDespacho.findViewById(R.id.btnCancelarNotaDespacho);
@@ -1389,6 +1402,15 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         alertRazSocial           = modalNotaDespacho.findViewById(R.id.alertCRazSocial);
                         alertKilometraje         = modalNotaDespacho.findViewById(R.id.alertKilometraje);
 
+                        textNumPuntos            = modalNotaDespacho.findViewById(R.id.textNumPuntos);
+                        buscarListNFC            = modalNotaDespacho.findViewById(R.id.buscarListNFC);
+                        buscarListPuntosNFC      = modalNotaDespacho.findViewById(R.id.buscarListPuntosNFC);
+                        textNFC                  = modalNotaDespacho.findViewById(R.id.textNFC);
+
+                        textNumPuntos.setVisibility(View.GONE);
+                        buscarListNFC.setVisibility(View.GONE);
+                        buscarListPuntosNFC.setVisibility(View.GONE);
+                        textNFC.setVisibility(View.GONE);
                         alertKilometraje.setVisibility(View.GONE);
 
                         /**
@@ -1864,6 +1886,56 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
     }
 
     /**
+     * @LIMPIAR:CamposBoletaFactura
+     */
+    private void limpiarCamposBoletaFacturaNDespacho() {
+
+        TextInputEditText inputNFCBoleta    = modalBoleta.findViewById(R.id.input_EtiquetaNFC);
+        TextInputEditText inputPlaca        = modalBoleta.findViewById(R.id.inputPlaca);
+        TextInputEditText inputDNI          = modalBoleta.findViewById(R.id.inputDNI);
+        TextInputEditText inputNombre       = modalBoleta.findViewById(R.id.inputNombre);
+        TextView textNumPuntosB              = modalBoleta.findViewById(R.id.textNumPuntos);
+
+        TextInputEditText inputNFCFactura   = modalFactura.findViewById(R.id.input_EtiquetaNFC);
+        TextInputEditText inputPlacaF       = modalFactura.findViewById(R.id.inputPlaca);
+        TextInputEditText inputRUC          = modalFactura.findViewById(R.id.inputRUC);
+        TextInputEditText inputRZ           = modalFactura.findViewById(R.id.inputRazSocial);
+        TextView textNumPuntosF             = modalFactura.findViewById(R.id.textNumPuntos);
+
+        TextInputEditText inputNFCNotaDespacho = modalNotaDespacho.findViewById(R.id.input_EtiquetaNFC);
+        TextInputEditText inputPlacaND         = modalNotaDespacho.findViewById(R.id.inputCPlaca);
+        TextInputEditText inputIDClienteND     = modalNotaDespacho.findViewById(R.id.inputCCliente);
+        TextInputEditText inputRZND            = modalNotaDespacho.findViewById(R.id.inputCRazSocial);
+        TextView inputNTarjeta                 = modalNotaDespacho.findViewById(R.id.input_CNTarjeta);
+        TextView textNumPuntosND               = modalNotaDespacho.findViewById(R.id.textNumPuntos);
+
+        if (inputNFCBoleta != null) {
+            inputNFCBoleta.setText("");
+            inputPlaca.setText("000-0000");
+            inputDNI.setText("");
+            inputNombre.setText("");
+            textNumPuntosB.setText("0");
+        }
+
+        if (inputNFCFactura != null) {
+            inputNFCFactura.setText("");
+            inputPlacaF.setText("000-0000");
+            inputRUC.setText("");
+            inputRZ.setText("");
+            textNumPuntosF.setText("0");
+        }
+
+        if (inputNFCNotaDespacho != null) {
+            inputNFCNotaDespacho.setText("");
+            inputPlacaND.setText("000-0000");
+            inputIDClienteND.setText("");
+            inputRZND.setText("");
+            inputNTarjeta.setText("");
+            textNumPuntosND.setText("0");
+        }
+    }
+
+    /**
      * @OBTENER:LectorEtiquetaNFC
      */
     private void  insertNFC(){
@@ -2233,9 +2305,9 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                     });
 
                     /**
-                     * @MOSTRARPEODUCTOS:Columnas8
+                     * @MOSTRARPEODUCTOS:Columnas3
                      */
-                    GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 8);
+                    GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
                     recyclerArticulo.setLayoutManager(layoutManager);
                     recyclerArticulo.setAdapter(articuloAdapter);
                     articuloAdapter.notifyDataSetChanged();
@@ -2319,9 +2391,9 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                     });
 
                     /**
-                     * @MOSTRARPEODUCTOS:Columnas8
+                     * @MOSTRARPEODUCTOS:Columnas3
                      */
-                    GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 8);
+                    GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
                     recyclerArticulo.setLayoutManager(layoutManager);
                     recyclerArticulo.setAdapter(articuloAdapter);
                     articuloAdapter.notifyDataSetChanged();
@@ -2859,6 +2931,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         case "03" :
                             printama.printTextln("                 ", Printama.CENTER);
                             printama.printImage( logoRobles,logoSize);
+                            printama.addNewLine(GlobalInfo.getterminalFCabecera);
                             printama.setSmallText();
                             if(GlobalInfo.getTerminalNameCompany10){
                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -2892,6 +2965,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         case "99" :
                             printama.printTextln("                 ", Printama.CENTER);
                             printama.printImage(logoRobles, logoSize);
+                            printama.addNewLine(GlobalInfo.getterminalFCabecera);
                             printama.setSmallText();
                             if(GlobalInfo.getTerminalNameCompany10){
                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -3230,6 +3304,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         case "01" :
                         case "03" :
                             printama.printImage(Printama.RIGHT,logoRobles, logoSize);
+                            printama.addNewLine(GlobalInfo.getterminalFCabecera);
                             printama.setSmallText();
                             if(GlobalInfo.getTerminalNameCompany10){
                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
@@ -3263,6 +3338,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         case "99" :
                             printama.printTextln("                 ", Printama.CENTER);
                             printama.printImage(logoRobles, logoSize);
+                            printama.addNewLine(GlobalInfo.getterminalFCabecera);
                             printama.setSmallText();
                             if(GlobalInfo.getTerminalNameCompany10){
                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
