@@ -20,7 +20,7 @@
 
             <Button
                 android:id="@+id/btnAutomatico"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:backgroundTint="@color/colorDanger"
@@ -34,9 +34,10 @@
 
             <Button
                 android:id="@+id/btnListadoComprobante"
-                android:layout_width="250sp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="2sp"
+                android:layout_weight="1"
                 android:backgroundTint="@color/colorSuccess"
                 android:fontFamily="@font/nunito_black"
                 android:gravity="center"
@@ -45,15 +46,35 @@
                 android:textColor="@color/white"
                 android:textSize="14sp"
                 app:cornerRadius="10sp" />
-            <ImageButton
+
+            <Button
                 android:id="@+id/btnLimpiarLado"
-                android:layout_width="50sp"
-                android:layout_height="50sp"
-                android:layout_marginTop="5sp"
-                android:layout_marginStart="8sp"
-                android:background="@drawable/input_border"
-                android:backgroundTint="@color/colorNer"
-                android:src="@drawable/icons8_limpiar"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/skyclue_500"
+                android:fontFamily="@font/nunito_black"
+                android:gravity="center"
+                android:text="limpiar"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:layout_marginEnd="3sp"
+                app:cornerRadius="10sp"/>
+            <Button
+                android:id="@+id/btnBoveda"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorOrange"
+                android:fontFamily="@font/nunito_black"
+                android:gravity="center"
+                android:text="bóveda"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:cornerRadius="10sp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -112,6 +133,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:gravity="center">
+
+        <Spinner
+            android:id="@+id/SpinnerTVehiculo"
+            android:layout_width="match_parent"
+            android:layout_height="50sp"
+            android:layout_weight="1"
+            android:background="@drawable/cardlogin"
+            android:backgroundTint="#2196F3"
+            android:gravity="center"/>
+    </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
@@ -438,6 +475,23 @@
                         android:fontFamily="@font/nunito_extrabold"
                         android:gravity="center"
                         android:text="@string/detalleV_NFC"
+                        android:textColor="@color/white"
+                        android:textSize="12sp" />
+                    <TextView
+                        android:layout_width="100sp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/nunito_extrabold"
+                        android:gravity="center"
+                        android:text="DIAS CREDITO"
+                        android:textColor="@color/white"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="100sp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/nunito_extrabold"
+                        android:gravity="center"
+                        android:text="ID VEHICULO"
                         android:textColor="@color/white"
                         android:textSize="12sp" />
                 </LinearLayout>
