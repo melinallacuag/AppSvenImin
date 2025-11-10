@@ -1,4 +1,6 @@
 package com.anggastudio.sample.Fragment;
+import static com.anggastudio.printama.Printama.CENTER;
+
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -53,6 +55,8 @@ import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -110,7 +114,7 @@ public class ListaComprobantesFragment extends Fragment  {
         BuscarRazonSocial       = view.findViewById(R.id.BuscarRazonSocial);
         btnConsultaComprobantes = view.findViewById(R.id.btnConsultaComprobantes);
 
-        btnConsultaComprobantes.setVisibility(View.GONE);
+        btnConsultaComprobantes.setVisibility(View.VISIBLE);
         BuscarRazonSocial.setIconifiedByDefault(false);
 
         /**
@@ -389,37 +393,41 @@ public class ListaComprobantesFragment extends Fragment  {
 
                     usersAnuladoList = response.body();
 
-                    for (Users user : usersAnuladoList) {
-
-                        GlobalInfo.getuserIDAnular10 = user.getUserID();
-                        GlobalInfo.getuserNameAnular10 = user.getNames();
-                        GlobalInfo.getuserPassAnular10 = user.getPassword();
-                        GlobalInfo.getuserCancelAnular10 = user.getCancel();
-
+                    if (usersAnuladoList == null || usersAnuladoList.isEmpty()) {
+                        Toast.makeText(getContext(), "Usuario no encontrado.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
 
-                    if (GlobalInfo.getuserCancelAnular10 == true) {
+                    Users user = usersAnuladoList.get(0);
 
-                        FragmentManager fragmentManager = getFragmentManager();
+                    GlobalInfo.getuserIDAnular10 = user.getUserID();
+                    GlobalInfo.getuserPassAnular10 = user.getPassword();
+                    GlobalInfo.getuserLockedAnular10 = user.getLocked();
+                    GlobalInfo.getuserCancelAnular10 = user.getCancel();
+                    GlobalInfo.getuserSuperAnular10  = user.getSuper();
 
-                        String getName = usuarioUser.trim();
-                        String getPass = PasswordChecker.checkpassword(contraseñaUser.trim());
+                    FragmentManager fragmentManager = getFragmentManager();
 
-                        if (getName.equals(GlobalInfo.getuserIDAnular10) && getPass.equals(GlobalInfo.getuserPassAnular10)) {
+                    String getName = (usuarioUser != null) ? usuarioUser.trim() : "";
+                    String getPass = (contraseñaUser != null) ? PasswordChecker.checkpassword(contraseñaUser.trim()) : "";
 
-                            Anulars(GlobalInfo.getconsultaventaTipoDocumentoID10, GlobalInfo.getconsultaventaSerieDocumento10, GlobalInfo.getconsultaventaNroDocumento10, GlobalInfo.getuserIDAnular10,GlobalInfo.getterminalID10);
+                    if(getName.equals(GlobalInfo.getuserIDAnular10) && getPass.equals(GlobalInfo.getuserPassAnular10)){
+                        if(GlobalInfo.getuserLockedAnular10){
+                            if(GlobalInfo.getuserCancelAnular10 || GlobalInfo.getuserSuperAnular10){
+                                Anulars(GlobalInfo.getconsultaventaTipoDocumentoID10, GlobalInfo.getconsultaventaSerieDocumento10, GlobalInfo.getconsultaventaNroDocumento10, GlobalInfo.getuserIDAnular10,GlobalInfo.getterminalID10);
 
-                            Toast.makeText(getContext(), "Se anulo correctamente", Toast.LENGTH_SHORT).show();
-                            fragmentManager.popBackStack();
+                                Toast.makeText(getContext(), "Se anulo correctamente", Toast.LENGTH_SHORT).show();
+                                fragmentManager.popBackStack();
 
-                            modalAnulacion.dismiss();
-
-                        } else {
-                            Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
+                                modalAnulacion.dismiss();
+                            }else{
+                                Toast.makeText(getContext(), "No tiene permisos para Anular.", Toast.LENGTH_SHORT).show();
+                            }
+                        }else{
+                            Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
                         }
-
-                    } else {
-                        Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
                     }
 
                     modalReimpresion.dismiss();
@@ -521,6 +529,7 @@ public class ListaComprobantesFragment extends Fragment  {
                     String nroTarjetaPuntos  = "";
                     Double puntosGanados     = 0.00;
                     Double puntosDisponibles = 0.00;
+                    String referencia        = "";
 
 
                     String Cajero1           = GlobalInfo.getuserName10;
@@ -562,6 +571,7 @@ public class ListaComprobantesFragment extends Fragment  {
                         nroTarjetaPuntos  = String.valueOf(reimpresion.getNroTarjetaPuntos());
                         puntosGanados     = Double.valueOf(reimpresion.getPuntosGanados());
                         puntosDisponibles = Double.valueOf(reimpresion.getPuntosDisponibles());
+                        referencia        = String.valueOf(reimpresion.getReferencia());
 
                         NroComprobante    = serieDocumento1 + "-" + nroDocumento1;
 
@@ -717,6 +727,7 @@ public class ListaComprobantesFragment extends Fragment  {
                     String finalNroTarjetaPuntos = nroTarjetaPuntos;
                     Double finalPuntosGanados = puntosGanados;
                     Double finalPuntosDisponibles = puntosDisponibles;
+                    String finalReferencia = referencia;
 
                     for (Map.Entry<String, List<Reimpresion>> entry : mapComprobantes.entrySet()) {
 
@@ -738,8 +749,6 @@ public class ListaComprobantesFragment extends Fragment  {
                                             printama.setSmallText();
                                             if(GlobalInfo.getTerminalNameCompany10){
                                                 printama.printTextlnBold(NameCompany, Printama.CENTER);
-                                            }else {
-                                                printama.printTextlnBold(" ");
                                             }
                                             if (!Address1.isEmpty()) {
                                                 if (!Address1Part1.isEmpty() && !Address2.isEmpty()) {
@@ -807,7 +816,42 @@ public class ListaComprobantesFragment extends Fragment  {
                                     switch (finalTipoDocumento) {
 
                                         case "01":
+                                            if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                printama.printTextlnBold("***** TRANSFERENCIA GRATUITA *****", Printama.CENTER);
+                                            }
                                             printama.printTextlnBold("FACTURA DE VENTA ELECTRONICA", Printama.CENTER);
+                                            if (GlobalInfo.getVistaQR) {
+                                                try {
+                                                    String qrContenido = qrSven;
+                                                    int qrTamanio = 180;
+
+                                                    Map<EncodeHintType, Object> hints = new HashMap<>();
+                                                    hints.put(EncodeHintType.MARGIN, 0);
+
+                                                    BitMatrix bitMatrix = new MultiFormatWriter().encode(
+                                                            qrContenido,
+                                                            BarcodeFormat.QR_CODE,
+                                                            qrTamanio,
+                                                            qrTamanio,
+                                                            hints
+                                                    );
+
+                                                    int width = bitMatrix.getWidth();
+                                                    int height = bitMatrix.getHeight();
+                                                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+
+                                                    for (int x = 0; x < width; x++) {
+                                                        for (int y = 0; y < height; y++) {
+                                                            bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                                                        }
+                                                    }
+
+                                                    printama.printImage(bitmap);
+
+                                                } catch (WriterException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
                                             break;
 
                                         case "03":
@@ -815,6 +859,38 @@ public class ListaComprobantesFragment extends Fragment  {
                                                 printama.printTextlnBold("***** TRANSFERENCIA GRATUITA *****", Printama.CENTER);
                                             }
                                             printama.printTextlnBold("BOLETA DE VENTA ELECTRONICA", Printama.CENTER);
+                                            if (GlobalInfo.getVistaQR) {
+                                                try {
+                                                    String qrContenido = qrSven;
+                                                    int qrTamanio = 180;
+
+                                                    Map<EncodeHintType, Object> hints = new HashMap<>();
+                                                    hints.put(EncodeHintType.MARGIN, 0);
+
+                                                    BitMatrix bitMatrix = new MultiFormatWriter().encode(
+                                                            qrContenido,
+                                                            BarcodeFormat.QR_CODE,
+                                                            qrTamanio,
+                                                            qrTamanio,
+                                                            hints
+                                                    );
+
+                                                    int width = bitMatrix.getWidth();
+                                                    int height = bitMatrix.getHeight();
+                                                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+
+                                                    for (int x = 0; x < width; x++) {
+                                                        for (int y = 0; y < height; y++) {
+                                                            bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                                                        }
+                                                    }
+
+                                                    printama.printImage(bitmap);
+
+                                                } catch (WriterException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
                                             break;
 
                                         case "98":
@@ -926,6 +1002,10 @@ public class ListaComprobantesFragment extends Fragment  {
                                     switch (finalTipoDocumento) {
 
                                         case "01":
+
+                                            if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                printama.printTextlnBold("OP. GRATUITAS: S/ " + finalMontoCanjeado, Printama.RIGHT);
+                                            }
 
                                             if (GlobalInfo.getsettingImpuestoID110 == 20) {
                                                 if (finalMtoDescuento > 0) {
@@ -1054,7 +1134,7 @@ public class ListaComprobantesFragment extends Fragment  {
 
                                                 case 4:
 
-                                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                                    printama.printTextlnBold("CONDICION DE PAGO: " + finalReferencia, Printama.LEFT);
                                                     printama.printTextlnBold("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
                                                     break;
 
@@ -1067,7 +1147,11 @@ public class ListaComprobantesFragment extends Fragment  {
                                                 if(!finalNroTarjetaPuntos.isEmpty() && !finalNroTarjetaPuntos.equals("1")){
                                                     printama.setSmallText();
                                                     printama.printTextlnBold("NRO. TARJETA PUNTOS : " + finalNroTarjetaPuntos, Printama.LEFT);
-                                                    printama.printTextlnBold("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                        printama.printTextlnBold("PUNTOS CANJEADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    }else{
+                                                        printama.printTextlnBold("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    }
                                                     printama.printTextlnBold("PUNTOS DISPONIBLES : " + finalPuntosDisponibles, Printama.LEFT);
                                                     printama.setSmallText();
                                                     printama.addNewLine(1);
@@ -1075,14 +1159,17 @@ public class ListaComprobantesFragment extends Fragment  {
                                             }
                                             printama.setSmallText();
                                             if (GlobalInfo.getsettingImpuestoID110 == 20) {
-                                                printama.printTextln("Bienes transferidos en la Amazonia para ser\n"+"consumidos en la misma.");
+                                                printSeparatorLine(printama, tipopapel);
+                                                printama.addNewLine(1);
+                                                printama.setSmallText();
+                                                printama.printTextln("Bienes transferidos en la\n" + "Amazonia para ser consumidos en la misma.", CENTER);
                                                 printama.setSmallText();
                                                 printSeparatorLine(printama, tipopapel);
                                                 printama.addNewLine(1);
                                                 printama.setSmallText();
                                             }
-                                            printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n" + "https://cpesven.apisven.com");
-
+                                            printama.printTextln("Autorizado mediante resolucion\n" + "de Superintendencia Nro.203-2015\n"+"SUNAT. Representacion impresa de\n"+"la boleta de venta electronica. Consulte desde", CENTER);
+                                            printama.printTextln("https://cpesven.apisven.com", CENTER);
                                             break;
 
                                         case "03":
@@ -1193,7 +1280,7 @@ public class ListaComprobantesFragment extends Fragment  {
                                                     break;
 
                                                 case 4:
-                                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                                    printama.printTextlnBold("CONDICION DE PAGO: "+ finalReferencia, Printama.LEFT);
                                                     printama.printTextlnBold("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
                                                     break;
                                             }
@@ -1204,15 +1291,19 @@ public class ListaComprobantesFragment extends Fragment  {
                                                 if(!finalNroTarjetaPuntos.isEmpty() && !finalNroTarjetaPuntos.equals("1")){
                                                     printama.setSmallText();
                                                     printama.printTextlnBold("NRO. TARJETA PUNTOS : " + finalNroTarjetaPuntos, Printama.LEFT);
-                                                    printama.printTextlnBold("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                        printama.printTextlnBold("PUNTOS CANJEADOS   : " + finalPuntosGanados, Printama.LEFT);
+                                                    }else{
+                                                        printama.printTextlnBold("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    }
                                                     printama.printTextlnBold("PUNTOS DISPONIBLES : " + finalPuntosDisponibles, Printama.LEFT);
                                                     printama.setSmallText();
                                                     printama.addNewLine(1);
                                                 }
                                             }
                                             printama.setSmallText();
-                                            printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n" + "https://cpesven.apisven.com");
-
+                                            printama.printTextln("Autorizado mediante resolucion\n" + "de Superintendencia Nro.203-2015\n"+"SUNAT. Representacion impresa de\n"+"la boleta de venta electronica. Consulte desde", CENTER);
+                                            printama.printTextln("https://cpesven.apisven.com", CENTER);
                                             break;
 
                                         case "98":
@@ -1338,6 +1429,9 @@ public class ListaComprobantesFragment extends Fragment  {
                                     switch (finalTipoDocumento) {
 
                                         case "01":
+                                            if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                printama.printTextlnBold("***** TRANSFERENCIA GRATUITA *****", Printama.CENTER);
+                                            }
                                             printama.printTextlnBold("FACTURA DE VENTA ELECTRONICA", Printama.CENTER);
                                             break;
 
@@ -1459,6 +1553,10 @@ public class ListaComprobantesFragment extends Fragment  {
                                     switch (finalTipoDocumento) {
 
                                         case "01":
+
+                                            if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                printama.printTextlnBold("OP. GRATUITAS: S/ " + finalMontoCanjeado, Printama.RIGHT);
+                                            }
 
                                             if (GlobalInfo.getsettingImpuestoID110 == 20) {
                                                 if (finalMtoDescuento > 0) {
@@ -1586,7 +1684,7 @@ public class ListaComprobantesFragment extends Fragment  {
 
                                                 case 4:
 
-                                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                                    printama.printTextlnBold("CONDICION DE PAGO: " + finalReferencia, Printama.LEFT);
                                                     printama.printTextlnBold("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
                                                     break;
 
@@ -1624,7 +1722,11 @@ public class ListaComprobantesFragment extends Fragment  {
                                                 if(!finalNroTarjetaPuntos.isEmpty() && !finalNroTarjetaPuntos.equals("1")){
                                                     printama.setSmallText();
                                                     printama.printTextlnBold("NRO. TARJETA PUNTOS : " + finalNroTarjetaPuntos, Printama.LEFT);
-                                                    printama.printTextlnBold("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                        printama.printTextlnBold("PUNTOS CANJEADOS   : " + finalPuntosGanados, Printama.LEFT);
+                                                    }else{
+                                                        printama.printTextlnBold("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    }
                                                     printama.printTextlnBold("PUNTOS DISPONIBLES : " + finalPuntosDisponibles, Printama.LEFT);
                                                     printama.setSmallText();
                                                     printama.addNewLine(1);
@@ -1750,7 +1852,7 @@ public class ListaComprobantesFragment extends Fragment  {
                                                     break;
 
                                                 case 4:
-                                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                                    printama.printTextlnBold("CONDICION DE PAGO: " + finalReferencia, Printama.LEFT);
                                                     printama.printTextlnBold("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
                                                     break;
                                             }
@@ -1783,7 +1885,13 @@ public class ListaComprobantesFragment extends Fragment  {
                                                 if(!finalNroTarjetaPuntos.isEmpty() && !finalNroTarjetaPuntos.equals("1")){
                                                     printama.setSmallText();
                                                     printama.printTextlnBold("NRO. TARJETA PUNTOS : " + finalNroTarjetaPuntos, Printama.LEFT);
-                                                    printama.printTextlnBold("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                        printama.printTextlnBold("PUNTOS CANJEADOS   : " + finalPuntosGanados, Printama.LEFT);
+
+                                                    }else{
+                                                        printama.printTextlnBold("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+
+                                                    }
                                                     printama.printTextlnBold("PUNTOS DISPONIBLES : " + finalPuntosDisponibles, Printama.LEFT);
                                                     printama.setSmallText();
                                                     printama.addNewLine(1);
@@ -1913,6 +2021,9 @@ public class ListaComprobantesFragment extends Fragment  {
                                     switch (finalTipoDocumento) {
 
                                         case "01":
+                                            if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                printama.printTextlnBold("***** TRANSFERENCIA GRATUITA *****", Printama.CENTER);
+                                            }
                                             printama.printTextlnBold("FACTURA DE VENTA ELECTRONICA", Printama.CENTER);
                                             break;
 
@@ -2033,6 +2144,10 @@ public class ListaComprobantesFragment extends Fragment  {
                                     switch (finalTipoDocumento) {
 
                                         case "01":
+
+                                            if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                printama.printTextlnBold("OP. GRATUITAS: S/ " + finalMontoCanjeado, Printama.RIGHT);
+                                            }
 
                                             if (GlobalInfo.getsettingImpuestoID110 == 20) {
                                                 if (finalMtoDescuento > 0) {
@@ -2160,7 +2275,7 @@ public class ListaComprobantesFragment extends Fragment  {
 
                                                 case 4:
 
-                                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                                    printama.printTextlnBold("CONDICION DE PAGO: " + finalReferencia, Printama.LEFT);
                                                     printama.printTextln("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
                                                     break;
 
@@ -2198,7 +2313,12 @@ public class ListaComprobantesFragment extends Fragment  {
                                                 if(!finalNroTarjetaPuntos.isEmpty() && !finalNroTarjetaPuntos.equals("1")){
                                                     printama.setSmallText();
                                                     printama.printTextln("NRO. TARJETA PUNTOS : " + finalNroTarjetaPuntos, Printama.LEFT);
-                                                    printama.printTextln("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                        printama.printTextln("PUNTOS CANJEADOS   : " + finalPuntosGanados, Printama.LEFT);
+
+                                                    }else{
+                                                        printama.printTextln("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    }
                                                     printama.printTextln("PUNTOS DISPONIBLES : " + finalPuntosDisponibles, Printama.LEFT);
                                                     printama.setSmallText();
                                                     printama.addNewLine(1);
@@ -2324,7 +2444,7 @@ public class ListaComprobantesFragment extends Fragment  {
                                                     break;
 
                                                 case 4:
-                                                    printama.printTextlnBold("CONDICION DE PAGO: 30 DIAS DE", Printama.LEFT);
+                                                    printama.printTextlnBold("CONDICION DE PAGO: " + finalReferencia, Printama.LEFT);
                                                     printama.printTextln("CREDITO: S/ " + MtoTotalFF, Printama.RIGHT);
                                                     break;
                                             }
@@ -2357,7 +2477,11 @@ public class ListaComprobantesFragment extends Fragment  {
                                                 if(!finalNroTarjetaPuntos.isEmpty() && !finalNroTarjetaPuntos.equals("1")){
                                                     printama.setSmallText();
                                                     printama.printTextln("NRO. TARJETA PUNTOS : " + finalNroTarjetaPuntos, Printama.LEFT);
-                                                    printama.printTextln("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    if(finalMtoTotal <= 0.00 && finalMontoCanjeado1 > 0.00 ){
+                                                        printama.printTextln("PUNTOS CANJEADOS   : " + finalPuntosGanados, Printama.LEFT);
+                                                    }else{
+                                                        printama.printTextln("PUNTOS GANADOS     : " + finalPuntosGanados, Printama.LEFT);
+                                                    }
                                                     printama.printTextln("PUNTOS DISPONIBLES : " + finalPuntosDisponibles, Printama.LEFT);
                                                     printama.setSmallText();
                                                     printama.addNewLine(1);

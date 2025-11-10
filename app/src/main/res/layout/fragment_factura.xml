@@ -155,11 +155,24 @@
                         android:layout_height="wrap_content"/>
                 </com.google.android.material.textfield.TextInputLayout>
                 <Button
+                    android:id="@+id/buscarRUCConsultaFac"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5sp"
+                    android:text="BUSCAR  SUNAT"
+                    android:textSize="14sp"
+                    app:cornerRadius="10sp"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/colorCest"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:layout_marginTop="-8sp"
+                    android:layout_marginLeft="5sp" />
+                <Button
                     android:id="@+id/buscarRUCFactura"
                     android:layout_width="150sp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10sp"
-                    android:text="@string/btn_sunat"
+                    android:layout_marginStart="5sp"
+                    android:text="BUSCAR APPSVEN"
                     android:textSize="14sp"
                     app:cornerRadius="10sp"
                     android:textColor="@color/white"
@@ -472,6 +485,30 @@
                     android:layout_height="wrap_content" />
 
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/alertDiasCredito"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Ingresar Días de Credito"
+                app:boxBackgroundMode="outline"
+                android:visibility="gone"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxCornerRadiusBottomEnd="15dp"
+                app:boxCornerRadiusTopEnd="15dp"
+                app:endIconMode="clear_text"
+                android:layout_weight="1">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputDiasCredito"
+                    android:fontFamily="@font/nunito_semibold"
+                    android:textSize="12sp"
+                    android:inputType="number"
+                    android:text="1"
+                    android:maxLength="2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/alertPEfectivo"

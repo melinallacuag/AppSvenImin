@@ -10,6 +10,7 @@ public class ClientePrecio {
     private  Double rango1;
     private  Double rango2;
     private  String clienteRZ;
+    private  String clienteDR;
     private  String nroPlaca;
     private  String tipoDescuento;
     private  Double montoDescuento;
@@ -78,6 +79,14 @@ public class ClientePrecio {
 
     public void setClienteRZ(String clienteRZ) {
         this.clienteRZ = clienteRZ;
+    }
+
+    public String getClienteDR() {
+        return clienteDR;
+    }
+
+    public void setClienteDR(String clienteDR) {
+        this.clienteDR = clienteDR;
     }
 
     public String getNroPlaca() {

@@ -1,14 +1,18 @@
 package com.anggastudio.sample.WebApiSVEN.Parameters;
 import static com.anggastudio.sample.WebApiSVEN.Parameters.RetrofitClient.getClient;
 import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
+import com.anggastudio.sample.WebApiSVEN.Models.Articulos;
 import com.anggastudio.sample.WebApiSVEN.Models.CDia;
 import com.anggastudio.sample.WebApiSVEN.Models.ClienteCredito;
 import com.anggastudio.sample.WebApiSVEN.Models.ClientePrecio;
 import com.anggastudio.sample.WebApiSVEN.Models.DetalleVenta;
+import com.anggastudio.sample.WebApiSVEN.Models.Egreso;
 import com.anggastudio.sample.WebApiSVEN.Models.LClientePuntos;
 import com.anggastudio.sample.WebApiSVEN.Models.LClientes;
 import com.anggastudio.sample.WebApiSVEN.Models.Lados;
 import com.anggastudio.sample.WebApiSVEN.Models.Mangueras;
+import com.anggastudio.sample.WebApiSVEN.Models.SettingMoneda;
+import com.anggastudio.sample.WebApiSVEN.Models.SettingTEgreso;
 import com.anggastudio.sample.WebApiSVEN.Models.SettingTurno;
 import com.anggastudio.sample.WebApiSVEN.Models.SettingVehiculo;
 import com.anggastudio.sample.WebApiSVEN.Models.TipoPago;
@@ -39,6 +43,7 @@ public class GlobalInfo {
     public static Integer getrDespachosCantidad10;
     public static String  getrDespachosSoles10;
     public static String  getTotalRVenddorSoles10;
+    public static String  getTotalREgresoSoles10;
 
     /**
      * @MOSTRARMODAL:Alertas
@@ -60,12 +65,17 @@ public class GlobalInfo {
     public static  List<ClientePrecio>  getclientePrecioList10;
     public static  List<LClientePuntos> getclientePuntosList10;
     public static  List<SettingVehiculo> gettipovehiculoList10;
+    public static  List<SettingMoneda> getmonedaList10;
+    public static  List<SettingTEgreso> getegresoList10;
+    public static  List<Egreso> getlistegresoList10;
+    public  static List<Articulos> getarticulosList10;
 
     /**
      * @DESCUENTO:ClientePrecio
      */
     public static String getRfIdCPrecio10;
     public static String getClienteRZPrecio10;
+    public static String getClienteDRPrecio10;
     public static String getClienteIDPrecio10;
     public static String getNroPlacaPrecio10;
     public static String getArticuloIdPrecio10;
@@ -97,14 +107,18 @@ public class GlobalInfo {
     public static String getuserPass10;
     public static String getuseridentFID10;
     public static Boolean getuserLocked10;
+    public static Boolean getuserCancel10;
+    public static Boolean getuserSuper10;
+    public static Boolean getuserAfiliar10;
 
     /**
      * @USER:ANULACION
      */
     public static String getuserIDAnular10;
-    public static String getuserNameAnular10;
     public static String getuserPassAnular10;
+    public static Boolean getuserLockedAnular10;
     public static Boolean getuserCancelAnular10;
+    public static Boolean getuserSuperAnular10;
 
     /**
      * @USER:ForzarCambioTurnoEInicioDia
@@ -113,7 +127,9 @@ public class GlobalInfo {
     public static String getuserIDFE10;
     public static String getuserNameFE10;
     public static String getuserPassFE10;
-    public static Boolean getuserCancelFE10;
+    public static Boolean getuserLockedFE0;
+    public static Boolean getuserSuperFE10;
+    public static Boolean getuserForzarCierreFE10;
 
     /**
      * @CARA_MARGUERA
@@ -155,6 +171,8 @@ public class GlobalInfo {
     public static boolean getConRfdPuntos;
     public static boolean getVistaQR;
     public static boolean getDobleImpresion;
+    public static boolean getReporteEgreso10;
+    public static boolean getterminalModalidad;
 
     /**
      * @SETTING
@@ -180,6 +198,8 @@ public class GlobalInfo {
     public static String  getsettingRutaLogo210;
     public static Integer getsettingDescuentoRFID10;
     public static Double getsettingValorIGV10;
+    public static Double getsettingDescuentoGll10;
+    public static boolean getsettingByImei10;
 
     /**
      * @SETTINGTURNO
@@ -197,6 +217,7 @@ public class GlobalInfo {
     public static String  getclienteRUC10;
     public static String  getclienteRZ10;
     public static String  getclienteDR10;
+    public static String  getclienteCredito10;
 
     /**
      * @OPTRAN
@@ -271,13 +292,23 @@ public class GlobalInfo {
      */
     public static String   getConsultaComprobanteNroSerie;
     public static String   getConsultaComprobanteNroDocumento;
-    public static int  getConsultaComprobanteTipoDocumento;
+    public static String  getConsultaComprobanteTipoDocumento;
 
     /**
-     * Deposito Boveda
+     * Egreso
      */
-    public static boolean getTerminalBoveda = false;
-
+    public static Integer getegresoID10;
+    public static String getegresoAnulado10;
+    /**
+     * Caja
+     */
+    public static String getTotalCajaSoles10;
+    /**
+    /**
+     *
+     */
+    public static Double getmnMtoSubTotal1;
+    public static Double getmnMtoImpuesto1;
     /**
      * @APIService
      */
@@ -288,8 +319,9 @@ public class GlobalInfo {
     //public static final String BASE_URL = "http://192.168.1.227:8081/";
     //  public static final String BASE_URL = "http://192.168.1.3:8081/";
     //public static final String BASE_URL = "http://192.168.0.245:8081/";
-    // public static final String BASE_URL = "http://192.168.1.245:8081/";
-     public static final String BASE_URL = "http://192.168.18.29:8081/";
+     public static final String BASE_URL = "http://192.168.1.245:8081/";
+     //public static final String BASE_URL = "http://192.168.18.29:8081/";
+    //public static final String BASE_URL = "http://192.168.68.103:8082/";
     //public static final String BASE_URL = "http://192.168.1.245:8081/";
    // public static final String BASE_URL = "http://192.168.42.245:8081/";
     //public static final String BASE_URL = "http://192.168.18.43:8081/";

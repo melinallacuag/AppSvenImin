@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,6 +68,7 @@ public class DasboardFragment extends Fragment{
     String usuarioUser,contraseñaUser;
 
     List<Users> usersCTList;
+    CardView btn_Boveda;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,10 +97,30 @@ public class DasboardFragment extends Fragment{
         btn_Cambioturno       = view.findViewById(R.id.btnCambioTurno);
         btn_Iniciodia         = view.findViewById(R.id.btnInicioDia);
         btn_Salir             = view.findViewById(R.id.btnSalir);
+        btn_Boveda             = view.findViewById(R.id.btnBoveda);
         img_Logo              = view.findViewById(R.id.logo_dashboard);
 
-        ventas                  = view.findViewById(R.id.ventas);
-        imageee                 = view.findViewById(R.id.imageee);
+        ventas                = view.findViewById(R.id.ventas);
+        imageee               = view.findViewById(R.id.imageee);
+
+        /**
+         * @OBTENER:Boveda
+         */
+        btn_Boveda.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                FragmentManager fragmentManagerBoveda = getActivity().getSupportFragmentManager();
+                FragmentTransaction fragmentTransactionBoveda= fragmentManagerBoveda.beginTransaction();
+                int fragmentContainerBoveda    = R.id.fragment_container;
+                BovedasFragment bovedasFragment = new BovedasFragment();
+
+                fragmentTransactionBoveda.replace(fragmentContainerBoveda, bovedasFragment);
+                fragmentTransactionBoveda.addToBackStack(null);
+                fragmentTransactionBoveda.commit();
+
+            }
+        });
 
         /**
          * @OBTENER:DatoGerealUserTerminal
@@ -379,11 +402,31 @@ public class DasboardFragment extends Fragment{
                                                 usuario.getText().clear();
                                                 contraseña.getText().clear();
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
                                             }
                                         });
+
+                                        TextWatcher campoVacioWatcher = new TextWatcher() {
+                                            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                            @Override
+                                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                if (usuario.hasFocus()) {
+                                                    alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                } else if (contraseña.hasFocus()) {
+                                                    alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                }
+                                            }
+
+                                            @Override public void afterTextChanged(Editable s) {}
+                                        };
+
+                                        usuario.addTextChangedListener(campoVacioWatcher);
+                                        contraseña.addTextChangedListener(campoVacioWatcher);
 
                                         btnAceptarCTFEntrada.setOnClickListener(new View.OnClickListener() {
                                             @Override
@@ -402,6 +445,8 @@ public class DasboardFragment extends Fragment{
 
                                                 findUsersCT(usuarioUser);
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
@@ -457,11 +502,31 @@ public class DasboardFragment extends Fragment{
                                                 usuario.getText().clear();
                                                 contraseña.getText().clear();
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
                                             }
                                         });
+
+                                        TextWatcher campoVacioWatcher = new TextWatcher() {
+                                            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                            @Override
+                                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                if (usuario.hasFocus()) {
+                                                    alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                } else if (contraseña.hasFocus()) {
+                                                    alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                }
+                                            }
+
+                                            @Override public void afterTextChanged(Editable s) {}
+                                        };
+
+                                        usuario.addTextChangedListener(campoVacioWatcher);
+                                        contraseña.addTextChangedListener(campoVacioWatcher);
 
                                         btnAceptarCTFEntrada.setOnClickListener(new View.OnClickListener() {
                                             @Override
@@ -480,6 +545,8 @@ public class DasboardFragment extends Fragment{
 
                                                 findUsersCT(usuarioUser);
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
@@ -535,11 +602,31 @@ public class DasboardFragment extends Fragment{
                                                 usuario.getText().clear();
                                                 contraseña.getText().clear();
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
                                             }
                                         });
+
+                                        TextWatcher campoVacioWatcher = new TextWatcher() {
+                                            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                            @Override
+                                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                if (usuario.hasFocus()) {
+                                                    alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                } else if (contraseña.hasFocus()) {
+                                                    alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                }
+                                            }
+
+                                            @Override public void afterTextChanged(Editable s) {}
+                                        };
+
+                                        usuario.addTextChangedListener(campoVacioWatcher);
+                                        contraseña.addTextChangedListener(campoVacioWatcher);
 
                                         btnAceptarCTFEntrada.setOnClickListener(new View.OnClickListener() {
                                             @Override
@@ -558,6 +645,8 @@ public class DasboardFragment extends Fragment{
 
                                                 findUsersCT(usuarioUser);
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
@@ -615,11 +704,31 @@ public class DasboardFragment extends Fragment{
                                                 usuario.getText().clear();
                                                 contraseña.getText().clear();
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
                                             }
                                         });
+
+                                        TextWatcher campoVacioWatcher = new TextWatcher() {
+                                            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                            @Override
+                                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                if (usuario.hasFocus()) {
+                                                    alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                } else if (contraseña.hasFocus()) {
+                                                    alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                }
+                                            }
+
+                                            @Override public void afterTextChanged(Editable s) {}
+                                        };
+
+                                        usuario.addTextChangedListener(campoVacioWatcher);
+                                        contraseña.addTextChangedListener(campoVacioWatcher);
 
                                         btnAceptarCTFEntrada.setOnClickListener(new View.OnClickListener() {
                                             @Override
@@ -638,6 +747,8 @@ public class DasboardFragment extends Fragment{
 
                                                 findUsersCT(usuarioUser);
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
@@ -779,11 +890,31 @@ public class DasboardFragment extends Fragment{
                                                     usuario.getText().clear();
                                                     contraseña.getText().clear();
 
+                                                    alertuser.setError(null);
+                                                    alertpassword.setError(null);
                                                     alertuser.setErrorEnabled(false);
                                                     alertpassword.setErrorEnabled(false);
 
                                                 }
                                             });
+
+                                            TextWatcher campoVacioWatcher = new TextWatcher() {
+                                                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                                @Override
+                                                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                    if (usuario.hasFocus()) {
+                                                        alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                    } else if (contraseña.hasFocus()) {
+                                                        alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                    }
+                                                }
+
+                                                @Override public void afterTextChanged(Editable s) {}
+                                            };
+
+                                            usuario.addTextChangedListener(campoVacioWatcher);
+                                            contraseña.addTextChangedListener(campoVacioWatcher);
 
                                             btnAceptarCIDEntrada.setOnClickListener(new View.OnClickListener() {
                                                 @Override
@@ -802,6 +933,8 @@ public class DasboardFragment extends Fragment{
 
                                                     findUsersID(usuarioUser);
 
+                                                    alertuser.setError(null);
+                                                    alertpassword.setError(null);
                                                     alertuser.setErrorEnabled(false);
                                                     alertpassword.setErrorEnabled(false);
 
@@ -864,11 +997,31 @@ public class DasboardFragment extends Fragment{
                                                     usuario.getText().clear();
                                                     contraseña.getText().clear();
 
+                                                    alertuser.setError(null);
+                                                    alertpassword.setError(null);
                                                     alertuser.setErrorEnabled(false);
                                                     alertpassword.setErrorEnabled(false);
 
                                                 }
                                             });
+
+                                            TextWatcher campoVacioWatcher = new TextWatcher() {
+                                                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                                @Override
+                                                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                    if (usuario.hasFocus()) {
+                                                        alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                    } else if (contraseña.hasFocus()) {
+                                                        alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                    }
+                                                }
+
+                                                @Override public void afterTextChanged(Editable s) {}
+                                            };
+
+                                            usuario.addTextChangedListener(campoVacioWatcher);
+                                            contraseña.addTextChangedListener(campoVacioWatcher);
 
                                             btnAceptarCIDEntrada.setOnClickListener(new View.OnClickListener() {
                                                 @Override
@@ -887,6 +1040,8 @@ public class DasboardFragment extends Fragment{
 
                                                     findUsersID(usuarioUser);
 
+                                                    alertuser.setError(null);
+                                                    alertpassword.setError(null);
                                                     alertuser.setErrorEnabled(false);
                                                     alertpassword.setErrorEnabled(false);
 
@@ -1230,44 +1385,48 @@ public class DasboardFragment extends Fragment{
 
                     usersCTList = response.body();
 
-                    for (Users user : usersCTList) {
-
-                        GlobalInfo.getuserIDFE10 = user.getUserID();
-                        GlobalInfo.getuserNameFE10 = user.getNames();
-                        GlobalInfo.getuserPassFE10 = user.getPassword();
-                        GlobalInfo.getuserCancelFE10 = user.getCancel();
-
+                    if (usersCTList == null || usersCTList.isEmpty()) {
+                        Toast.makeText(getContext(), "Usuario no encontrado.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
 
-                    if (GlobalInfo.getuserCancelFE10 == true) {
+                    Users user = usersCTList.get(0);
 
-                        String getName = usuarioUser.trim();
-                        String getPass = PasswordChecker.checkpassword(contraseñaUser.trim());
+                    GlobalInfo.getuserIDFE10     = user.getUserID();
+                    GlobalInfo.getuserPassFE10   = user.getPassword();
+                    GlobalInfo.getuserSuperFE10  = user.getSuper();
+                    GlobalInfo.getuserLockedFE0  = user.getLocked();
+                    GlobalInfo.getuserForzarCierreFE10 = user.getForzarCierre();
 
-                        if (getName.equals(GlobalInfo.getuserIDFE10) && getPass.equals(GlobalInfo.getuserPassFE10)) {
+                    String getName = usuarioUser.trim();
+                    String getPass = PasswordChecker.checkpassword(contraseñaUser.trim());
 
-                            try {
-                                Intent intent = new Intent(getContext(), Login.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    if (getName.equals(GlobalInfo.getuserIDFE10) && getPass.equals(GlobalInfo.getuserPassFE10)) {
+                        if(GlobalInfo.getuserLockedFE0){
+                            if(GlobalInfo.getuserForzarCierreFE10 || GlobalInfo.getuserSuperFE10){
+                                try {
+                                    Intent intent = new Intent(getContext(), Login.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                                cerrarTurno(GlobalInfo.getterminalID10);
+                                    cerrarTurno(GlobalInfo.getterminalID10);
 
-                                startActivity(intent);
-                                finalize();
+                                    startActivity(intent);
+                                    finalize();
 
-                                Toast.makeText(getContext(), "SE GENERO EL CAMBIO DE TURNO ", Toast.LENGTH_SHORT).show();
-                            } catch (Throwable e) {
-                                e.printStackTrace();
+                                    Toast.makeText(getContext(), "SE GENERO EL CAMBIO DE TURNO ", Toast.LENGTH_SHORT).show();
+                                } catch (Throwable e) {
+                                    e.printStackTrace();
+                                }
+
+                                modalForzarEntrada.dismiss();
+                            }else{
+                                Toast.makeText(getContext(), "No tiene permisos para Forzar Cambiar de Turno.", Toast.LENGTH_SHORT).show();
                             }
-
-                            modalForzarEntrada.dismiss();
-
-                        } else {
-                            Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
                         }
-
-                    } else {
-                        Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
                     }
 
                     modalAlertaCTurnoActual.dismiss();
@@ -1304,44 +1463,47 @@ public class DasboardFragment extends Fragment{
 
                     usersCTList = response.body();
 
-                    for (Users user : usersCTList) {
-
-                        GlobalInfo.getuserIDFE10 = user.getUserID();
-                        GlobalInfo.getuserNameFE10 = user.getNames();
-                        GlobalInfo.getuserPassFE10 = user.getPassword();
-                        GlobalInfo.getuserCancelFE10 = user.getCancel();
-
+                    if (usersCTList == null || usersCTList.isEmpty()) {
+                        Toast.makeText(getContext(), "Usuario no encontrado.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
 
-                    if (GlobalInfo.getuserCancelFE10 == true) {
+                    Users user = usersCTList.get(0);
 
-                        String getName = usuarioUser.trim();
-                        String getPass = PasswordChecker.checkpassword(contraseñaUser.trim());
+                    GlobalInfo.getuserIDFE10     = user.getUserID();
+                    GlobalInfo.getuserPassFE10   = user.getPassword();
+                    GlobalInfo.getuserSuperFE10  = user.getSuper();
+                    GlobalInfo.getuserLockedFE0 = user.getLocked();
+                    GlobalInfo.getuserForzarCierreFE10 = user.getForzarCierre();
 
-                        if (getName.equals(GlobalInfo.getuserIDFE10) && getPass.equals(GlobalInfo.getuserPassFE10)) {
+                    String getName = (usuarioUser != null) ? usuarioUser.trim() : "";
+                    String getPass = (contraseñaUser != null) ? PasswordChecker.checkpassword(contraseñaUser.trim()) : "";
 
-                            try {
-                                Intent intent = new Intent(getContext(), Login.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    if (getName.equals(GlobalInfo.getuserIDFE10) && getPass.equals(GlobalInfo.getuserPassFE10)) {
+                        if(GlobalInfo.getuserLockedFE0) {
+                            if (GlobalInfo.getuserForzarCierreFE10 || GlobalInfo.getuserSuperFE10) {
+                                try {
+                                    Intent intent = new Intent(getContext(), Login.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                                iniciarDia(GlobalInfo.getterminalID10);
+                                    iniciarDia(GlobalInfo.getterminalID10);
 
-                                startActivity(intent);
-                                finalize();
+                                    startActivity(intent);
+                                    finalize();
 
-                                Toast.makeText(getContext(), "SE GENERO EL INICIO DE DÍA", Toast.LENGTH_SHORT).show();
-                            } catch (Throwable e) {
-                                e.printStackTrace();
+                                    Toast.makeText(getContext(), "SE GENERO EL INICIO DE DÍA", Toast.LENGTH_SHORT).show();
+                                } catch (Throwable e) {
+                                    e.printStackTrace();
+                                }
+                                modalForzarEntrada.dismiss();
+                            } else {
+                                Toast.makeText(getContext(), "No tiene permisos para Forzar Inicio de Día.", Toast.LENGTH_SHORT).show();
                             }
-
-                            modalForzarEntrada.dismiss();
-
-                        } else {
-                            Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
                         }
-
-                    } else {
-                        Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
                     }
 
                     modalAlertaDiaActual.dismiss();

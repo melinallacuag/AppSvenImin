@@ -352,6 +352,7 @@
                     android:layout_weight="1"
                     android:fontFamily="@font/nunito_extrabold"
                     android:text="Credito"
+                    android:visibility="gone"
                     android:textColor="@color/gris"
                     android:textSize="16sp" />
                 <RadioButton

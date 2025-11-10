@@ -1,23 +1,23 @@
 package com.anggastudio.sample;
-
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.anggastudio.sample.Adapter.CLadosAdapter;
 import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
+import com.anggastudio.sample.WebApiSVEN.Models.DetalleVenta;
 import com.anggastudio.sample.WebApiSVEN.Models.Lados;
+import com.anggastudio.sample.WebApiSVEN.Models.Mangueras;
 import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -56,6 +56,27 @@ public class ConfigurarLados extends AppCompatActivity {
         /**
          * @ELIMINAR:CLados
          */
+
+        inputTerminalId.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String inputTerminaCLados= s.toString();
+
+                if (!inputTerminaCLados.isEmpty() && !inputTerminaCLados.matches("^[A-Za-z0-9]+$")) {
+                    alertTerminalId.setError("* Solo se permiten letras y números");
+                    return;
+                } else {
+                    alertTerminalId.setError(null);
+                    alertTerminalId.setErrorEnabled(false);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
         btnEliminaCLado.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -1,28 +1,39 @@
 package com.anggastudio.sample.WebApiSVEN.Controllers;
+import com.anggastudio.sample.WebApiSVEN.Models.ActualizarCredito;
 import com.anggastudio.sample.WebApiSVEN.Models.Anular;
+import com.anggastudio.sample.WebApiSVEN.Models.ApiResponse;
 import com.anggastudio.sample.WebApiSVEN.Models.Articulo;
+import com.anggastudio.sample.WebApiSVEN.Models.Articulos;
 import com.anggastudio.sample.WebApiSVEN.Models.CDia;
 import com.anggastudio.sample.WebApiSVEN.Models.CTurno;
 import com.anggastudio.sample.WebApiSVEN.Models.CambioPrecios;
 import com.anggastudio.sample.WebApiSVEN.Models.ClienteCredito;
 import com.anggastudio.sample.WebApiSVEN.Models.ClientePrecio;
 import com.anggastudio.sample.WebApiSVEN.Models.Company;
+import com.anggastudio.sample.WebApiSVEN.Models.Comprobante;
 import com.anggastudio.sample.WebApiSVEN.Models.Correlativo;
 import com.anggastudio.sample.WebApiSVEN.Models.DetalleVenta;
+import com.anggastudio.sample.WebApiSVEN.Models.Egreso;
+import com.anggastudio.sample.WebApiSVEN.Models.EliminarComp;
 import com.anggastudio.sample.WebApiSVEN.Models.Familia;
 import com.anggastudio.sample.WebApiSVEN.Models.Gratuita;
+import com.anggastudio.sample.WebApiSVEN.Models.Ingresos;
 import com.anggastudio.sample.WebApiSVEN.Models.LClientePuntos;
 import com.anggastudio.sample.WebApiSVEN.Models.LClientes;
 import com.anggastudio.sample.WebApiSVEN.Models.Lados;
 import com.anggastudio.sample.WebApiSVEN.Models.ListaComprobante;
 import com.anggastudio.sample.WebApiSVEN.Models.Mangueras;
+import com.anggastudio.sample.WebApiSVEN.Models.MontoEfectivo;
 import com.anggastudio.sample.WebApiSVEN.Models.Optran;
 import com.anggastudio.sample.WebApiSVEN.Models.Placa;
 import com.anggastudio.sample.WebApiSVEN.Models.RAnulados;
 import com.anggastudio.sample.WebApiSVEN.Models.Reimpresion;
+import com.anggastudio.sample.WebApiSVEN.Models.ReporteEgreso;
 import com.anggastudio.sample.WebApiSVEN.Models.ReporteTarjetas;
 import com.anggastudio.sample.WebApiSVEN.Models.ReporteVendedor;
 import com.anggastudio.sample.WebApiSVEN.Models.Setting;
+import com.anggastudio.sample.WebApiSVEN.Models.SettingMoneda;
+import com.anggastudio.sample.WebApiSVEN.Models.SettingTEgreso;
 import com.anggastudio.sample.WebApiSVEN.Models.SettingTask;
 import com.anggastudio.sample.WebApiSVEN.Models.SettingTurno;
 import com.anggastudio.sample.WebApiSVEN.Models.SettingVehiculo;
@@ -122,6 +133,9 @@ public interface APIService {
     @GET("api/cliente/listado/RUC/{clienteId}")
     Call<List<LClientes>> findClienteRUC(@Path("clienteId") String clienteId);
 
+    @GET("api/cliente/listado/RUCAPI/{clienteId}")
+    Call<List<LClientes>> findClienteRUCAPI(@Path("clienteId") String clienteId);
+
     /**
      * @DetalleVenta
      */
@@ -188,11 +202,12 @@ public interface APIService {
     @GET("api/correlativo/listado")
     Call<List<Correlativo>> getCorrelativo();
 
-    @GET("api/correlativo/listado/{imei}/{tipoDoc}/{rfid}/{articuloId}/{tranId}")
-    Call<List<Correlativo>> findCorrelativo(@Path("imei") String imei, @Path("tipoDoc") String tipoDoc, @Path("rfid") String rfid, @Path("articuloId") String articuloId, @Path("tranId") String tranId);
+    /**27-03-20 TipoVenta **/
+    @GET("api/correlativo/listado/{imei}/{tipoDoc}/{rfid}/{articuloId}/{tranId}/{tipoVenta}")
+    Call<List<Correlativo>> findCorrelativo(@Path("imei") String imei, @Path("tipoDoc") String tipoDoc, @Path("rfid") String rfid, @Path("articuloId") String articuloId, @Path("tranId") String tranId, @Path("tipoVenta") String tipoVenta);
 
-    @GET("api/correlativo/listadosinrfid/{imei}/{tipoDoc}/{clienteId}/{articuloId}/{tranId}")
-    Call<List<Correlativo>> findCorrelativosinrfid(@Path("imei") String imei, @Path("tipoDoc") String tipoDoc, @Path("clienteId") String clienteId, @Path("articuloId") String articuloId, @Path("tranId") String tranId);
+    @GET("api/correlativo/listadosinrfid/{imei}/{tipoDoc}/{clienteId}/{articuloId}/{tranId}/{pagoId}")
+    Call<List<Correlativo>> findCorrelativosinrfid(@Path("imei") String imei, @Path("tipoDoc") String tipoDoc, @Path("clienteId") String clienteId, @Path("articuloId") String articuloId, @Path("tranId") String tranId, @Path("pagoId") String pagoId);
 
     @GET("api/correlativo/listadomarket/{imei}/{tipoDoc}")
     Call<List<Correlativo>> findCorrelativomarket(@Path("imei") String imei, @Path("tipoDoc") String tipoDoc);
@@ -371,5 +386,110 @@ public interface APIService {
 
     @GET("api/SettingVehiculo/Listado/{CompanyID}/{VehiculoID}")
     Call<List<SettingVehiculo>> findSettingVehiculo(@Path("CompanyID") Integer CompanyID, @Path("VehiculoID") Integer VehiculoID);
+
+
+    /**
+     * @SettingMoneda
+     */
+    @GET("api/SMoneda/Listado")
+    Call<List<SettingMoneda>> getSettingMoneda();
+
+    /**
+     * @SettingTEgreso
+     */
+    @GET("api/SEgreso/Listado")
+    Call<List<SettingTEgreso>> getSettingTEgreso();
+
+    /**
+     * @EgresoMontoEfectivo
+     */
+    @GET("api/EgresoEfectivo/Listado/{terminalID}/{turno}")
+    Call<List<MontoEfectivo>> findMontoEfectivo(@Path("terminalID") String terminalID, @Path("turno") Integer turno);
+
+    /**
+     * @ListadoEgresos
+     */
+    @GET("api/Egresos/Listado/{terminalID}/{turno}")
+    Call<List<Egreso>> findListadoEgresos(@Path("terminalID") String terminalID, @Path("turno") Integer turno);
+
+    /**
+     * @ReporteEgresos
+     */
+    @GET("api/Egresos/ListadoDSB/{terminalID}/{turno}")
+    Call<List<ReporteEgreso>> findReporteEgresos(@Path("terminalID") String terminalID, @Path("turno") Integer turno);
+
+
+    /**
+     * @GuardarEgresos
+     */
+    @POST("api/Egresos/Guardar")
+    Call<Integer> post(@Body Egreso egreso);
+
+    /**
+     * @ReimprimirEgresos
+     */
+    @GET("api/Egresos/Listado/{ID}")
+    Call<List<Egreso>> findListadoReimprimir( @Path("ID") Integer ID);
+
+    /**
+     * @AnularEgresos
+     */
+    @GET("api/Egresos/Anular/Listado/{ID}")
+    Call<List<Egreso>> findEgresoAnular(@Path("ID") Integer ID);
+
+    /**
+     * @ListadoIngresos
+     */
+    @GET("api/Ingresos/Listado/{terminalID}/{turno}")
+    Call<List<Ingresos>> findListadoIngresos(@Path("terminalID") String terminalID, @Path("turno") Integer turno);
+
+    /**
+     * @GuardarIngresos
+     */
+    @POST("api/Ingresos/Guardar")
+    Call<Integer> post(@Body Ingresos ingresos);
+
+    /**
+     * @ReimprimirIngresos
+     */
+    @GET("api/Ingresos/Listado/{ID}")
+    Call<List<Ingresos>> findListadoReimprimirIngresos( @Path("ID") Integer ID);
+
+    /**
+     * @AnularIngresos
+     */
+    @GET("api/Ingresos/Anular/Listado/{ID}")
+    Call<List<Ingresos>> findIngresosAnular(@Path("ID") Integer ID);
+
+    /**
+     * @Articulos
+     */
+    @GET("api/articulo/ListadoND")
+    Call<List<Articulos>> getArticulos();
+
+
+    /**
+     * @ConsultarComprobante
+     */
+    @GET("api/ConsultarComprobante/Listado/{TipoDocumento}/{SerieDocumento}/{NroDocumento}/{TerminalID}")
+    Call<List<Reimpresion>> findConsultarComprobante(@Path("TipoDocumento") String TipoDocumento, @Path("SerieDocumento") String SerieDocumento, @Path("NroDocumento") String NroDocumento, @Path("TerminalID") String TerminalID);
+
+    /**
+     * @ActualizarConsultarComprobante
+     */
+    @POST("api/ActualizarDatos/Actualizar")
+    Call<ApiResponse> ActualizarDatos(@Body Comprobante comprobante);
+
+    /**
+     * @ActualizarConsultarComprobante
+     */
+    @POST("api/ActualizarDatos/ActualizarCredito")
+    Call<ApiResponse> ActualizarCreditos(@Body ActualizarCredito actualizarCredito);
+
+    /**
+     * @EliminarComprobante
+     */
+    @POST("api/ActualizarDatos/Delete")
+    Call<ApiResponse> DeleteDatos(@Body EliminarComp eliminarComp);
 
 }

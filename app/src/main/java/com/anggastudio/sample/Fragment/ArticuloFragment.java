@@ -1,4 +1,7 @@
 package com.anggastudio.sample.Fragment;
+import static com.anggastudio.printama.Printama.CENTER;
+import static com.anggastudio.printama.Printama.LEFT;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -11,6 +14,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -28,6 +32,7 @@ import android.nfc.tech.NfcF;
 import android.nfc.tech.NfcV;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,6 +49,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -93,6 +99,8 @@ import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -149,7 +157,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
     List<LClientePuntos>  clientePuntosList;
 
     RecyclerView recyclerLClientePuntosNFC,recyclerListaClientesAfiliados,recyclerFamilia, recyclerArticulo, recyclerCarrito, recyclerLCliente,recyclerLClienteCredito;
-    Button btnCancelarNFC,btnAceptarNFC,
+    Button buscarRUCConsultaFac,buscarListSinPuntosNFC,btnCancelarNFC,btnAceptarNFC,
             btnAceptarErrorWifi,btnAceptarError,
             btnTodoArticulo,
             btnBoleta,btnCancelarBoleta,btnAgregarBoleta,btnGenerarBoleta,buscarPlacaBoleta,buscarDNIBoleta,btnCancelarLCliente,
@@ -169,7 +177,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
     CarritoAdapter carritoAdapter;
     SearchView BuscarProducto,btnBuscadorClienteRZ,BuscarRazonSocial;
 
-    TextInputLayout alertuserNFC,alertpasswordNFC,textNFC,alertPlaca,alertDNI,alertNombre,alertPEfectivo,alertOperacion,alertSelectTPago,
+    TextInputLayout textBuscarPutnos,alertuserNFC,alertpasswordNFC,textNFC,alertPlaca,alertDNI,alertNombre,alertPEfectivo,alertOperacion,alertSelectTPago,
             alertRUC,alertRazSocial,alertObservacion,alertTarjeta,alertCliente,alertKilometraje;
 
     TextInputEditText usuarioNFC,contraseñaNFC,inputNFC,inputPlaca,inputDNI,inputNombre,inputDireccion,inputObservacion,inputOperacion,inputPEfectivo,
@@ -366,6 +374,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
             @Override
             public boolean onQueryTextSubmit(String query) {
                 onQueryTextChange(query);
+                view.requestFocus();
                 return true;
             }
             @Override
@@ -389,6 +398,11 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
             }
         });
 
+        BuscarProducto.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                view.requestFocus();
+            }
+        });
         /**
          * @FILTRAR:ArticuloTop
          */
@@ -570,6 +584,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         alertOperacion    = modalBoleta.findViewById(R.id.alertOperacion);
                         alertObservacion  = modalBoleta.findViewById(R.id.alertObservacion);
                         textNFC           = modalBoleta.findViewById(R.id.textNFC);
+                        textBuscarPutnos  = modalBoleta.findViewById(R.id.textBuscarPutnos);
 
                         inputPlaca        = modalBoleta.findViewById(R.id.inputPlaca);
                         inputDNI          = modalBoleta.findViewById(R.id.inputDNI);
@@ -603,6 +618,18 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         buscarListNFC     = modalBoleta.findViewById(R.id.buscarListNFC);
                         buscarListPuntosNFC  = modalBoleta.findViewById(R.id.buscarListPuntosNFC);
                         textNumPuntos     = modalBoleta.findViewById(R.id.textNumPuntos);
+                        buscarListSinPuntosNFC = modalBoleta.findViewById(R.id.buscarListSinPuntosNFC);
+
+                        alertDNI.setError(null);
+                        alertDNI.setErrorEnabled(false);
+                        alertNombre.setError(null);
+                        alertNombre.setErrorEnabled(false);
+                        alertPlaca.setError(null);
+                        alertPlaca.setErrorEnabled(false);
+                        alertOperacion.setError(null);
+                        alertOperacion.setErrorEnabled(false);
+                        alertPEfectivo.setError(null);
+                        alertPEfectivo.setErrorEnabled(false);
 
                         inputDNI.setEnabled(true);
                         inputNombre.setEnabled(true);
@@ -611,13 +638,34 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         radioCredito.setVisibility(View.GONE);
                         radioGratuito.setVisibility(View.VISIBLE);
                         radioCanje.setVisibility(View.GONE);
+                        textNumPuntos.setVisibility(View.GONE);
 
-                        if(GlobalInfo.getTerminalSoloPuntos10){
+                       /* if(GlobalInfo.getTerminalSoloPuntos10){
                             buscarListNFC.setVisibility(View.GONE);
                             buscarListPuntosNFC.setVisibility(View.VISIBLE);
                         }else{
                             buscarListNFC.setVisibility(View.VISIBLE);
                             buscarListPuntosNFC.setVisibility(View.GONE);
+                        }*/
+
+                        if(GlobalInfo.getTerminalSoloPuntos10 && !GlobalInfo.getConRfdPuntos){
+                            buscarListNFC.setVisibility(View.GONE);
+                            buscarListPuntosNFC.setVisibility(View.VISIBLE);
+                            buscarListSinPuntosNFC.setVisibility(View.GONE);
+                            textNFC.setVisibility(View.VISIBLE);
+                            textBuscarPutnos.setVisibility(View.GONE);
+                        }else if(GlobalInfo.getTerminalSoloPuntos10 && GlobalInfo.getConRfdPuntos){
+                            buscarListNFC.setVisibility(View.GONE);
+                            buscarListPuntosNFC.setVisibility(View.GONE);
+                            buscarListSinPuntosNFC.setVisibility(View.VISIBLE);
+                            textNFC.setVisibility(View.GONE);
+                            textBuscarPutnos.setVisibility(View.VISIBLE);
+                        }else{
+                            buscarListNFC.setVisibility(View.VISIBLE);
+                            buscarListPuntosNFC.setVisibility(View.GONE);
+                            buscarListSinPuntosNFC.setVisibility(View.GONE);
+                            textNFC.setVisibility(View.VISIBLE);
+                            textBuscarPutnos.setVisibility(View.GONE);
                         }
 
                         /**
@@ -965,6 +1013,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 inputNFC.getText().clear();
                                 inputOperacion.getText().clear();
                                 textNumPuntos.setText(String.valueOf(0));
+                                inputObservacion.getText().clear();
 
                                 alertPlaca.setErrorEnabled(false);
                                 alertDNI.setErrorEnabled(false);
@@ -982,6 +1031,161 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         /**
                          * @AGREGAR:Boleta
                          */
+
+                        inputDNI.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String dniBoleta = s.toString();
+
+                                if (dniBoleta.isEmpty()) {
+                                    alertDNI.setError("* El campo DNI es obligatorio");
+                                    return;
+                                } else if (dniBoleta.length() < 8) {
+                                    alertDNI.setError("* El DNI debe tener 8 dígitos");
+                                    return;
+                                } else {
+                                    alertDNI.setError(null);
+                                    alertDNI.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputNombre.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String NombreBoleta = s.toString();
+
+                                if (NombreBoleta.isEmpty()) {
+                                    alertNombre.setError("* El campo Nombre es obligatorio");
+                                    return;
+                                } else if (NombreBoleta.length() < 8) {
+                                    alertNombre.setError("* El Nombre debe tener mínino 8 dígitos");
+                                    return;
+                                } else {
+                                    alertNombre.setError(null);
+                                    alertNombre.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputPlaca.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String placaBoleta = s.toString();
+
+                                if (placaBoleta.isEmpty()) {
+                                    alertPlaca.setError("* El campo Placa es obligatorio");
+                                    return;
+                                } else if (!placaBoleta.matches("^[A-Za-z0-9-]+$")) {
+                                    alertPlaca.setError("* Solo se permiten letras, números y guiones");
+                                    return;
+                                } else {
+                                    alertPlaca.setError(null);
+                                    alertPlaca.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputOperacion.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String operacionBoleta = s.toString();
+
+                                if (operacionBoleta.isEmpty()) {
+                                    alertOperacion.setError("* El campo Nro Operación es obligatorio");
+                                    return;
+                                } else if (operacionBoleta.length() < 4) {
+                                    alertOperacion.setError("* El  Nro Operación debe tener mayor a 4 dígitos");
+                                    return;
+                                } else {
+                                    alertOperacion.setError(null);
+                                    alertOperacion.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputPEfectivo.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String pefectivoBoleta = s.toString();
+
+                                if (pefectivoBoleta.isEmpty()) {
+                                    alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
+                                    return;
+                                } else {
+                                    alertPEfectivo.setError(null);
+                                    alertPEfectivo.setErrorEnabled(false);
+                                }
+
+                                try {
+                                    Double dosDecimales = Double.valueOf(pefectivoBoleta);
+                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
+                                    if (dosDecimales != Double.parseDouble(decimalFormat.format(dosDecimales))) {
+                                        alertPEfectivo.setError("* Por favor ingrese un valor con dos decimales solamente");
+                                    } else {
+                                        alertPEfectivo.setError(null);
+                                        alertPEfectivo.setErrorEnabled(false);
+                                    }
+
+                                } catch (NumberFormatException e) {
+                                    alertPEfectivo.setError("* Formato numérico no válido");
+                                }
+
+
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputObservacion.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String observacionBoleta = s.toString();
+
+                                if (!observacionBoleta.isEmpty() && !observacionBoleta.matches("^[A-Za-z0-9 ]+$")) {
+                                    alertObservacion.setError("* Solo se permiten letras, números y espacios");
+                                    return;
+                                } else {
+                                    alertObservacion.setError(null);
+                                    alertObservacion.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
                         btnAgregarBoleta.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -992,30 +1196,45 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 GlobalInfo.getMarketClienteDR       = inputDireccion.getText().toString();
                                 GlobalInfo.getMarketOperacion       = inputOperacion.getText().toString();
                                 GlobalInfo.getMarketPEfectivo       = inputPEfectivo.getText().toString();
+                                GlobalInfo.getMarketObservacion     = inputObservacion.getText().toString();
 
                                 int checkedRadioButtonId = radioFormaPago.getCheckedRadioButtonId();
 
-                                if (GlobalInfo.getMarketPlaca.isEmpty()) {
 
-                                    alertPlaca.setError("* El campo Placa es obligatorio");
-                                    return;
-                                } else if (GlobalInfo.getMarketClienteID.isEmpty()) {
-
+                                if (GlobalInfo.getMarketClienteID.isEmpty()) {
                                     alertDNI.setError("* El campo DNI es obligatorio");
                                     return;
                                 } else if (GlobalInfo.getMarketClienteID.length() < 8) {
-
                                     alertDNI.setError("* El DNI debe tener 8 dígitos");
                                     return;
-                                } else if (GlobalInfo.getMarketClienteRZ.isEmpty()) {
+                                } else {
+                                    alertDNI.setError(null);
+                                    alertDNI.setErrorEnabled(false);
+                                }
 
+                                if (GlobalInfo.getMarketClienteRZ.isEmpty()) {
                                     alertNombre.setError("* El campo Nombre es obligatorio");
                                     return;
                                 } else if (GlobalInfo.getMarketClienteRZ.length() < 8) {
-
                                     alertNombre.setError("* El Nombre debe tener mínino 8 dígitos");
                                     return;
-                                } else if (checkedRadioButtonId == radioTarjeta.getId()) {
+                                } else {
+                                    alertNombre.setError(null);
+                                    alertNombre.setErrorEnabled(false);
+                                }
+
+                                if (GlobalInfo.getMarketPlaca.isEmpty()) {
+                                    alertPlaca.setError("* El campo Placa es obligatorio");
+                                    return;
+                                } else if (!GlobalInfo.getMarketPlaca.matches("^[A-Za-z0-9-]+$")) {
+                                    alertPlaca.setError("* Solo se permiten letras, números y guiones");
+                                    return;
+                                } else {
+                                    alertPlaca.setError(null);
+                                    alertPlaca.setErrorEnabled(false);
+                                }
+
+                                if (checkedRadioButtonId == radioTarjeta.getId()) {
 
                                     if (GlobalInfo.getMarketOperacion.isEmpty()) {
                                         alertOperacion.setError("* El campo Nro Operación es obligatorio");
@@ -1023,16 +1242,28 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                     } else if (GlobalInfo.getMarketOperacion.length() < 4) {
                                         alertOperacion.setError("* El  Nro Operación debe tener mayor a 4 dígitos");
                                         return;
-                                    } else if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
+                                    } else {
+                                        alertOperacion.setError(null);
+                                        alertOperacion.setErrorEnabled(false);
+                                    }
+
+                                    if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
                                         alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
                                         return;
+                                    } else {
+                                        alertPEfectivo.setError(null);
+                                        alertPEfectivo.setErrorEnabled(false);
                                     }
+
 
                                 } else if (checkedRadioButtonId == radioCredito.getId()) {
 
                                     if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
                                         alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
                                         return;
+                                    } else {
+                                        alertPEfectivo.setError(null);
+                                        alertPEfectivo.setErrorEnabled(false);
                                     }
 
                                 }
@@ -1041,8 +1272,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 GlobalInfo.getMarketOperacion = "";
                                 GlobalInfo.getMarketPEfectivo = "0.00";
                                 GlobalInfo.getMarketnroTarjetaNotaD = "";
-                                GlobalInfo.getMarketObservacion     = "";
-
+                                //  GlobalInfo.getMarketObservacion     = "";
 
                                 alertPlaca.setErrorEnabled(false);
                                 alertDNI.setErrorEnabled(false);
@@ -1105,6 +1335,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 inputNFC.getText().clear();
                                 radioFormaPago.check(radioEfectivo.getId());
                                 textNumPuntos.setText(String.valueOf(0));
+                                inputObservacion.getText().clear();
 
                                 btnBoleta.setVisibility(View.GONE);
                                 btnFactura.setVisibility(View.GONE);
@@ -1167,18 +1398,64 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         buscarListNFC      = modalFactura.findViewById(R.id.buscarListNFC);
                         buscarListPuntosNFC  = modalFactura.findViewById(R.id.buscarListPuntosNFC);
                         textNumPuntos       = modalFactura.findViewById(R.id.textNumPuntos);
+                        buscarRUCConsultaFac = modalFactura.findViewById(R.id.buscarRUCConsultaFac);
+
+                        alertRUC.setError(null);
+                        alertRUC.setErrorEnabled(false);
+                        alertRazSocial.setError(null);
+                        alertRazSocial.setErrorEnabled(false);
+                        alertPlaca.setError(null);
+                        alertPlaca.setErrorEnabled(false);
+                        alertOperacion.setError(null);
+                        alertOperacion.setErrorEnabled(false);
+                        alertPEfectivo.setError(null);
+                        alertPEfectivo.setErrorEnabled(false);
 
                         textNumPuntos.setVisibility(View.GONE);
                         textNFC.setVisibility(View.GONE);
                         buscarListPuntosNFC.setVisibility(View.GONE);
                         buscarListNFC.setVisibility(View.GONE);
-                        alertObservacion.setVisibility(View.GONE);
+                        // alertObservacion.setVisibility(View.GONE);
                         radioCredito.setVisibility(View.GONE);
 
                         inputRUC.setEnabled(true);
                         inputRazSocial.setEnabled(true);
                         alertRUC.setBoxBackgroundColorResource(R.color.transparentenew);
                         alertRazSocial.setBoxBackgroundColorResource(R.color.transparentenew);
+
+                        /**
+                         *
+                         */
+                        buscarRUCConsultaFac.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                String campoRUC = inputRUC.getText().toString();
+
+                                if (campoRUC.isEmpty() || campoRUC == null) {
+                                    alertRUC.setError("* El campo RUC es obligatorio");
+                                    return;
+                                }else if (campoRUC.length() < 11){
+                                    alertRUC.setError("* El RUC debe tener 11 dígitos");
+                                    return;
+                                }
+
+                                findClienteRUCAPI(campoRUC);
+
+                                alertRUC.setErrorEnabled(false);
+
+                                inputPlaca.setText("000-0000");
+                                inputNFC.getText().clear();
+                                inputRazSocial.getText().clear();
+                                inputDireccion.getText().clear();
+
+                                inputRUC.setEnabled(true);
+                                inputRazSocial.setEnabled(true);
+                                alertRUC.setBoxBackgroundColorResource(R.color.transparentenew);
+                                alertRazSocial.setBoxBackgroundColorResource(R.color.transparentenew);
+
+                            }
+                        });
 
                         /**
                          * @MODAL:MostrarListadoClienteRUC
@@ -1347,6 +1624,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 radioFormaPago.check(radioEfectivo.getId());
                                 inputPEfectivo.setText("0");
                                 inputOperacion.getText().clear();
+                                inputObservacion.getText().clear();
 
                                 alertPlaca.setErrorEnabled(false);
                                 alertRUC.setErrorEnabled(false);
@@ -1364,6 +1642,162 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         /**
                          * @AGREGAR:Factura
                          */
+
+                        inputRUC.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String rucFactura = s.toString();
+
+                                if (rucFactura.isEmpty()) {
+                                    alertRUC.setError("* El campo RUC es obligatorio");
+                                    return;
+                                } else if (rucFactura.length() < 11) {
+                                    alertRUC.setError("* El RUC debe tener 11 dígitos");
+                                    return;
+                                } else {
+                                    alertRUC.setError(null);
+                                    alertRUC.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputRazSocial.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String RazSocialFactura = s.toString();
+
+                                if (RazSocialFactura.isEmpty()) {
+                                    alertRazSocial.setError("* La Razon Social es obligatorio");
+                                    return;
+                                } else if (RazSocialFactura.length() < 5) {
+                                    alertRazSocial.setError("* La Razon Social debe tener mínino 5 dígitos");
+                                    return;
+                                } else {
+                                    alertRazSocial.setError(null);
+                                    alertRazSocial.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputPlaca.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String placaFactura = s.toString();
+
+                                if (placaFactura.isEmpty()) {
+                                    alertPlaca.setError("* El campo Placa es obligatorio");
+                                    return;
+                                } else if (!placaFactura.matches("^[A-Za-z0-9-]+$")) {
+                                    alertPlaca.setError("* Solo se permiten letras, números y guiones");
+                                    return;
+                                } else {
+                                    alertPlaca.setError(null);
+                                    alertPlaca.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputOperacion.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String operacionFactura = s.toString();
+
+                                if (operacionFactura.isEmpty()) {
+                                    alertOperacion.setError("* El campo Nro Operación es obligatorio");
+                                    return;
+                                } else if (operacionFactura.length() < 4) {
+                                    alertOperacion.setError("* El  Nro Operación debe tener mayor a 4 dígitos");
+                                    return;
+                                } else {
+                                    alertOperacion.setError(null);
+                                    alertOperacion.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputPEfectivo.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String pefectivoFactura = s.toString();
+
+                                if (pefectivoFactura.isEmpty()) {
+                                    alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
+                                    return;
+                                } else {
+                                    alertPEfectivo.setError(null);
+                                    alertPEfectivo.setErrorEnabled(false);
+                                }
+
+                                try {
+                                    Double dosDecimales = Double.valueOf(pefectivoFactura);
+                                    DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
+                                    if (dosDecimales != Double.parseDouble(decimalFormat.format(dosDecimales))) {
+                                        alertPEfectivo.setError("* Por favor ingrese un valor con dos decimales solamente");
+                                    } else {
+                                        alertPEfectivo.setError(null);
+                                        alertPEfectivo.setErrorEnabled(false);
+                                    }
+
+                                } catch (NumberFormatException e) {
+                                    alertPEfectivo.setError("* Formato numérico no válido");
+                                }
+
+
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputObservacion.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String observacionFactura = s.toString();
+
+                                if (!observacionFactura.isEmpty() && !observacionFactura.matches("^[A-Za-z0-9 ]+$")) {
+                                    alertObservacion.setError("* Solo se permiten letras, números y espacios");
+                                    return;
+                                } else {
+                                    alertObservacion.setError(null);
+                                    alertObservacion.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
                         btnAgregarFactura.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -1374,51 +1808,72 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 GlobalInfo.getMarketClienteDR       = inputDireccion.getText().toString();
                                 GlobalInfo.getMarketOperacion       = inputOperacion.getText().toString();
                                 GlobalInfo.getMarketPEfectivo       = inputPEfectivo.getText().toString();
+                                GlobalInfo.getMarketObservacion     = inputObservacion.getText().toString();
 
                                 int checkedRadioButtonId = radioFormaPago.getCheckedRadioButtonId();
 
-                                if (GlobalInfo.getMarketPlaca.isEmpty()) {
-
-                                    alertPlaca.setError("* El campo Placa es obligatorio");
-                                    return;
-                                } else if (GlobalInfo.getMarketClienteID   .isEmpty()) {
-
+                                if (GlobalInfo.getMarketClienteID.isEmpty()) {
                                     alertRUC.setError("* El campo RUC es obligatorio");
                                     return;
-                                } else if (GlobalInfo.getMarketClienteID   .length() < 11) {
-
+                                } else if (GlobalInfo.getMarketClienteID.length() < 11) {
                                     alertRUC.setError("* El RUC debe tener 11 dígitos");
                                     return;
-                                } else if (GlobalInfo.getMarketClienteRZ.isEmpty()) {
+                                } else {
+                                    alertRUC.setError(null);
+                                    alertRUC.setErrorEnabled(false);
+                                }
 
+                                if (GlobalInfo.getMarketClienteRZ.isEmpty()) {
                                     alertRazSocial.setError("* La Razon Social es obligatorio");
                                     return;
-                                }  else if (GlobalInfo.getMarketClienteRZ.length() < 11 ) {
-
-                                    alertRazSocial.setError("* La Razon Social debe tener mínino 11 dígitos");
+                                } else if (GlobalInfo.getMarketClienteRZ.length() < 5) {
+                                    alertRazSocial.setError("* La Razon Social debe tener mínino 5 dígitos");
                                     return;
-                                }else if (checkedRadioButtonId == radioTarjeta.getId()) {
+                                } else {
+                                    alertRazSocial.setError(null);
+                                    alertRazSocial.setErrorEnabled(false);
+                                }
+
+                                if (GlobalInfo.getMarketPlaca.isEmpty()) {
+                                    alertPlaca.setError("* El campo Placa es obligatorio");
+                                    return;
+                                } else if (!GlobalInfo.getMarketPlaca.matches("^[A-Za-z0-9-]+$")) {
+                                    alertPlaca.setError("* Solo se permiten letras, números y guiones");
+                                    return;
+                                } else {
+                                    alertPlaca.setError(null);
+                                    alertPlaca.setErrorEnabled(false);
+                                }
+
+                                if (checkedRadioButtonId == radioTarjeta.getId()) {
 
                                     if (GlobalInfo.getMarketOperacion.isEmpty()) {
-
                                         alertOperacion.setError("* El campo Nro Operación es obligatorio");
                                         return;
                                     } else if (GlobalInfo.getMarketOperacion.length() < 4) {
-
                                         alertOperacion.setError("* El  Nro Operación debe tener mayor a 4 dígitos");
                                         return;
-                                    } else if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
+                                    } else {
+                                        alertOperacion.setError(null);
+                                        alertOperacion.setErrorEnabled(false);
+                                    }
 
+                                    if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
                                         alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
                                         return;
+                                    } else {
+                                        alertPEfectivo.setError(null);
+                                        alertPEfectivo.setErrorEnabled(false);
                                     }
 
                                 } else if (checkedRadioButtonId == radioCredito.getId()) {
 
                                     if (GlobalInfo.getMarketPEfectivo.isEmpty()) {
-
                                         alertPEfectivo.setError("* El campo Pago Efectivo es obligatorio");
                                         return;
+                                    } else {
+                                        alertPEfectivo.setError(null);
+                                        alertPEfectivo.setErrorEnabled(false);
                                     }
 
                                 }
@@ -1429,12 +1884,11 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 alertOperacion.setErrorEnabled(false);
                                 alertPEfectivo.setErrorEnabled(false);
 
-
                                 GlobalInfo.getMarketTarjetaCredito = "";
                                 GlobalInfo.getMarketOperacion = "";
                                 GlobalInfo.getMarketPEfectivo = "0.00";
                                 GlobalInfo.getMarketnroTarjetaNotaD = "";
-                                GlobalInfo.getMarketObservacion     = "";
+                                // GlobalInfo.getMarketObservacion     = "";
 
                                 GlobalInfo.getMarketFormaPago = radioNombreFormaPago.getText().toString().substring(0, 1);
 
@@ -1489,6 +1943,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 inputPEfectivo.setText("0");
                                 inputOperacion.getText().clear();
                                 radioFormaPago.check(radioEfectivo.getId());
+                                inputObservacion.getText().clear();
 
                                 btnBoleta.setVisibility(View.GONE);
                                 btnFactura.setVisibility(View.GONE);
@@ -1534,11 +1989,23 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         alertCliente             = modalNotaDespacho.findViewById(R.id.alertCCliente);
                         alertRazSocial           = modalNotaDespacho.findViewById(R.id.alertCRazSocial);
                         alertKilometraje         = modalNotaDespacho.findViewById(R.id.alertKilometraje);
+                        alertObservacion         = modalNotaDespacho.findViewById(R.id.alertObservacion);
 
                         textNumPuntos            = modalNotaDespacho.findViewById(R.id.textNumPuntos);
                         buscarListNFC            = modalNotaDespacho.findViewById(R.id.buscarListNFC);
                         buscarListPuntosNFC      = modalNotaDespacho.findViewById(R.id.buscarListPuntosNFC);
                         textNFC                  = modalNotaDespacho.findViewById(R.id.textNFC);
+
+                        alertKilometraje.setError(null);
+                        alertKilometraje.setErrorEnabled(false);
+                        alertRazSocial.setError(null);
+                        alertRazSocial.setErrorEnabled(false);
+                        alertPlaca.setError(null);
+                        alertPlaca.setErrorEnabled(false);
+                        alertTarjeta.setError(null);
+                        alertTarjeta.setErrorEnabled(false);
+                        alertObservacion.setError(null);
+                        alertObservacion.setErrorEnabled(false);
 
                         textNumPuntos.setVisibility(View.GONE);
                         buscarListNFC.setVisibility(View.GONE);
@@ -1647,6 +2114,72 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         /**
                          * @AGREGAR:NotaDespacho
                          */
+
+                        inputKilometraje.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String kilometraje = s.toString();
+
+                                if (!kilometraje.isEmpty() && !kilometraje.matches("^[A-Za-z0-9]+$")) {
+                                    alertKilometraje.setError("* Solo se permiten letras y números");
+                                } else {
+                                    alertKilometraje.setError(null);
+                                    alertKilometraje.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputObservacion.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String observacion = s.toString();
+
+                                if (!observacion.isEmpty() && !observacion.matches("^[A-Za-z0-9 ]+$")) {
+                                    alertObservacion.setError("* Solo se permiten letras, números y espacios");
+                                    return;
+                                } else {
+                                    alertObservacion.setError(null);
+                                    alertObservacion.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
+                        inputPlaca.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String placa = s.toString();
+
+                                if (placa.isEmpty()) {
+                                    alertPlaca.setError("* El campo Placa es obligatorio");
+                                    return;
+                                } else if (!placa.matches("^[A-Za-z0-9-]+$")) {
+                                    alertPlaca.setError("* Solo se permiten letras, números y guiones");
+                                    return;
+                                } else {
+                                    alertPlaca.setError(null);
+                                    alertPlaca.setErrorEnabled(false);
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {}
+                        });
+
                         btnAgregarNotaDespacho.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -1658,15 +2191,31 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 GlobalInfo.getMarketObservacion     = inputObservacion.getText().toString();
                                 GlobalInfo.getMarketnroTarjetaNotaD = inputTarjeta.getText().toString();
 
-                                if(GlobalInfo.getMarketClienteID.isEmpty()){
+                                if (GlobalInfo.getMarketClienteID.isEmpty()) {
                                     alertCliente.setError("* Seleccionar Cliente");
                                     return;
-                                }else if(GlobalInfo.getMarketClienteRZ.isEmpty()){
-                                    alertRazSocial.setError("* La Razon Social es obligatorio");
-                                    return;
-                                }else if(GlobalInfo.getMarketPlaca.isEmpty()){
+                                } else {
+                                    alertCliente.setError(null);
+                                    alertCliente.setErrorEnabled(false);
+                                }
+
+                                if (GlobalInfo.getMarketPlaca .isEmpty()) {
                                     alertPlaca.setError("* El campo Placa es obligatorio");
                                     return;
+                                } else if (!GlobalInfo.getMarketPlaca .matches("^[A-Za-z0-9-]+$")) {
+                                    alertPlaca.setError("* Solo se permiten letras, números y guiones");
+                                    return;
+                                } else {
+                                    alertPlaca.setError(null);
+                                    alertPlaca.setErrorEnabled(false);
+                                }
+
+                                if (GlobalInfo.getMarketClienteRZ.isEmpty()) {
+                                    alertRazSocial.setError("* La Razon Social es obligatorio");
+                                    return;
+                                } else {
+                                    alertRazSocial.setError(null);
+                                    alertRazSocial.setErrorEnabled(false);
                                 }
 
                                 GlobalInfo.getMarketTarjetaCredito = "";
@@ -1741,10 +2290,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
                                 Context context = requireContext();
 
-                                ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-                                NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-
-                                if (networkInfo != null && networkInfo.isConnected()) {
+                                if (hayConexion(context)) {
 
                                     /** Variables de Detalle Venta **/
 
@@ -1808,7 +2354,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                             break;
                                     }
 
-                                    if (mnClienteID != null && mnClienteID.isEmpty() && mnTipoDocumento == "03") {
+                                    if (mnClienteID != null && mnClienteID.isEmpty() && mnTipoDocumento.equals("03")) {
                                         mnTipoPago       = "E";
                                         mnNroPlaca       = "000-0000";
                                         mnClienteID      = "11111111";
@@ -1832,15 +2378,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                             mnobservacionPag, mnMontoSoles, GlobalInfo.getMarketMontoTotal,mnTarjND,mnobservacion);
 
                                 } else {
-
-                                    modal_ErrorWifi.show();
-                                    btnAceptarErrorWifi   = modal_ErrorWifi.findViewById(R.id.btnAceptarWifi);
-                                    btnAceptarErrorWifi.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            modal_ErrorWifi.dismiss();
-                                        }
-                                    });
+                                    mostrarErrorWifi();
                                     modal_CV_Articulo.dismiss();
                                 }
 
@@ -1890,35 +2428,48 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                         detTotal = 0.00;
                                     }
 
-                                    String linnesS = String.format(Locale.getDefault(), "%-48s\n%-9s %4s %8s %7s %10s", detArticuloDs, "", detUmedida, String.format("%.2f", detPrecio), detCantidad, String.format("%.2f", detTotal));
-                                    MarketDABuilder.append(linnesS).append("\n");
+                                    if(GlobalInfo.getTipoPapel10.equals("58mm")){
+                                        String linnesS = String.format(Locale.getDefault(), "%-32s\n%-2s %3s %6s %4s %9s", detArticuloDs, "", detUmedida, String.format("%.2f", detPrecio), detCantidad, String.format("%.2f", detTotal));
+                                        MarketDABuilder.append(linnesS).append("\n");
+                                    }else{
+                                        String linnesS = String.format(Locale.getDefault(), "%-48s\n%-9s %4s %8s %7s %10s", detArticuloDs, "", detUmedida, String.format("%.2f", detPrecio), detCantidad, String.format("%.2f", detTotal));
+                                        MarketDABuilder.append(linnesS).append("\n");
+                                    }
+
 
                                 }
 
-                                if (mnPagoID == 2) {
+                                if (mnPagoID == 2 && GlobalInfo.getDobleImpresion) {
 
                                     /** @IMPRESION01 */
                                     imprimirMarket(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
-                                            GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,mnMtoSubTotal1, mnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                            GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,GlobalInfo.getmnMtoSubTotal1, GlobalInfo.getmnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
                                             xFechaDocumentoQR,mnPagoID,mnTarjetaCreditoID,mnOperacionREF, mnMontoSoles,MarketDABuilder,mnobservacion,mnTarjND);
 
                                     /** @IMPRESION02 */
+
+                                    long delay = 3000;
+
+                                    if( GlobalInfo.getTipoPapel10.equals("58mm")){
+                                        delay = 10000;
+                                    }
+
                                     Timer timerS = new Timer();
                                     timerS.schedule(new TimerTask() {
                                         @Override
                                         public void run() {
                                             imprimirMarket(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
-                                                    GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,mnMtoSubTotal1, mnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                                    GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,GlobalInfo.getmnMtoSubTotal1, GlobalInfo.getmnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
                                                     xFechaDocumentoQR,mnPagoID,mnTarjetaCreditoID,mnOperacionREF, mnMontoSoles,MarketDABuilder,mnobservacion,mnTarjND);
 
                                             timerS.cancel();
                                         }
-                                    }, 3000);
+                                    }, delay);
 
                                 } else {
 
                                     imprimirMarket(GlobalInfo.getTipoPapel10, mnTipoDocumento, NroComprobante, xFechaHoraImpresion, GlobalInfo.getterminalTurno10,
-                                            GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,mnMtoSubTotal1, mnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
+                                            GlobalInfo.getuserName10,GlobalInfo.getMarketMontoTotal,GlobalInfo.getmnMtoSubTotal1, GlobalInfo.getmnMtoImpuesto1,mnClienteID, mnClienteRS, mnCliernteDR, mnNroPlaca,
                                             xFechaDocumentoQR,mnPagoID,mnTarjetaCreditoID,mnOperacionREF, mnMontoSoles,MarketDABuilder,mnobservacion,mnTarjND);
                                 }
 
@@ -2016,6 +2567,19 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
 
         return view;
+    }
+
+    private boolean hayConexion(Context context) {
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
+    }
+
+    private void mostrarErrorWifi() {
+        modal_ErrorWifi.show();
+        btnAceptarErrorWifi = modal_ErrorWifi.findViewById(R.id.btnAceptarWifi);
+        btnAceptarErrorWifi.setOnClickListener(v -> modal_ErrorWifi.dismiss());
     }
 
     /**
@@ -2139,78 +2703,81 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
                     usersListNFC = response.body();
 
-                    for (Users user : usersListNFC) {
-                        GlobalInfo.getuserIDAnular10 = user.getUserID();
-                        GlobalInfo.getuserNameAnular10 = user.getNames();
-                        GlobalInfo.getuserPassAnular10 = user.getPassword();
-                        GlobalInfo.getuserCancelAnular10 = user.getCancel();
+                    if (usersListNFC == null || usersListNFC.isEmpty()) {
+                        Toast.makeText(getContext(), "Usuario no encontrado.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
 
-                    if (GlobalInfo.getuserCancelAnular10 == true) {
+                    Users user = usersListNFC.get(0);
 
-                        String getName = usuarioNFC.getText().toString();
-                        String getPass = PasswordChecker.checkpassword(contraseñaNFC.getText().toString());
+                    GlobalInfo.getuserID10     = user.getUserID();
+                    GlobalInfo.getuserPass10   = user.getPassword();
+                    GlobalInfo.getuserLocked10 = user.getLocked();
+                    GlobalInfo.getuserSuper10  = user.getSuper();
+                    GlobalInfo.getuserAfiliar10 = user.getAfiliar();
 
-                        /**
-                         * @Modal-ListadoClientes-Descuento
-                         */
-                        modallistNFC = new Dialog(getContext());
-                        modallistNFC.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                        modallistNFC.setContentView(R.layout.modal_list_nfc);
-                        modallistNFC.setCancelable(false);
+                    String getName = (usuarioUserNFC != null) ? usuarioUserNFC.trim() : "";
+                    String getPass = (contraseñaUserNFC != null) ? PasswordChecker.checkpassword(contraseñaUserNFC.trim()) : "";
 
-                        if (getName.equals(GlobalInfo.getuserNameAnular10) || getPass.equals(GlobalInfo.getuserPassAnular10)) {
+                    modallistNFC = new Dialog(getContext());
+                    modallistNFC.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    modallistNFC.setContentView(R.layout.modal_list_nfc);
+                    modallistNFC.setCancelable(false);
 
-                            recyclerListaClientesAfiliados = modallistNFC.findViewById(R.id.recyclerLClienteNFC);
-                            recyclerListaClientesAfiliados.setLayoutManager(new LinearLayoutManager(getContext()));
+                    if(getName.equals(GlobalInfo.getuserID10) && getPass.equals(GlobalInfo.getuserPass10)) {
+                        if (GlobalInfo.getuserLocked10) {
+                            if (GlobalInfo.getuserAfiliar10 || GlobalInfo.getuserSuper10) {
+                                recyclerListaClientesAfiliados = modallistNFC.findViewById(R.id.recyclerLClienteNFC);
+                                recyclerListaClientesAfiliados.setLayoutManager(new LinearLayoutManager(getContext()));
 
-                            BuscarRazonSocial     = modallistNFC.findViewById(R.id.btnBuscadorClienteRZ);
-                            btnCancelarLCliente   = modallistNFC.findViewById(R.id.btnCancelarLCliente);
+                                BuscarRazonSocial     = modallistNFC.findViewById(R.id.btnBuscadorClienteRZ);
+                                btnCancelarLCliente   = modallistNFC.findViewById(R.id.btnCancelarLCliente);
 
-                            BuscarRazonSocial.setIconifiedByDefault(false);
+                                BuscarRazonSocial.setIconifiedByDefault(false);
 
-                            btnCancelarLCliente.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    BuscarRazonSocial.setQuery("", false);
-                                    modallistNFC.dismiss();
-                                }
-                            });
-
-                            /** Buscador por Razon Social */
-                            BuscarRazonSocial.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                                @Override
-                                public boolean onQueryTextSubmit(String query) {
-                                    onQueryTextChange(query);
-                                    return true;
-                                }
-
-                                @Override
-                                public boolean onQueryTextChange(String newText) {
-                                    String userInput = newText.toLowerCase();
-                                    if (lRegistroClienteAdapter != null) {
-                                        lRegistroClienteAdapter.filtrado(userInput);
+                                btnCancelarLCliente.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        BuscarRazonSocial.setQuery("", false);
+                                        modallistNFC.dismiss();
                                     }
-                                    return true;
-                                }
-                            });
+                                });
 
-                            modalNFCLogin.dismiss();
+                                /** Buscador por Razon Social */
+                                BuscarRazonSocial.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                                    @Override
+                                    public boolean onQueryTextSubmit(String query) {
+                                        onQueryTextChange(query);
+                                        return true;
+                                    }
 
-                            usuarioNFC.getText().clear();
-                            contraseñaNFC.getText().clear();
+                                    @Override
+                                    public boolean onQueryTextChange(String newText) {
+                                        String userInput = newText.toLowerCase();
+                                        if (lRegistroClienteAdapter != null) {
+                                            lRegistroClienteAdapter.filtrado(userInput);
+                                        }
+                                        return true;
+                                    }
+                                });
 
-                            /**
-                             * @APISERVICE-ListadoCliente-Descuento
-                             */
-                            findCliente(GlobalInfo.getnfcId10 , String.valueOf(GlobalInfo.getterminalCompanyID10));
+                                modalNFCLogin.dismiss();
 
+                                usuarioNFC.getText().clear();
+                                contraseñaNFC.getText().clear();
+
+                                /**
+                                 * @APISERVICE-ListadoCliente-Descuento
+                                 */
+                                findCliente(GlobalInfo.getnfcId10 , String.valueOf(GlobalInfo.getterminalCompanyID10));
+                            } else {
+                                Toast.makeText(getContext(), "No tiene permisos para Acceder al listado.", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
-                            Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
                         }
-
-                    } else {
-                        Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
                     }
 
                 } catch (Exception ex) {
@@ -2288,78 +2855,82 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
                     usersListNFC = response.body();
 
-                    for (Users user : usersListNFC) {
-                        GlobalInfo.getuserIDAnular10 = user.getUserID();
-                        GlobalInfo.getuserNameAnular10 = user.getNames();
-                        GlobalInfo.getuserPassAnular10 = user.getPassword();
-                        GlobalInfo.getuserCancelAnular10 = user.getCancel();
+                    if (usersListNFC == null || usersListNFC.isEmpty()) {
+                        Toast.makeText(getContext(), "Usuario no encontrado.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
 
-                    if (GlobalInfo.getuserCancelAnular10 == true) {
+                    Users user = usersListNFC.get(0);
 
-                        String getName = usuarioNFC.getText().toString();
-                        String getPass = PasswordChecker.checkpassword(contraseñaNFC.getText().toString());
+                    GlobalInfo.getuserID10     = user.getUserID();
+                    GlobalInfo.getuserPass10   = user.getPassword();
+                    GlobalInfo.getuserLocked10 = user.getLocked();
+                    GlobalInfo.getuserSuper10  = user.getSuper();
+                    GlobalInfo.getuserAfiliar10 = user.getAfiliar();
 
-                        /**
-                         * @Modal-ListadoClientes-Puntos
-                         */
-                        modallistNFCPuntos = new Dialog(getContext());
-                        modallistNFCPuntos.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                        modallistNFCPuntos.setContentView(R.layout.modal_list_puntos_nfc);
-                        modallistNFCPuntos.setCancelable(false);
+                    String getName = (usuarioUserNFC != null) ? usuarioUserNFC.trim() : "";
+                    String getPass = (contraseñaUserNFC != null) ? PasswordChecker.checkpassword(contraseñaUserNFC.trim()) : "";
 
-                        if (getName.equals(GlobalInfo.getuserNameAnular10) || getPass.equals(GlobalInfo.getuserPassAnular10)) {
 
-                            recyclerLClientePuntosNFC = modallistNFCPuntos.findViewById(R.id.recyclerLClientePuntosNFC);
-                            recyclerLClientePuntosNFC.setLayoutManager(new LinearLayoutManager(getContext()));
+                    modallistNFC = new Dialog(getContext());
+                    modallistNFC.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    modallistNFC.setContentView(R.layout.modal_list_nfc);
+                    modallistNFC.setCancelable(false);
 
-                            BuscarRazonSocial     = modallistNFCPuntos.findViewById(R.id.btnBuscadorClienteRZ);
-                            btnCancelarLCliente   = modallistNFCPuntos.findViewById(R.id.btnCancelarLCliente);
+                    if(getName.equals(GlobalInfo.getuserID10) && getPass.equals(GlobalInfo.getuserPass10)) {
+                        if (GlobalInfo.getuserLocked10) {
+                            if (GlobalInfo.getuserAfiliar10 || GlobalInfo.getuserSuper10) {
+                                recyclerLClientePuntosNFC = modallistNFCPuntos.findViewById(R.id.recyclerLClientePuntosNFC);
+                                recyclerLClientePuntosNFC.setLayoutManager(new LinearLayoutManager(getContext()));
 
-                            BuscarRazonSocial.setIconifiedByDefault(false);
+                                BuscarRazonSocial = modallistNFCPuntos.findViewById(R.id.btnBuscadorClienteRZ);
+                                btnCancelarLCliente = modallistNFCPuntos.findViewById(R.id.btnCancelarLCliente);
 
-                            btnCancelarLCliente.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    BuscarRazonSocial.setQuery("", false);
-                                    modallistNFCPuntos.dismiss();
-                                }
-                            });
+                                BuscarRazonSocial.setIconifiedByDefault(false);
 
-                            /** Buscador por Razon Social */
-                            BuscarRazonSocial.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                                @Override
-                                public boolean onQueryTextSubmit(String query) {
-                                    onQueryTextChange(query);
-                                    return true;
-                                }
-
-                                @Override
-                                public boolean onQueryTextChange(String newText) {
-                                    String userInput = newText.toLowerCase();
-                                    if (lRegistroClientePuntosAdapter != null) {
-                                        lRegistroClientePuntosAdapter.filtrado(userInput);
+                                btnCancelarLCliente.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        BuscarRazonSocial.setQuery("", false);
+                                        modallistNFCPuntos.dismiss();
                                     }
-                                    return true;
-                                }
-                            });
+                                });
 
-                            modalNFCLogin.dismiss();
+                                /** Buscador por Razon Social */
+                                BuscarRazonSocial.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                                    @Override
+                                    public boolean onQueryTextSubmit(String query) {
+                                        onQueryTextChange(query);
+                                        return true;
+                                    }
 
-                            usuarioNFC.getText().clear();
-                            contraseñaNFC.getText().clear();
+                                    @Override
+                                    public boolean onQueryTextChange(String newText) {
+                                        String userInput = newText.toLowerCase();
+                                        if (lRegistroClientePuntosAdapter != null) {
+                                            lRegistroClientePuntosAdapter.filtrado(userInput);
+                                        }
+                                        return true;
+                                    }
+                                });
 
-                            /**
-                             * @APISERVICE-ListadoCliente-Descuento
-                             */
-                            findClientePuntos(GlobalInfo.getnfcId10, GlobalInfo.getterminalCompanyID10);
+                                modalNFCLogin.dismiss();
 
+                                usuarioNFC.getText().clear();
+                                contraseñaNFC.getText().clear();
+
+                                /**
+                                 * @APISERVICE-ListadoCliente-Descuento
+                                 */
+                                findClientePuntos(GlobalInfo.getnfcId10, GlobalInfo.getterminalCompanyID10);
+                            } else {
+                                Toast.makeText(getContext(), "No tiene permisos para Acceder al listado.", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
-                            Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
                         }
-
-                    } else {
-                        Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
                     }
 
                 } catch (Exception ex) {
@@ -2761,25 +3332,42 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                     Double mnMtoCanje = 0.00;
 
                     Double mnMtoSubTotal0 = 0.00;
-                    mnMtoSubTotal1 = 0.00;
+                    Double mnMtoSubTotal1 = 0.00;
                     String mnMtoSubTotal2 = "";
 
                     Double mnMtoImpuesto0 = 0.00;
-                    mnMtoImpuesto1 = 0.00;
+                    Double mnMtoImpuesto1 = 0.00;
                     String mnMtoImpuesto2 = "";
 
                     Integer mnItem = 0;
 
                     mnPrecioOrig = GlobalInfo.getMarketPrecio;
-
                     mnMtoCanje = mnMtoTotal;
                     mnMtoPagar = mnMtoTotal;
 
-                    mnMtoSubTotal0 = mnMtoTotal / 1.18;
+
+                    if (GlobalInfo.getsettingImpuestoID110 == 20) {
+                        mnMtoSubTotal0 = mnMtoTotal;
+                        mnMtoSubTotal1 = Math.round(mnMtoSubTotal0 * 100.0) / 100.0;
+
+                        mnMtoImpuesto0 = Double.valueOf(GlobalInfo.getsettingImpuestoValor110);
+                        mnMtoImpuesto1 = Math.round(mnMtoImpuesto0 * 100.0) / 100.0;
+                    }else{
+                        mnMtoSubTotal0 = mnMtoTotal / GlobalInfo.getsettingValorIGV10;
+                        mnMtoSubTotal1 = Math.round(mnMtoSubTotal0 * 100.0) / 100.0;
+
+                        mnMtoImpuesto0 = mnMtoTotal - mnMtoSubTotal1;
+                        mnMtoImpuesto1 = Math.round(mnMtoImpuesto0 * 100.0) / 100.0;
+                    }
+
+                    GlobalInfo.getmnMtoSubTotal1 = mnMtoSubTotal1;
+                    GlobalInfo.getmnMtoImpuesto1= mnMtoImpuesto1;
+
+                 /*   mnMtoSubTotal0 = mnMtoTotal / GlobalInfo.getsettingValorIGV10;
                     mnMtoSubTotal1 = Math.round(mnMtoSubTotal0*100.0)/100.0;
 
                     mnMtoImpuesto0 = mnMtoTotal - mnMtoSubTotal1;
-                    mnMtoImpuesto1 = Math.round(mnMtoImpuesto0*100.0)/100.0;
+                    mnMtoImpuesto1 = Math.round(mnMtoImpuesto0*100.0)/100.0;*/
 
                     /** GRABAR VENTA DETALLE EN BASE DE DATOS **/
 
@@ -2791,7 +3379,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         detPrecio     = articulo.getPrecio_Venta();
                         detCantidad   = Double.valueOf(cantidadesSeleccionadas.get(articulo.getArticuloID()));
 
-                        detTotal = detPrecio * detCantidad;
+                      /*  detTotal = detPrecio * detCantidad;
                         detTotal1 = Math.round(detTotal*100.0)/100.0;
 
                         detSubtotal = detTotal1 / 1.18;
@@ -2803,6 +3391,30 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                         } else {
                             detImpuesto = detTotal1 - detSubtotal1;
                             detImpuesto1 = Math.round(detImpuesto*100.0)/100.0;
+                        }*/
+
+                        detTotal = detPrecio * detCantidad;
+                        detTotal1 = Math.round(detTotal * 100.0) / 100.0;
+
+                        if (mnobservacionPag.equals("GRATUITA")) {
+                            detSubtotal1 = 0.00;
+                            detImpuesto1 = 0.00;
+                            detTotal1 = 0.00;
+                        } else {
+                            if (GlobalInfo.getsettingImpuestoID110 == 20) {
+                                detSubtotal = detTotal1;
+                                detSubtotal1 = Math.round(detSubtotal * 100.0) / 100.0;
+
+                                detImpuesto = Double.valueOf(GlobalInfo.getsettingImpuestoValor110);
+                                detImpuesto1 = Math.round(detImpuesto * 100.0) / 100.0;
+                            } else {
+                                detSubtotal = detTotal1 / GlobalInfo.getsettingValorIGV10;
+                                detSubtotal1 = Math.round(detSubtotal * 100.0) / 100.0;
+
+                                detImpuesto = detTotal1 - detSubtotal1;
+                                detImpuesto1 = Math.round(detImpuesto * 100.0) / 100.0;
+                            }
+
                         }
 
                         mnItem += 1;
@@ -2843,15 +3455,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
             @Override
             public void onFailure(Call<List<Correlativo>> call, Throwable t) {
-
-                modal_ErrorServidor.show();
-                btnAceptarError   = modal_ErrorServidor.findViewById(R.id.btnAceptarError);
-                btnAceptarError.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        modal_ErrorServidor.dismiss();
-                    }
-                });
+                mostrarErrorWifi();
                 modal_CV_Articulo.dismiss();
 
             }
@@ -2926,7 +3530,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                     });
 
                     /**
-                     * @MOSTRARPEODUCTOS:Columnas3
+                     * @MOSTRARPEODUCTOS:Columnas6
                      */
                     GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 6);
                     recyclerArticulo.setLayoutManager(layoutManager);
@@ -3012,7 +3616,7 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                     });
 
                     /**
-                     * @MOSTRARPEODUCTOS:Columnas3
+                     * @MOSTRARPEODUCTOS:Columnas6
                      */
                     GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 6);
                     recyclerArticulo.setLayoutManager(layoutManager);
@@ -3130,6 +3734,9 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
                             btnBuscadorClienteRZ.setQuery("", false);
                             modalClienteCredito.dismiss();
+
+                            alertCliente.setError(null);
+                            alertCliente.setErrorEnabled(false);
                         }
                     });
                     recyclerLClienteCredito.setAdapter(clienteCreditoAdapter);
@@ -3307,6 +3914,11 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
                     GlobalInfo.getlclientesList10 = response.body();
 
+                    if (GlobalInfo.getlclientesList10 == null || GlobalInfo.getlclientesList10.isEmpty()) {
+                        Toast.makeText(getContext(), "No se encontraron datos del RUC", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     LClientes lClientes = GlobalInfo.getlclientesList10.get(0);
 
                     GlobalInfo.getclienteId10  = String.valueOf(lClientes.getClienteID());
@@ -3319,6 +3931,57 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
                 }catch (Exception ex){
                     Toast.makeText(getContext(),ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<LClientes>> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de conexión APICORE Cliente RUC - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * @APISERVICE:BuscarClienteRUC
+     */
+    private  void findClienteRUCAPI(String id){
+
+        Call<List<LClientes>> call = mAPIService.findClienteRUCAPI(id);
+
+        call.enqueue(new Callback<List<LClientes>>() {
+            @Override
+            public void onResponse(Call<List<LClientes>> call, Response<List<LClientes>> response) {
+                try {
+
+                    if(!response.isSuccessful()){
+                        Toast.makeText(getContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    GlobalInfo.getlclientesList10 = response.body();
+
+                    if (GlobalInfo.getlclientesList10 == null || GlobalInfo.getlclientesList10.isEmpty()) {
+                        Toast.makeText(getContext(), "No se encontraron datos del RUC", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    LClientes lClientes = GlobalInfo.getlclientesList10.get(0);
+
+                    if ("error".equalsIgnoreCase(lClientes.getClienteID()) || "error".equalsIgnoreCase(lClientes.getClienteRUC())) {
+                        Toast.makeText(getContext(), "RUC no encontrado o no existe", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    GlobalInfo.getclienteId10  = String.valueOf(lClientes.getClienteID());
+                    GlobalInfo.getclienteRUC10 = String.valueOf(lClientes.getClienteRUC());
+                    GlobalInfo.getclienteRZ10  = String.valueOf(lClientes.getClienteRZ());
+                    GlobalInfo.getclienteDR10  = String.valueOf(lClientes.getClienteDR());
+
+                    inputRazSocial.setText(GlobalInfo.getclienteRZ10);
+                    inputDireccion.setText(GlobalInfo.getclienteDR10);
+
+                }catch (Exception ex){
+                    Toast.makeText(getContext(),"Error: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -3521,6 +4184,8 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
         String MtoTotalPagoFF = String.format("%.2f",_MtoTotal - _mtoSoles);
 
+        String OpGravadoF =  String.format("%.2f",0.00);
+
         /** Convertir número a letras */
         Numero_Letras NumLetra = new Numero_Letras();
         String LetraSoles      = NumLetra.Convertir(String.valueOf(_MtoTotal),true);
@@ -3544,6 +4209,435 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
             switch (tipopapel) {
 
                 case "58mm":
+
+                    switch (_TipoDocumento) {
+
+                        case "01" :
+                        case "03" :
+                            printama.printTextln("                 ", CENTER);
+                            printama.printImage(logoRobles, logoSize);
+                            printama.setSmallText();
+                            if(GlobalInfo.getTerminalNameCompany10){
+                                printama.printTextlnBold(NameCompany, CENTER);
+                            }
+
+                            if (!Address1.isEmpty()) {
+                                if (!Address1Part1.isEmpty() && !Address2.isEmpty()) {
+                                    printama.printTextlnBold("PRINCIPAL: " + Address1Part1, CENTER);
+                                    if (!finalAddress1Part.isEmpty()) {
+                                        printama.printTextlnBold(finalAddress1Part + " - " + Address2, CENTER);
+                                    } else {
+                                        printama.printTextlnBold(Address2, CENTER);
+                                    }
+                                }
+                            }
+
+                            if (!Branch1.isEmpty()) {
+                                if (!Branch1Part1.isEmpty() && !Branch2.isEmpty()) {
+                                    printama.printTextlnBold("SUCURSAL: " + Branch1Part1, CENTER);
+                                    if (!finalBranch1Part.isEmpty()) {
+                                        printama.printTextlnBold(finalBranch1Part + " - " + Branch2, CENTER);
+                                    } else {
+                                        printama.printTextlnBold(Branch2, CENTER);
+                                    }
+                                }
+                            }
+
+                            printama.printTextlnBold("RUC: " + RUCCompany, CENTER);
+
+                            break;
+
+                        case "98" :
+                        case "99" :
+                            printama.printTextln("                 ", CENTER);
+                            printama.printImage(logoRobles, logoSize);
+                            printama.setSmallText();
+                            if(GlobalInfo.getTerminalNameCompany10){
+                                printama.printTextlnBold(NameCompany, CENTER);
+                            }
+                            if (!Branch1.isEmpty()) {
+                                if (!Branch1Part1.isEmpty() && !Branch2.isEmpty()) {
+                                    printama.printTextlnBold("SUCURSAL: " + Branch1Part1, CENTER);
+                                    if (!finalBranch1Part.isEmpty()) {
+                                        printama.printTextlnBold(finalBranch1Part + " - " + Branch2, CENTER);
+                                    } else {
+                                        printama.printTextlnBold(Branch2, CENTER);
+                                    }
+                                }
+                            }else{
+                                if (!Address1.isEmpty()) {
+                                    if (!Address1Part1.isEmpty() && !Address2.isEmpty()) {
+                                        printama.printTextlnBold("PRINCIPAL: " + Address1Part1, CENTER);
+                                        if (!finalAddress1Part.isEmpty()) {
+                                            printama.printTextlnBold(finalAddress1Part + " - " + Address2, CENTER);
+                                        } else {
+                                            printama.printTextlnBold(Address2, CENTER);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                    }
+
+                    switch (_TipoDocumento) {
+                        case "01" :
+                            printama.printTextlnBold("FACTURA DE VENTA ELECTRONICA", CENTER);
+                            if (GlobalInfo.getVistaQR) {
+                                try {
+                                    String qrContenido = QRGenerado;
+                                    int qrTamanio = 180;
+
+                                    Map<EncodeHintType, Object> hints = new HashMap<>();
+                                    hints.put(EncodeHintType.MARGIN, 0);
+
+                                    BitMatrix bitMatrix = new MultiFormatWriter().encode(
+                                            qrContenido,
+                                            BarcodeFormat.QR_CODE,
+                                            qrTamanio,
+                                            qrTamanio,
+                                            hints
+                                    );
+
+                                    int width = bitMatrix.getWidth();
+                                    int height = bitMatrix.getHeight();
+                                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+
+                                    for (int x = 0; x < width; x++) {
+                                        for (int y = 0; y < height; y++) {
+                                            bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                                        }
+                                    }
+
+                                    printama.printImage(bitmap);
+
+                                } catch (WriterException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            break;
+                        case "03" :
+                            if (mnTipoPago.equals("G")){
+                                printama.printTextlnBold("***** TRANSFERENCIA GRATUITA *****", CENTER);
+                            }
+                            printama.printTextlnBold("BOLETA DE VENTA ELECTRONICA", CENTER);
+                            if (GlobalInfo.getVistaQR) {
+                                try {
+                                    String qrContenido = QRGenerado;
+                                    int qrTamanio = 180;
+
+                                    Map<EncodeHintType, Object> hints = new HashMap<>();
+                                    hints.put(EncodeHintType.MARGIN, 0);
+
+                                    BitMatrix bitMatrix = new MultiFormatWriter().encode(
+                                            qrContenido,
+                                            BarcodeFormat.QR_CODE,
+                                            qrTamanio,
+                                            qrTamanio,
+                                            hints
+                                    );
+
+                                    int width = bitMatrix.getWidth();
+                                    int height = bitMatrix.getHeight();
+                                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+
+                                    for (int x = 0; x < width; x++) {
+                                        for (int y = 0; y < height; y++) {
+                                            bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                                        }
+                                    }
+
+                                    printama.printImage(bitmap);
+
+                                } catch (WriterException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            break;
+                        case "99" :
+                            printama.printTextlnBold("NOTA DE DESPACHO", Printama.CENTER);
+                            break;
+                    }
+
+                    printama.printTextlnBold(_NroDocumento,Printama.CENTER);
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
+                    printama.printTextln("Fecha-Hora : " + _FechaDocumento, Printama.LEFT);
+                    printama.printTextln("Turno        : " + _Turno, Printama.LEFT);
+                    printama.printTextln("Cajero       : "+ _Cajero , Printama.LEFT);
+
+                    if (!_NroPlaca.isEmpty()) {
+                        printama.printTextln("Nro. PLaca   : "+ _NroPlaca, Printama.LEFT);
+                    }
+
+                    switch (_TipoDocumento) {
+                        case "01" :
+                            printama.printTextln("RUC          : "+ _ClienteID , Printama.LEFT);
+                            printama.printTextln("Razon Social : "+ _ClienteRZ, Printama.LEFT);
+
+                            if (!_ClienteDR.isEmpty()) {
+                                printama.printTextln("Dirección    : "+ _ClienteDR, Printama.LEFT);
+                            }
+                            if (!_obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : "+ _obervacion, Printama.LEFT);
+                            }
+
+                            break;
+                        case "03" :
+
+                            if (CVarios.equals(_ClienteID)){
+
+                            }else {
+                                printama.printTextln("DNI          : "+ _ClienteID , Printama.LEFT);
+                                printama.printTextln("Nombres      : "+ _ClienteRZ, Printama.LEFT);
+
+                                if (!_ClienteDR.isEmpty()) {
+                                    printama.printTextln("Dirección    : "+ _ClienteDR, Printama.LEFT);
+                                }
+
+                                if (!_obervacion.isEmpty()) {
+                                    printama.printTextln("Observación  : "+ _obervacion, Printama.LEFT);
+                                }
+
+                            }
+                            break;
+                        case "99" :
+
+                            if (!_obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : " + _obervacion, Printama.LEFT);
+                            }
+                            printama.printTextln("RUC/DNI      : " + _ClienteID, Printama.LEFT);
+                            printama.printTextln("Cliente      : " + _ClienteRZ, Printama.LEFT);
+                            printama.printTextln("#Contrato    : " + _NTarjND , Printama.LEFT);
+
+                            break;
+                    }
+
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
+                    printama.printTextlnBold("PROD. " + "U/MED " + "PRE.  " + "CANT.  " + "IMPORTE", Printama.LEFT);
+                    printama.setSmallText();
+                    printama.printTextlnBold(MarketDABuilder.toString(),Printama.RIGHT);
+                    printama.setSmallText();
+                    printSeparatorLine(printama, tipopapel);
+                    printama.addNewLine(1);
+                    printama.setSmallText();
+
+                    switch (_TipoDocumento) {
+                        case "01" :
+
+                            if (GlobalInfo.getsettingImpuestoID110 == 20) {
+
+                                printama.printTextln("OP. GRAVADAS: S/  " + OpGravadoF, Printama.RIGHT);
+                                printama.printTextln("OP. EXONERADAS: S/ " + MtoTotalFF , Printama.RIGHT);
+                                printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
+                                printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            }else{
+
+                                printama.printTextln("OP. GRAVADAS: S/ " + MtoSubTotalFF, Printama.RIGHT);
+                                printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
+                                printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            }
+
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+
+                            switch (_PagoID) {
+                                case 1 :
+                                    printama.printTextlnBold("CONDICION DE PAGO:", Printama.LEFT);
+                                    printama.printTextlnBold("CONTADO: S/ " + MtoTotalFF, Printama.RIGHT);
+                                    break;
+                                case 2 :
+
+                                    printama.printTextlnBold("CONDICION DE PAGO: CONTADO", Printama.LEFT);
+
+                                    switch (_TarjetaCreditoID) {
+                                        case 1 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("VISA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 2 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("MASTERCARD: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 3 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("DINERS: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 4 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("YAPE: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 5 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("AMERICAN EXPRES: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 6 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 7 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("TRANSFERENCIA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                    }
+
+                                    break;
+
+                            }
+
+                            printama.setSmallText();
+                            if (GlobalInfo.getsettingImpuestoID110 == 20) {
+                                printSeparatorLine(printama, tipopapel);
+                                printama.addNewLine(1);
+                                printama.setSmallText();
+                                printama.printTextln("Bienes transferidos en la\n" + "Amazonia para ser consumidos en la misma.", CENTER);
+                                printama.setSmallText();
+                                printSeparatorLine(printama, tipopapel);
+                                printama.addNewLine(1);
+                                printama.setSmallText();
+                            }
+                            printama.printTextln("Autorizado mediante resolucion\n" + "de Superintendencia Nro.203-2015\n"+"SUNAT. Representacion impresa de\n"+"la boleta de venta electronica. Consulte desde", CENTER);
+                            printama.printTextln("https://cpesven.apisven.com", CENTER);
+                            break;
+                        case "03" :
+
+                            if (mnTipoPago.equals("G")){
+                                printama.printTextlnBold("OP. GRATUITAS: S/ " + opGratruitas, Printama.RIGHT);
+
+                            }
+
+                            printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+
+                            switch (_PagoID) {
+                                case 1 :
+                                    printama.printTextlnBold("CONDICION DE PAGO:", Printama.LEFT);
+                                    printama.printTextlnBold("CONTADO: S/ " + MtoTotalFF, Printama.RIGHT);
+                                    break;
+                                case 2 :
+
+                                    printama.printTextlnBold("CONDICION DE PAGO: CONTADO", Printama.LEFT);
+
+                                    switch (_TarjetaCreditoID) {
+                                        case 1 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("VISA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 2 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("MASTERCARD: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 3 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("DINERS: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 4 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("YAPE: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 5 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("AMERICAN EXPRES: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 6 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 7 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("TRANSFERENCIA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                    }
+
+                                    break;
+                            }
+
+                            printama.setSmallText();
+                            printama.printTextln("SON: " + LetraSoles, Printama.LEFT);
+                            printama.printTextln("                 ", CENTER);
+                            printama.setSmallText();
+                            printama.printTextln("Autorizado mediante resolucion\n" + "de Superintendencia Nro.203-2015\n"+"SUNAT. Representacion impresa de\n"+"la boleta de venta electronica. Consulte desde", CENTER);
+                            printama.printTextln("https://cpesven.apisven.com", CENTER);
+                            break;
+                        case "99" :
+                            printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+                            printama.setSmallText();
+                            printSeparatorLine(printama, tipopapel);
+                            printama.addNewLine(1);
+                            printama.setSmallText();
+                            printama.printTextlnBold("NOMBRE :" , Printama.LEFT);
+                            printama.printTextlnBold("DNI    :" , Printama.LEFT);
+                            printama.printTextlnBold("FIRMA  :" , Printama.LEFT);
+                            break;
+                    }
+                    break;
                 case "80mm":
 
                     switch (_TipoDocumento) {
@@ -3658,6 +4752,10 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 printama.printTextln("Dirección    : " + _ClienteDR, Printama.LEFT);
                             }
 
+                            if (!_obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : " + _obervacion, Printama.LEFT);
+                            }
+
                             break;
 
                         case "03":
@@ -3673,6 +4771,9 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                     printama.printTextln("Dirección    : " + _ClienteDR, Printama.LEFT);
                                 }
 
+                                if (!_obervacion.isEmpty()) {
+                                    printama.printTextln("Observación  : " + _obervacion, Printama.LEFT);
+                                }
                             }
 
                             break;
@@ -3702,9 +4803,19 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                     switch (_TipoDocumento) {
                         case "01" :
 
-                            printama.printTextln("OP. GRAVADAS: S/ " + MtoSubTotalFF, Printama.RIGHT);
-                            printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
-                            printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+                            if (GlobalInfo.getsettingImpuestoID110 == 20) {
+
+                                printama.printTextln("OP. GRAVADAS: S/  " + OpGravadoF, Printama.RIGHT);
+                                printama.printTextln("OP. EXONERADAS: S/ " + MtoTotalFF , Printama.RIGHT);
+                                printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
+                                printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            }else{
+                                printama.printTextln("OP. GRAVADAS: S/ " + MtoSubTotalFF, Printama.RIGHT);
+                                printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
+                                printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            }
 
                             printama.setSmallText();
                             printSeparatorLine(printama, tipopapel);
@@ -3769,6 +4880,14 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                             printama.setSmallText();
                                             printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
                                             break;
+                                        case 7 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("TRANSFERENCIA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
                                     }
 
                                     break;
@@ -3801,6 +4920,13 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 }
                             }
                             printama.setSmallText();
+                            if (GlobalInfo.getsettingImpuestoID110 == 20) {
+                                printama.printTextln("Bienes transferidos en la Amazonia para ser\n" + "consumidos en la misma.");
+                                printama.setSmallText();
+                                printSeparatorLine(printama, tipopapel);
+                                printama.addNewLine(1);
+                                printama.setSmallText();
+                            }
                             printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "https://cpesven.apisven.com");
                             break;
                         case "03" :
@@ -3870,6 +4996,14 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                                 printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
                                             }
                                             printama.printTextlnBold("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+                                        case 7 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextlnBold("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextlnBold("TRANSFERENCIA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
                                             printama.setSmallText();
                                             printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
                                             break;
@@ -4033,6 +5167,10 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 printama.printTextln("Dirección    : " + _ClienteDR, Printama.LEFT);
                             }
 
+                            if (!_obervacion.isEmpty()) {
+                                printama.printTextln("Observación  : "+ _obervacion, Printama.LEFT);
+                            }
+
                             break;
 
                         case "03":
@@ -4046,6 +5184,10 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
 
                                 if (!_ClienteDR.isEmpty()) {
                                     printama.printTextln("Dirección    : " + _ClienteDR, Printama.LEFT);
+                                }
+
+                                if (!_obervacion.isEmpty()) {
+                                    printama.printTextln("Observación  : "+ _obervacion, Printama.LEFT);
                                 }
 
                             }
@@ -4077,9 +5219,19 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                     switch (_TipoDocumento) {
                         case "01" :
 
-                            printama.printTextln("OP. GRAVADAS: S/ " + MtoSubTotalFF, Printama.RIGHT);
-                            printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
-                            printama.printTextln("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+                            if (GlobalInfo.getsettingImpuestoID110 == 20) {
+
+                                printama.printTextln("OP. GRAVADAS: S/  " + OpGravadoF, Printama.RIGHT);
+                                printama.printTextln("OP. EXONERADAS: S/ " + MtoTotalFF , Printama.RIGHT);
+                                printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
+                                printama.printTextlnBold("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            }else{
+                                printama.printTextln("OP. GRAVADAS: S/ " + MtoSubTotalFF, Printama.RIGHT);
+                                printama.printTextln("I.G.V. 18%: S/  " + MtoImpuestoFF, Printama.RIGHT);
+                                printama.printTextln("TOTAL VENTA: S/ " + MtoTotalFF , Printama.RIGHT);
+
+                            }
 
                             printama.setSmallText();
                             printSeparatorLine(printama, tipopapel);
@@ -4144,6 +5296,15 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                             printama.setSmallText();
                                             printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
                                             break;
+
+                                        case 7 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("TRANSFERENCIA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
                                     }
 
                                     break;
@@ -4176,6 +5337,13 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                 }
                             }
                             printama.setSmallText();
+                            if (GlobalInfo.getsettingImpuestoID110 == 20) {
+                                printama.printTextln("Bienes transferidos en la Amazonia para ser\n" + "consumidos en la misma.");
+                                printama.setSmallText();
+                                printSeparatorLine(printama, tipopapel);
+                                printama.addNewLine(1);
+                                printama.setSmallText();
+                            }
                             printama.printTextln("Autorizado mediante resolucion de Superintendencia Nro. 203-2015 SUNAT. Representacion impresa de la boleta de venta electronica. Consulte desde\n"+ "https://cpesven.apisven.com");
                             break;
                         case "03" :
@@ -4245,6 +5413,15 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
                                                 printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
                                             }
                                             printama.printTextln("PLIN: S/ " + MtoTotalPagoFF, Printama.RIGHT);
+                                            printama.setSmallText();
+                                            printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
+                                            break;
+
+                                        case 7 :
+                                            if (_mtoSoles > 0){
+                                                printama.printTextln("EFECTIVO: S/ " + MtoSoles, Printama.RIGHT);
+                                            }
+                                            printama.printTextln("TRANSFERENCIA: S/ " + MtoTotalPagoFF, Printama.RIGHT);
                                             printama.setSmallText();
                                             printama.printTextln("NRO.OPERACION:" + _OperacionREF, Printama.LEFT);
                                             break;
@@ -4410,5 +5587,29 @@ public class ArticuloFragment extends Fragment implements NfcAdapter.ReaderCallb
         options.setBarcodeImageEnabled(false);
         barcodeLauncher.launch(options);
     }
+
+    public void printTextAsBitmap(Context context, Printama printama, String text, int textSizeSp, int maxWidthPx) {
+        TextView textView = new TextView(context);
+        textView.setText(text);
+        textView.setTextSize(textSizeSp);
+        textView.setTypeface(Typeface.MONOSPACE);
+        textView.setTextColor(Color.BLACK);
+        textView.setGravity(Gravity.START); // Alineación tipo párrafo (izquierda)
+        // textView.setLineSpacing(0f, 1.1f);  // Espaciado entre líneas si quieres mejorar legibilidad
+
+        textView.setDrawingCacheEnabled(true);
+        textView.measure(
+                View.MeasureSpec.makeMeasureSpec(maxWidthPx, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        );
+        textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
+        textView.buildDrawingCache();
+
+        Bitmap bitmap = Bitmap.createBitmap(textView.getDrawingCache());
+        textView.setDrawingCacheEnabled(false);
+
+        printama.printImage(bitmap);
+    }
+
 
 }

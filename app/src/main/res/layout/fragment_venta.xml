@@ -151,6 +151,7 @@
     </LinearLayout>
 
         <TextView
+            android:id="@+id/OpeModalidad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/nunito_black"
@@ -160,6 +161,7 @@
             android:textStyle="bold" />
 
         <LinearLayout
+            android:id="@+id/OpeModalidadBoton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -169,7 +171,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="2sp"
                 android:layout_weight="1"
-                android:backgroundTint="@color/colorPrimaryBtn"
+                android:backgroundTint="@color/colorPrimary"
                 android:fontFamily="@font/nunito_black"
                 android:gravity="center"
                 android:text="@string/ope_libre"
