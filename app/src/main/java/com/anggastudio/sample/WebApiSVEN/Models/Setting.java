@@ -21,6 +21,10 @@ public class Setting {
     private Integer timerAppVenta;
     private String rutaLogo1;
     private String rutaLogo2;
+    private Integer descuentoRFID;
+    private Double valorIGV;
+    private Double descuentoGll;
+    private Boolean byImei;
 
     public Integer getCompanyID() {
         return companyID;
@@ -172,5 +176,37 @@ public class Setting {
 
     public void setRutaLogo2(String rutaLogo2) {
         this.rutaLogo2 = rutaLogo2;
+    }
+
+    public Integer getDescuentoRFID() {
+        return descuentoRFID;
+    }
+
+    public void setDescuentoRFID(Integer descuentoRFID) {
+        this.descuentoRFID = descuentoRFID;
+    }
+
+    public Double getValorIGV() {
+        return valorIGV;
+    }
+
+    public void setValorIGV(Double valorIGV) {
+        this.valorIGV = valorIGV;
+    }
+
+    public Double getDescuentoGll() {
+        return descuentoGll;
+    }
+
+    public void setDescuentoGll(Double descuentoGll) {
+        this.descuentoGll = descuentoGll;
+    }
+
+    public Boolean getByImei() {
+        return byImei;
+    }
+
+    public void setByImei(Boolean byImei) {
+        this.byImei = byImei;
     }
 }

@@ -1,24 +1,18 @@
 package com.anggastudio.sample.Fragment;
-import android.Manifest;
 import android.app.Dialog;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.os.Environment;
-import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +34,6 @@ import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -51,8 +44,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DasboardFragment extends Fragment{
-
-    private static final int TU_CODIGO_DE_SOLICITUD_DE_PERMISO = 123;
 
     private APIService mAPIService;
     private NFCUtil nfcUtil;
@@ -67,14 +58,17 @@ public class DasboardFragment extends Fragment{
             modalAlertaCTurnoActual,modalAlertaIngreso,modalInicioDiaGenerado;
 
     ShapeableImageView img_Logo;
+
     ImageView imageee;
 
     TextInputEditText usuario, contraseña;
+
     TextInputLayout alertuser,alertpassword;
 
     String usuarioUser,contraseñaUser;
 
     List<Users> usersCTList;
+    CardView btn_Boveda;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -103,10 +97,30 @@ public class DasboardFragment extends Fragment{
         btn_Cambioturno       = view.findViewById(R.id.btnCambioTurno);
         btn_Iniciodia         = view.findViewById(R.id.btnInicioDia);
         btn_Salir             = view.findViewById(R.id.btnSalir);
+        btn_Boveda             = view.findViewById(R.id.btnBoveda);
         img_Logo              = view.findViewById(R.id.logo_dashboard);
 
-        ventas                  = view.findViewById(R.id.ventas);
-        imageee                 = view.findViewById(R.id.imageee);
+        ventas                = view.findViewById(R.id.ventas);
+        imageee               = view.findViewById(R.id.imageee);
+
+        /**
+         * @OBTENER:Boveda
+         */
+        btn_Boveda.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                FragmentManager fragmentManagerBoveda = getActivity().getSupportFragmentManager();
+                FragmentTransaction fragmentTransactionBoveda= fragmentManagerBoveda.beginTransaction();
+                int fragmentContainerBoveda    = R.id.fragment_container;
+                BovedasFragment bovedasFragment = new BovedasFragment();
+
+                fragmentTransactionBoveda.replace(fragmentContainerBoveda, bovedasFragment);
+                fragmentTransactionBoveda.addToBackStack(null);
+                fragmentTransactionBoveda.commit();
+
+            }
+        });
 
         /**
          * @OBTENER:DatoGerealUserTerminal
@@ -118,24 +132,54 @@ public class DasboardFragment extends Fragment{
         /**
          * @MOSTRAR:LogoEmpresa_Dasboard
          */
-        String rutaImagen="/storage/emulated/0/appSven/" + GlobalInfo.getsettingRutaLogo110;
-        File file = new File(rutaImagen);
+        String rutaImagen = "/storage/emulated/0/appSven/";
 
-        if(!file.exists()){
-            rutaImagen = "/storage/emulated/0/appSven/sinfoto.jpg";
+        if (!TextUtils.isEmpty(GlobalInfo.getsettingRutaLogo110)) {
+            rutaImagen += GlobalInfo.getsettingRutaLogo110;
+            File file = new File(rutaImagen);
+            if (!file.exists()) {
+                rutaImagen = "/storage/emulated/0/appSven/sinlogo.jpg";
+            }
+        } else {
+            rutaImagen += "sinlogo.jpg";
         }
 
-        Uri logoUri = Uri.parse("file://" + rutaImagen);
-        img_Logo.setImageURI(logoUri);
+        Uri imagenProd = Uri.parse("file://" + rutaImagen);
+        img_Logo.setImageURI(imagenProd);
 
         /**
          * @OBTENER:DatoGeneralCompania
          */
-        String DirSucursal = (GlobalInfo.getBranchCompany10 != null) ? GlobalInfo.getBranchCompany10 : "";
-        DirSucursal = DirSucursal.replace("-","");
-        nombre_empresa.setText(GlobalInfo.getNameCompany10);
-        sucursal_empresa.setText(DirSucursal);
-        slogan_empresa.setText(GlobalInfo.getSloganCompany10);
+        String DirSucursal = "";
+        if (GlobalInfo.getBranchCompany10 != null && !GlobalInfo.getBranchCompany10.isEmpty()) {
+            DirSucursal = GlobalInfo.getBranchCompany10.replace("-", "");
+            sucursal_empresa.setText(DirSucursal);
+        } else {
+
+            if (GlobalInfo.getAddressCompany10 != null && !GlobalInfo.getAddressCompany10.isEmpty()) {
+                DirSucursal = GlobalInfo.getAddressCompany10.replace("-", "");
+                sucursal_empresa.setText(DirSucursal);
+            }else {
+                sucursal_empresa.setText("");
+            }
+
+        }
+
+        String NameCompany = "";
+        if (GlobalInfo.getNameCompany10 != null && !GlobalInfo.getNameCompany10.isEmpty()) {
+            NameCompany = GlobalInfo.getNameCompany10;
+            nombre_empresa.setText(NameCompany);
+        } else {
+            nombre_empresa.setText("");
+        }
+
+        String SloganCompany = "";
+        if (GlobalInfo.getSloganCompany10 != null && !GlobalInfo.getSloganCompany10.isEmpty()) {
+            SloganCompany = GlobalInfo.getSloganCompany10;
+            slogan_empresa.setText(SloganCompany);
+        } else {
+            slogan_empresa.setText("");
+        }
 
         /**
          * @MODAL:MostrarAlertaInicioDía_Ingresar
@@ -146,10 +190,10 @@ public class DasboardFragment extends Fragment{
         modalAlertaIngreso.setCancelable(true);
 
         if (GlobalInfo.getterminalVentaPlaya10) {
-            ventas.setText("GRIFO");
+            ventas.setText("Grifo");
             imageee.setImageResource(R.drawable.icon_salefuel);
         } else if (GlobalInfo.getterminalVentaTienda10) {
-            ventas.setText("TIENDA");
+            ventas.setText("Tienda");
             imageee.setImageResource(R.drawable.iconcaja);
         }
         /**
@@ -162,11 +206,12 @@ public class DasboardFragment extends Fragment{
                 if(GlobalInfo.getterminalVentaPlaya10){
 
                     if ( GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty() ){
+
                         FragmentManager fragmentManagerVenta = getActivity().getSupportFragmentManager();
                         FragmentTransaction fragmentTransactionVenta = fragmentManagerVenta.beginTransaction();
+
                         int fragmentContainerVenta  = R.id.fragment_container;
                         VentaFragment ventaFragment = new VentaFragment();
-
                         fragmentTransactionVenta.replace(fragmentContainerVenta, ventaFragment);
                         fragmentTransactionVenta.addToBackStack(null);
                         fragmentTransactionVenta.commit();
@@ -191,31 +236,31 @@ public class DasboardFragment extends Fragment{
 
                                 FragmentManager fragmentManagerVenta = getActivity().getSupportFragmentManager();
                                 FragmentTransaction fragmentTransactionVenta = fragmentManagerVenta.beginTransaction();
+
                                 int fragmentContainerVenta  = R.id.fragment_container;
                                 VentaFragment ventaFragment = new VentaFragment();
-
                                 fragmentTransactionVenta.replace(fragmentContainerVenta, ventaFragment);
                                 fragmentTransactionVenta.addToBackStack(null);
                                 fragmentTransactionVenta.commit();
 
                                 modalAlertaIngreso.dismiss();
+
                             }
                         });
                     }
 
                 }else if(GlobalInfo.getterminalVentaTienda10){
 
-                    FragmentManager fragmentManagerCarrito = getActivity().getSupportFragmentManager();
+                    FragmentManager fragmentManagerArticulo = getActivity().getSupportFragmentManager();
+                    FragmentTransaction fragmentTransactionArticulo = fragmentManagerArticulo.beginTransaction();
 
-                    FragmentTransaction fragmentTransactionCarrito = fragmentManagerCarrito.beginTransaction();
+                    int fragmentContainerArticulo = R.id.fragment_container;
+                    ArticuloFragment articuloFragment = new ArticuloFragment();
+                    fragmentTransactionArticulo.replace(fragmentContainerArticulo, articuloFragment);
+                    fragmentTransactionArticulo.addToBackStack(null);
+                    fragmentTransactionArticulo.commit();
 
-                    int fragmentContainerCarrito = R.id.fragment_container;
-                    ProductosFragment productosFragment = new ProductosFragment();
-                    fragmentTransactionCarrito.replace(fragmentContainerCarrito, productosFragment);
-                    fragmentTransactionCarrito.addToBackStack(null);
-                    fragmentTransactionCarrito.commit();
                 }
-
             }
         });
 
@@ -313,7 +358,7 @@ public class DasboardFragment extends Fragment{
 
                     Boolean xPase                 = false;
 
-                    if (FechaActual == 1) {
+                    if (FechaActual == 1 && GlobalInfo.getTerminalInicioDiaValidar10) {
 
                         if (GlobalInfo.getSettingTurno10.equals(0) && GlobalInfo.getterminalTurno10.equals(1)) {
 
@@ -357,17 +402,37 @@ public class DasboardFragment extends Fragment{
                                                 usuario.getText().clear();
                                                 contraseña.getText().clear();
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
                                             }
                                         });
 
+                                        TextWatcher campoVacioWatcher = new TextWatcher() {
+                                            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                            @Override
+                                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                if (usuario.hasFocus()) {
+                                                    alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                } else if (contraseña.hasFocus()) {
+                                                    alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                }
+                                            }
+
+                                            @Override public void afterTextChanged(Editable s) {}
+                                        };
+
+                                        usuario.addTextChangedListener(campoVacioWatcher);
+                                        contraseña.addTextChangedListener(campoVacioWatcher);
+
                                         btnAceptarCTFEntrada.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View view) {
 
-                                                usuarioUser = usuario.getText().toString();
+                                                usuarioUser    = usuario.getText().toString();
                                                 contraseñaUser = contraseña.getText().toString();
 
                                                 if (usuarioUser.isEmpty()) {
@@ -380,6 +445,8 @@ public class DasboardFragment extends Fragment{
 
                                                 findUsersCT(usuarioUser);
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
@@ -435,17 +502,37 @@ public class DasboardFragment extends Fragment{
                                                 usuario.getText().clear();
                                                 contraseña.getText().clear();
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
                                             }
                                         });
 
+                                        TextWatcher campoVacioWatcher = new TextWatcher() {
+                                            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                            @Override
+                                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                if (usuario.hasFocus()) {
+                                                    alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                } else if (contraseña.hasFocus()) {
+                                                    alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                }
+                                            }
+
+                                            @Override public void afterTextChanged(Editable s) {}
+                                        };
+
+                                        usuario.addTextChangedListener(campoVacioWatcher);
+                                        contraseña.addTextChangedListener(campoVacioWatcher);
+
                                         btnAceptarCTFEntrada.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View view) {
 
-                                                usuarioUser = usuario.getText().toString();
+                                                usuarioUser    = usuario.getText().toString();
                                                 contraseñaUser = contraseña.getText().toString();
 
                                                 if (usuarioUser.isEmpty()) {
@@ -458,6 +545,8 @@ public class DasboardFragment extends Fragment{
 
                                                 findUsersCT(usuarioUser);
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
@@ -513,17 +602,37 @@ public class DasboardFragment extends Fragment{
                                                 usuario.getText().clear();
                                                 contraseña.getText().clear();
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
                                             }
                                         });
 
+                                        TextWatcher campoVacioWatcher = new TextWatcher() {
+                                            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                            @Override
+                                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                if (usuario.hasFocus()) {
+                                                    alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                } else if (contraseña.hasFocus()) {
+                                                    alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                }
+                                            }
+
+                                            @Override public void afterTextChanged(Editable s) {}
+                                        };
+
+                                        usuario.addTextChangedListener(campoVacioWatcher);
+                                        contraseña.addTextChangedListener(campoVacioWatcher);
+
                                         btnAceptarCTFEntrada.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View view) {
 
-                                                usuarioUser = usuario.getText().toString();
+                                                usuarioUser    = usuario.getText().toString();
                                                 contraseñaUser = contraseña.getText().toString();
 
                                                 if (usuarioUser.isEmpty()) {
@@ -536,6 +645,8 @@ public class DasboardFragment extends Fragment{
 
                                                 findUsersCT(usuarioUser);
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
@@ -545,8 +656,6 @@ public class DasboardFragment extends Fragment{
 
                                     }
                                 });
-
-                                return;
                             }
 
                         }
@@ -595,11 +704,31 @@ public class DasboardFragment extends Fragment{
                                                 usuario.getText().clear();
                                                 contraseña.getText().clear();
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
                                             }
                                         });
+
+                                        TextWatcher campoVacioWatcher = new TextWatcher() {
+                                            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                            @Override
+                                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                if (usuario.hasFocus()) {
+                                                    alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                } else if (contraseña.hasFocus()) {
+                                                    alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                }
+                                            }
+
+                                            @Override public void afterTextChanged(Editable s) {}
+                                        };
+
+                                        usuario.addTextChangedListener(campoVacioWatcher);
+                                        contraseña.addTextChangedListener(campoVacioWatcher);
 
                                         btnAceptarCTFEntrada.setOnClickListener(new View.OnClickListener() {
                                             @Override
@@ -618,6 +747,8 @@ public class DasboardFragment extends Fragment{
 
                                                 findUsersCT(usuarioUser);
 
+                                                alertuser.setError(null);
+                                                alertpassword.setError(null);
                                                 alertuser.setErrorEnabled(false);
                                                 alertpassword.setErrorEnabled(false);
 
@@ -691,243 +822,291 @@ public class DasboardFragment extends Fragment{
             @Override
             public void onClick(View view) {
 
-                    for (SettingTurno settingTurno : GlobalInfo.getsettingTurnoList10 ) {
+                for (SettingTurno settingTurno : GlobalInfo.getsettingTurnoList10 ) {
 
-                        GlobalInfo.getSettingCompanyId10 = settingTurno.getCompanyID();
-                        GlobalInfo.getSettingTurno10     = settingTurno.getTurno();
-                        GlobalInfo.getSettingRango110    = settingTurno.getRango1();
-                        GlobalInfo.getSettingRango210    = settingTurno.getRango2();
+                    GlobalInfo.getSettingCompanyId10 = settingTurno.getCompanyID();
+                    GlobalInfo.getSettingTurno10     = settingTurno.getTurno();
+                    GlobalInfo.getSettingRango110    = settingTurno.getRango1();
+                    GlobalInfo.getSettingRango210    = settingTurno.getRango2();
 
-                        if (GlobalInfo.getSettingTurno10 .equals(0)) {
+                    if (GlobalInfo.getSettingTurno10 .equals(0)) {
 
-                            Calendar calendarprint = Calendar.getInstance(TimeZone.getTimeZone("America/Lima"));
-                            SimpleDateFormat formatdate = new SimpleDateFormat("HHmmss");
-                            String FechaHoraImpresion = formatdate.format(calendarprint.getTime());
-                            Integer HoraActual = Integer.valueOf(FechaHoraImpresion);
+                        Calendar calendarprint = Calendar.getInstance(TimeZone.getTimeZone("America/Lima"));
+                        SimpleDateFormat formatdate = new SimpleDateFormat("HHmmss");
+                        String FechaHoraImpresion = formatdate.format(calendarprint.getTime());
+                        Integer HoraActual = Integer.valueOf(FechaHoraImpresion);
 
 
-                            Calendar calendarfecha      = Calendar.getInstance(TimeZone.getTimeZone("America/Lima"));
-                            SimpleDateFormat formatfecha  = new SimpleDateFormat("dd");
-                            String FechasImpresion    = formatfecha.format(calendarfecha.getTime());
-                            Integer FechaActual = Integer.valueOf(FechasImpresion);
+                        Calendar calendarfecha      = Calendar.getInstance(TimeZone.getTimeZone("America/Lima"));
+                        SimpleDateFormat formatfecha  = new SimpleDateFormat("dd");
+                        String FechasImpresion    = formatfecha.format(calendarfecha.getTime());
+                        Integer FechaActual = Integer.valueOf(FechasImpresion);
 
-                            if (FechaActual == 1) {
+                        if (FechaActual == 1 && GlobalInfo.getTerminalInicioDiaValidar10) {
 
-                                if (HoraActual >= 0 && HoraActual <= 3000) {
-                                    findOptranDia(GlobalInfo.getterminalImei10);
-                                } else {
-                                    if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
-
-                                        /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
-                                        modalInicioDiaGenerado.show();
-
-                                    }else {
-
-                                        findOptranDiaFE(GlobalInfo.getterminalImei10);
-
-                                        modalAlertaDiaActual.show();
-
-                                        btnIngresarIDFEntrada = modalAlertaDiaActual.findViewById(R.id.btnIngresarIDFEntrada);
-
-                                        modalForzarEntrada = new Dialog(getContext());
-                                        modalForzarEntrada.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                        modalForzarEntrada.setContentView(R.layout.modal_forzarentrada);
-                                        modalForzarEntrada.setCancelable(false);
-
-                                        btnIngresarIDFEntrada.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-
-                                                if (!modalForzarEntrada.isShowing()) {
-                                                    modalForzarEntrada.show();
-                                                }
-
-                                                btnCancelarIDFEntrada = modalForzarEntrada.findViewById(R.id.btnCancelarFEntrada);
-                                                btnAceptarCIDEntrada  = modalForzarEntrada.findViewById(R.id.btnAceptarFEntrada);
-                                                usuario               = modalForzarEntrada.findViewById(R.id.inputUserFEntrada);
-                                                contraseña            = modalForzarEntrada.findViewById(R.id.inputContraseñaFEntrada);
-                                                alertuser             = modalForzarEntrada.findViewById(R.id.alertUserFEntrada);
-                                                alertpassword         = modalForzarEntrada.findViewById(R.id.alertContraseñaFEntrada);
-
-                                                btnCancelarIDFEntrada.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
-
-                                                        modalForzarEntrada.dismiss();
-
-                                                        usuario.getText().clear();
-                                                        contraseña.getText().clear();
-
-                                                        alertuser.setErrorEnabled(false);
-                                                        alertpassword.setErrorEnabled(false);
-
-                                                    }
-                                                });
-
-                                                btnAceptarCIDEntrada.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
-
-                                                        usuarioUser = usuario.getText().toString();
-                                                        contraseñaUser = contraseña.getText().toString();
-
-                                                        if (usuarioUser.isEmpty()) {
-                                                            alertuser.setError("El campo usuario es obligatorio");
-                                                            return;
-                                                        } else if (contraseñaUser.isEmpty()) {
-                                                            alertpassword.setError("El campo contraseña es obligatorio");
-                                                            return;
-                                                        }
-
-                                                        findUsersID(usuarioUser);
-
-                                                        alertuser.setErrorEnabled(false);
-                                                        alertpassword.setErrorEnabled(false);
-
-                                                    }
-                                                });
-
-                                            }
-                                        });
-
-                                        return;
-                                    }
-                                }
-
+                            if (HoraActual >= 0 && HoraActual <= 3000) {
+                                findOptranDia(GlobalInfo.getterminalImei10);
                             } else {
 
-                                if (HoraActual >= GlobalInfo.getSettingRango110 && HoraActual <= GlobalInfo.getSettingRango210) {
-                                    findOptranDia(GlobalInfo.getterminalImei10);
-                                } else {
-                                    if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
+                                if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
 
-                                        /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
-                                        modalInicioDiaGenerado.show();
+                                    /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
+                                    modalInicioDiaGenerado.show();
 
-                                    }else {
+                                }else {
 
-                                        findOptranDiaFE(GlobalInfo.getterminalImei10);
+                                    findOptranDiaFE(GlobalInfo.getterminalImei10);
 
-                                        modalAlertaDiaActual.show();
+                                    modalAlertaDiaActual.show();
 
-                                        btnIngresarIDFEntrada = modalAlertaDiaActual.findViewById(R.id.btnIngresarIDFEntrada);
+                                    btnIngresarIDFEntrada = modalAlertaDiaActual.findViewById(R.id.btnIngresarIDFEntrada);
 
-                                        modalForzarEntrada = new Dialog(getContext());
-                                        modalForzarEntrada.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                        modalForzarEntrada.setContentView(R.layout.modal_forzarentrada);
-                                        modalForzarEntrada.setCancelable(false);
+                                    modalForzarEntrada = new Dialog(getContext());
+                                    modalForzarEntrada.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    modalForzarEntrada.setContentView(R.layout.modal_forzarentrada);
+                                    modalForzarEntrada.setCancelable(false);
 
-                                        btnIngresarIDFEntrada.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
+                                    btnIngresarIDFEntrada.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
 
-                                                if (!modalForzarEntrada.isShowing()) {
-                                                    modalForzarEntrada.show();
+                                            if (!modalForzarEntrada.isShowing()) {
+                                                modalForzarEntrada.show();
+                                            }
+
+                                            btnCancelarIDFEntrada = modalForzarEntrada.findViewById(R.id.btnCancelarFEntrada);
+                                            btnAceptarCIDEntrada  = modalForzarEntrada.findViewById(R.id.btnAceptarFEntrada);
+                                            usuario               = modalForzarEntrada.findViewById(R.id.inputUserFEntrada);
+                                            contraseña            = modalForzarEntrada.findViewById(R.id.inputContraseñaFEntrada);
+                                            alertuser             = modalForzarEntrada.findViewById(R.id.alertUserFEntrada);
+                                            alertpassword         = modalForzarEntrada.findViewById(R.id.alertContraseñaFEntrada);
+
+                                            btnCancelarIDFEntrada.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+
+                                                    modalForzarEntrada.dismiss();
+
+                                                    usuario.getText().clear();
+                                                    contraseña.getText().clear();
+
+                                                    alertuser.setError(null);
+                                                    alertpassword.setError(null);
+                                                    alertuser.setErrorEnabled(false);
+                                                    alertpassword.setErrorEnabled(false);
+
+                                                }
+                                            });
+
+                                            TextWatcher campoVacioWatcher = new TextWatcher() {
+                                                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                                @Override
+                                                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                    if (usuario.hasFocus()) {
+                                                        alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                    } else if (contraseña.hasFocus()) {
+                                                        alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                    }
                                                 }
 
-                                                btnCancelarIDFEntrada = modalForzarEntrada.findViewById(R.id.btnCancelarFEntrada);
-                                                btnAceptarCIDEntrada  = modalForzarEntrada.findViewById(R.id.btnAceptarFEntrada);
-                                                usuario               = modalForzarEntrada.findViewById(R.id.inputUserFEntrada);
-                                                contraseña            = modalForzarEntrada.findViewById(R.id.inputContraseñaFEntrada);
-                                                alertuser             = modalForzarEntrada.findViewById(R.id.alertUserFEntrada);
-                                                alertpassword         = modalForzarEntrada.findViewById(R.id.alertContraseñaFEntrada);
+                                                @Override public void afterTextChanged(Editable s) {}
+                                            };
 
-                                                btnCancelarIDFEntrada.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
+                                            usuario.addTextChangedListener(campoVacioWatcher);
+                                            contraseña.addTextChangedListener(campoVacioWatcher);
 
-                                                        modalForzarEntrada.dismiss();
+                                            btnAceptarCIDEntrada.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
 
-                                                        usuario.getText().clear();
-                                                        contraseña.getText().clear();
+                                                    usuarioUser = usuario.getText().toString();
+                                                    contraseñaUser = contraseña.getText().toString();
 
-                                                        alertuser.setErrorEnabled(false);
-                                                        alertpassword.setErrorEnabled(false);
-
+                                                    if (usuarioUser.isEmpty()) {
+                                                        alertuser.setError("El campo usuario es obligatorio");
+                                                        return;
+                                                    } else if (contraseñaUser.isEmpty()) {
+                                                        alertpassword.setError("El campo contraseña es obligatorio");
+                                                        return;
                                                     }
-                                                });
 
-                                                btnAceptarCIDEntrada.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
+                                                    findUsersID(usuarioUser);
 
-                                                        usuarioUser = usuario.getText().toString();
-                                                        contraseñaUser = contraseña.getText().toString();
+                                                    alertuser.setError(null);
+                                                    alertpassword.setError(null);
+                                                    alertuser.setErrorEnabled(false);
+                                                    alertpassword.setErrorEnabled(false);
 
-                                                        if (usuarioUser.isEmpty()) {
-                                                            alertuser.setError("El campo usuario es obligatorio");
-                                                            return;
-                                                        } else if (contraseñaUser.isEmpty()) {
-                                                            alertpassword.setError("El campo contraseña es obligatorio");
-                                                            return;
-                                                        }
+                                                }
+                                            });
 
-                                                        findUsersID(usuarioUser);
+                                        }
+                                    });
 
-                                                        alertuser.setErrorEnabled(false);
-                                                        alertpassword.setErrorEnabled(false);
-
-                                                    }
-                                                });
-
-                                            }
-                                        });
-
-                                        return;
-                                    }
+                                    return;
                                 }
 
                             }
 
-                            if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
+                        } else {
 
-                                /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
-                                modalInicioDiaGenerado.show();
+                            if (HoraActual >= GlobalInfo.getSettingRango110 && HoraActual <= GlobalInfo.getSettingRango210) {
+                                findOptranDia(GlobalInfo.getterminalImei10);
+                            } else {
 
-                            }else {
+                                if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
 
-                                modalInicioDia.show();
+                                    /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
+                                    modalInicioDiaGenerado.show();
 
-                                btnCancelarInicio = modalInicioDia.findViewById(R.id.btncancelariniciodia);
-                                btnAceptarInicio  = modalInicioDia.findViewById(R.id.btnagregariniciodia);
+                                }else {
 
-                                btnCancelarInicio.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        modalInicioDia.dismiss();
-                                    }
-                                });
+                                    findOptranDiaFE(GlobalInfo.getterminalImei10);
 
-                                btnAceptarInicio.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
+                                    modalAlertaDiaActual.show();
 
-                                        modalAlertaVentaPendiente.show();
+                                    btnIngresarIDFEntrada = modalAlertaDiaActual.findViewById(R.id.btnIngresarIDFEntrada);
 
-                                        try {
-                                            Intent intent = new Intent(getContext(), Login.class);
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    modalForzarEntrada = new Dialog(getContext());
+                                    modalForzarEntrada.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    modalForzarEntrada.setContentView(R.layout.modal_forzarentrada);
+                                    modalForzarEntrada.setCancelable(false);
 
-                                            iniciarDia(GlobalInfo.getterminalID10);
+                                    btnIngresarIDFEntrada.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
 
-                                            startActivity(intent);
-                                            finalize();
+                                            if (!modalForzarEntrada.isShowing()) {
+                                                modalForzarEntrada.show();
+                                            }
 
-                                            Toast.makeText(getContext(), "SE GENERO EL INICIO DE DÍA", Toast.LENGTH_SHORT).show();
-                                        } catch (Throwable e) {
-                                            e.printStackTrace();
+                                            btnCancelarIDFEntrada = modalForzarEntrada.findViewById(R.id.btnCancelarFEntrada);
+                                            btnAceptarCIDEntrada  = modalForzarEntrada.findViewById(R.id.btnAceptarFEntrada);
+                                            usuario               = modalForzarEntrada.findViewById(R.id.inputUserFEntrada);
+                                            contraseña            = modalForzarEntrada.findViewById(R.id.inputContraseñaFEntrada);
+                                            alertuser             = modalForzarEntrada.findViewById(R.id.alertUserFEntrada);
+                                            alertpassword         = modalForzarEntrada.findViewById(R.id.alertContraseñaFEntrada);
+
+                                            btnCancelarIDFEntrada.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+
+                                                    modalForzarEntrada.dismiss();
+
+                                                    usuario.getText().clear();
+                                                    contraseña.getText().clear();
+
+                                                    alertuser.setError(null);
+                                                    alertpassword.setError(null);
+                                                    alertuser.setErrorEnabled(false);
+                                                    alertpassword.setErrorEnabled(false);
+
+                                                }
+                                            });
+
+                                            TextWatcher campoVacioWatcher = new TextWatcher() {
+                                                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                                @Override
+                                                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                                    if (usuario.hasFocus()) {
+                                                        alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                                                    } else if (contraseña.hasFocus()) {
+                                                        alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                                                    }
+                                                }
+
+                                                @Override public void afterTextChanged(Editable s) {}
+                                            };
+
+                                            usuario.addTextChangedListener(campoVacioWatcher);
+                                            contraseña.addTextChangedListener(campoVacioWatcher);
+
+                                            btnAceptarCIDEntrada.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+
+                                                    usuarioUser = usuario.getText().toString();
+                                                    contraseñaUser = contraseña.getText().toString();
+
+                                                    if (usuarioUser.isEmpty()) {
+                                                        alertuser.setError("El campo usuario es obligatorio");
+                                                        return;
+                                                    } else if (contraseñaUser.isEmpty()) {
+                                                        alertpassword.setError("El campo contraseña es obligatorio");
+                                                        return;
+                                                    }
+
+                                                    findUsersID(usuarioUser);
+
+                                                    alertuser.setError(null);
+                                                    alertpassword.setError(null);
+                                                    alertuser.setErrorEnabled(false);
+                                                    alertpassword.setErrorEnabled(false);
+
+                                                }
+                                            });
+
                                         }
+                                    });
 
-                                    }
-                                });
+                                    return;
+                                }
 
                             }
 
                         }
 
-                        break;
+                        if (GlobalInfo.getCDiaList10 != null && !GlobalInfo.getCDiaList10.isEmpty()){
+
+                            /**  No puede realizar Inicio de Día. Porque ya esta genero. **/
+                            modalInicioDiaGenerado.show();
+
+                        }else {
+
+                            modalInicioDia.show();
+
+                            btnCancelarInicio = modalInicioDia.findViewById(R.id.btncancelariniciodia);
+                            btnAceptarInicio  = modalInicioDia.findViewById(R.id.btnagregariniciodia);
+
+                            btnCancelarInicio.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    modalInicioDia.dismiss();
+                                }
+                            });
+
+                            btnAceptarInicio.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                    modalAlertaVentaPendiente.show();
+
+                                    try {
+                                        Intent intent = new Intent(getContext(), Login.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                                        iniciarDia(GlobalInfo.getterminalID10);
+
+                                        startActivity(intent);
+                                        finalize();
+
+                                        Toast.makeText(getContext(), "SE GENERO EL INICIO DE DÍA", Toast.LENGTH_SHORT).show();
+                                    } catch (Throwable e) {
+                                        e.printStackTrace();
+                                    }
+
+                                }
+                            });
+
+                        }
+
                     }
+
+                    break;
                 }
+            }
 
         });
 
@@ -1004,7 +1183,7 @@ public class DasboardFragment extends Fragment{
                         return;
                     }
 
-                        GlobalInfo.getCDiaList10 = response.body();
+                    GlobalInfo.getCDiaList10 = response.body();
 
                 } catch (Exception ex) {
                     Toast.makeText(getContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1206,44 +1385,48 @@ public class DasboardFragment extends Fragment{
 
                     usersCTList = response.body();
 
-                    for (Users user : usersCTList) {
-
-                        GlobalInfo.getuserIDFE10 = user.getUserID();
-                        GlobalInfo.getuserNameFE10 = user.getNames();
-                        GlobalInfo.getuserPassFE10 = user.getPassword();
-                        GlobalInfo.getuserCancelFE10 = user.getCancel();
-
+                    if (usersCTList == null || usersCTList.isEmpty()) {
+                        Toast.makeText(getContext(), "Usuario no encontrado.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
 
-                    if (GlobalInfo.getuserCancelFE10 == true) {
+                    Users user = usersCTList.get(0);
 
-                        String getName = usuarioUser.trim();
-                        String getPass = PasswordChecker.checkpassword(contraseñaUser.trim());
+                    GlobalInfo.getuserIDFE10     = user.getUserID();
+                    GlobalInfo.getuserPassFE10   = user.getPassword();
+                    GlobalInfo.getuserSuperFE10  = user.getSuper();
+                    GlobalInfo.getuserLockedFE0  = user.getLocked();
+                    GlobalInfo.getuserForzarCierreFE10 = user.getForzarCierre();
 
-                        if (getName.equals(GlobalInfo.getuserIDFE10) && getPass.equals(GlobalInfo.getuserPassFE10)) {
+                    String getName = usuarioUser.trim();
+                    String getPass = PasswordChecker.checkpassword(contraseñaUser.trim());
 
-                            try {
-                                Intent intent = new Intent(getContext(), Login.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    if (getName.equals(GlobalInfo.getuserIDFE10) && getPass.equals(GlobalInfo.getuserPassFE10)) {
+                        if(GlobalInfo.getuserLockedFE0){
+                            if(GlobalInfo.getuserForzarCierreFE10 || GlobalInfo.getuserSuperFE10){
+                                try {
+                                    Intent intent = new Intent(getContext(), Login.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                                cerrarTurno(GlobalInfo.getterminalID10);
+                                    cerrarTurno(GlobalInfo.getterminalID10);
 
-                                startActivity(intent);
-                                finalize();
+                                    startActivity(intent);
+                                    finalize();
 
-                                Toast.makeText(getContext(), "SE GENERO EL CAMBIO DE TURNO ", Toast.LENGTH_SHORT).show();
-                            } catch (Throwable e) {
-                                e.printStackTrace();
+                                    Toast.makeText(getContext(), "SE GENERO EL CAMBIO DE TURNO ", Toast.LENGTH_SHORT).show();
+                                } catch (Throwable e) {
+                                    e.printStackTrace();
+                                }
+
+                                modalForzarEntrada.dismiss();
+                            }else{
+                                Toast.makeText(getContext(), "No tiene permisos para Forzar Cambiar de Turno.", Toast.LENGTH_SHORT).show();
                             }
-
-                            modalForzarEntrada.dismiss();
-
-                        } else {
-                            Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
                         }
-
-                    } else {
-                        Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
                     }
 
                     modalAlertaCTurnoActual.dismiss();
@@ -1280,44 +1463,47 @@ public class DasboardFragment extends Fragment{
 
                     usersCTList = response.body();
 
-                    for (Users user : usersCTList) {
-
-                        GlobalInfo.getuserIDFE10 = user.getUserID();
-                        GlobalInfo.getuserNameFE10 = user.getNames();
-                        GlobalInfo.getuserPassFE10 = user.getPassword();
-                        GlobalInfo.getuserCancelFE10 = user.getCancel();
-
+                    if (usersCTList == null || usersCTList.isEmpty()) {
+                        Toast.makeText(getContext(), "Usuario no encontrado.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
 
-                    if (GlobalInfo.getuserCancelFE10 == true) {
+                    Users user = usersCTList.get(0);
 
-                        String getName = usuarioUser.trim();
-                        String getPass = PasswordChecker.checkpassword(contraseñaUser.trim());
+                    GlobalInfo.getuserIDFE10     = user.getUserID();
+                    GlobalInfo.getuserPassFE10   = user.getPassword();
+                    GlobalInfo.getuserSuperFE10  = user.getSuper();
+                    GlobalInfo.getuserLockedFE0 = user.getLocked();
+                    GlobalInfo.getuserForzarCierreFE10 = user.getForzarCierre();
 
-                        if (getName.equals(GlobalInfo.getuserIDFE10) && getPass.equals(GlobalInfo.getuserPassFE10)) {
+                    String getName = (usuarioUser != null) ? usuarioUser.trim() : "";
+                    String getPass = (contraseñaUser != null) ? PasswordChecker.checkpassword(contraseñaUser.trim()) : "";
 
-                            try {
-                                Intent intent = new Intent(getContext(), Login.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    if (getName.equals(GlobalInfo.getuserIDFE10) && getPass.equals(GlobalInfo.getuserPassFE10)) {
+                        if(GlobalInfo.getuserLockedFE0) {
+                            if (GlobalInfo.getuserForzarCierreFE10 || GlobalInfo.getuserSuperFE10) {
+                                try {
+                                    Intent intent = new Intent(getContext(), Login.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                                iniciarDia(GlobalInfo.getterminalID10);
+                                    iniciarDia(GlobalInfo.getterminalID10);
 
-                                startActivity(intent);
-                                finalize();
+                                    startActivity(intent);
+                                    finalize();
 
-                                Toast.makeText(getContext(), "SE GENERO EL INICIO DE DÍA", Toast.LENGTH_SHORT).show();
-                            } catch (Throwable e) {
-                                e.printStackTrace();
+                                    Toast.makeText(getContext(), "SE GENERO EL INICIO DE DÍA", Toast.LENGTH_SHORT).show();
+                                } catch (Throwable e) {
+                                    e.printStackTrace();
+                                }
+                                modalForzarEntrada.dismiss();
+                            } else {
+                                Toast.makeText(getContext(), "No tiene permisos para Forzar Inicio de Día.", Toast.LENGTH_SHORT).show();
                             }
-
-                            modalForzarEntrada.dismiss();
-
-                        } else {
-                            Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
                         }
-
-                    } else {
-                        Toast.makeText(getContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
                     }
 
                     modalAlertaDiaActual.dismiss();

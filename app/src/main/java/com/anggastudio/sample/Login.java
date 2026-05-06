@@ -1,26 +1,49 @@
 package com.anggastudio.sample;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.nfc.Tag;
 import android.os.Bundle;
-import android.util.TypedValue;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.anggastudio.sample.WebApiSVEN.Controllers.APIService;
+import com.anggastudio.sample.WebApiSVEN.Models.Articulos;
 import com.anggastudio.sample.WebApiSVEN.Models.Company;
 import com.anggastudio.sample.WebApiSVEN.Models.DetalleVenta;
 import com.anggastudio.sample.WebApiSVEN.Models.Lados;
 import com.anggastudio.sample.WebApiSVEN.Models.Mangueras;
 import com.anggastudio.sample.WebApiSVEN.Models.Setting;
+import com.anggastudio.sample.WebApiSVEN.Models.SettingMoneda;
+import com.anggastudio.sample.WebApiSVEN.Models.SettingTEgreso;
+import com.anggastudio.sample.WebApiSVEN.Models.SettingVehiculo;
 import com.anggastudio.sample.WebApiSVEN.Models.Terminal;
 import com.anggastudio.sample.WebApiSVEN.Models.TipoPago;
 import com.anggastudio.sample.WebApiSVEN.Models.Users;
 import com.anggastudio.sample.WebApiSVEN.Parameters.GlobalInfo;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -28,16 +51,28 @@ import retrofit2.Response;
 public class Login extends AppCompatActivity{
 
     private APIService mAPIService;
+    // private APIService mAPIService2;
     private NFCUtil nfcUtil;
 
-    ImageButton configuracion;
+    ImageButton configuracion,btnConfigurarLados,btnConfigurarPrecios;
     Button btniniciar;
     TextInputEditText inputUsuario, inputContraseña;
     TextInputLayout alertuser,alertpassword;
-    TextView imeii;
+    TextView imeii,terminalId;
     String usuarioUser,contraseñaUser;
 
+    Dialog modalForzarEntrada;
+
+    Button btnCancelarCTFEntrada,btnAceptarCTFEntrada;
+    TextInputEditText usuarioEntrada, contraseñaEntrada;
+
+    TextInputLayout alertuserEntrada,alertpasswordEntrada;
+    String usuarioUserEntrada,contraseñaUserEntrada;
+
+
     List<Users> usersList;
+    List<Users> usersEntradaList;
+
     List<Terminal> terminalList;
     List<Company> companyList;
     List<Setting> settingList;
@@ -57,7 +92,194 @@ public class Login extends AppCompatActivity{
         alertuser       = findViewById(R.id.textusuario);
         alertpassword   = findViewById(R.id.textcontraseña);
         configuracion   = findViewById(R.id.btnconfiguracion);
+        btnConfigurarLados   = findViewById(R.id.btnConfigurarLados);
+        btnConfigurarPrecios = findViewById(R.id.btnConfigurarPrecios);
         imeii           = findViewById(R.id.imei);
+        terminalId      = findViewById(R.id.terminalId);
+
+        configuracion.setColorFilter(getResources().getColor(R.color.white));
+        btnConfigurarLados.setColorFilter(getResources().getColor(R.color.white));
+
+        modalForzarEntrada  = new Dialog(Login.this);
+        modalForzarEntrada.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        modalForzarEntrada.setContentView(R.layout.modal_forzarentrada);
+        modalForzarEntrada.setCancelable(false);
+
+        /**
+         * @CONFIGURAR:Precios
+         */
+        btnConfigurarPrecios.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (!modalForzarEntrada.isShowing()) {
+                    modalForzarEntrada.show();
+                }
+
+                btnCancelarCTFEntrada = modalForzarEntrada.findViewById(R.id.btnCancelarFEntrada);
+                btnAceptarCTFEntrada  = modalForzarEntrada.findViewById(R.id.btnAceptarFEntrada);
+                usuarioEntrada        = modalForzarEntrada.findViewById(R.id.inputUserFEntrada);
+                contraseñaEntrada     = modalForzarEntrada.findViewById(R.id.inputContraseñaFEntrada);
+                alertuserEntrada      = modalForzarEntrada.findViewById(R.id.alertUserFEntrada);
+                alertpasswordEntrada  = modalForzarEntrada.findViewById(R.id.alertContraseñaFEntrada);
+
+                btnCancelarCTFEntrada.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        modalForzarEntrada.dismiss();
+
+                        usuarioEntrada.getText().clear();
+                        contraseñaEntrada.getText().clear();
+
+                        alertuserEntrada.setError(null);
+                        alertpasswordEntrada.setError(null);
+                        alertuserEntrada.setErrorEnabled(false);
+                        alertpasswordEntrada.setErrorEnabled(false);
+
+                    }
+                });
+
+                TextWatcher campoVacioWatcher = new TextWatcher() {
+                    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if (usuarioEntrada.hasFocus()) {
+                            alertuserEntrada.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                        } else if (contraseñaEntrada.hasFocus()) {
+                            alertpasswordEntrada.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                        }
+                    }
+
+                    @Override public void afterTextChanged(Editable s) {}
+                };
+
+                usuarioEntrada.addTextChangedListener(campoVacioWatcher);
+                contraseñaEntrada.addTextChangedListener(campoVacioWatcher);
+
+                btnAceptarCTFEntrada.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        usuarioUserEntrada    = usuarioEntrada.getText().toString();
+                        contraseñaUserEntrada = contraseñaEntrada.getText().toString();
+
+                        if (usuarioUserEntrada.isEmpty()) {
+                            alertuserEntrada.setError("El campo usuario es obligatorio");
+                            return;
+                        } else if (contraseñaUserEntrada.isEmpty()) {
+                            alertpasswordEntrada.setError("El campo contraseña es obligatorio");
+                            return;
+                        }
+
+                        findUsersEntradaPrecios(usuarioUserEntrada);
+
+                        alertuserEntrada.setError(null);
+                        alertpasswordEntrada.setError(null);
+                        alertuserEntrada.setErrorEnabled(false);
+                        alertpasswordEntrada.setErrorEnabled(false);
+
+                    }
+                });
+
+
+                Toast.makeText(Login.this, "Configurar Precios", Toast.LENGTH_SHORT).show();
+
+
+            }
+        });
+
+        /**
+         * @CONFIGURAR:Lados
+         */
+        btnConfigurarLados.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (GlobalInfo.getConfiguracionPL || GlobalInfo.getsettingByImei10 == false){
+
+                    if (!modalForzarEntrada.isShowing()) {
+                        modalForzarEntrada.show();
+                    }
+
+                    btnCancelarCTFEntrada = modalForzarEntrada.findViewById(R.id.btnCancelarFEntrada);
+                    btnAceptarCTFEntrada  = modalForzarEntrada.findViewById(R.id.btnAceptarFEntrada);
+                    usuarioEntrada        = modalForzarEntrada.findViewById(R.id.inputUserFEntrada);
+                    contraseñaEntrada     = modalForzarEntrada.findViewById(R.id.inputContraseñaFEntrada);
+                    alertuserEntrada      = modalForzarEntrada.findViewById(R.id.alertUserFEntrada);
+                    alertpasswordEntrada  = modalForzarEntrada.findViewById(R.id.alertContraseñaFEntrada);
+
+                    btnCancelarCTFEntrada.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            modalForzarEntrada.dismiss();
+
+                            usuarioEntrada.getText().clear();
+                            contraseñaEntrada.getText().clear();
+
+                            alertuserEntrada.setError(null);
+                            alertpasswordEntrada.setError(null);
+                            alertuserEntrada.setErrorEnabled(false);
+                            alertpasswordEntrada.setErrorEnabled(false);
+
+                        }
+                    });
+
+                    TextWatcher campoVacioWatcher = new TextWatcher() {
+                        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            if (usuarioEntrada.hasFocus()) {
+                                alertuserEntrada.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                            } else if (contraseñaEntrada.hasFocus()) {
+                                alertpasswordEntrada.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                            }
+                        }
+
+                        @Override public void afterTextChanged(Editable s) {}
+                    };
+
+                    usuarioEntrada.addTextChangedListener(campoVacioWatcher);
+                    contraseñaEntrada.addTextChangedListener(campoVacioWatcher);
+
+                    btnAceptarCTFEntrada.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            usuarioUserEntrada    = usuarioEntrada.getText().toString();
+                            contraseñaUserEntrada = contraseñaEntrada.getText().toString();
+
+                            if (usuarioUserEntrada.isEmpty()) {
+                                alertuserEntrada.setError("El campo usuario es obligatorio");
+                                return;
+                            } else if (contraseñaUserEntrada.isEmpty()) {
+                                alertpasswordEntrada.setError("El campo contraseña es obligatorio");
+                                return;
+                            }
+
+                            findUsersLados(usuarioUserEntrada);
+
+                            alertuserEntrada.setError(null);
+                            alertpasswordEntrada.setError(null);
+                            alertuserEntrada.setErrorEnabled(false);
+                            alertpasswordEntrada.setErrorEnabled(false);
+
+                        }
+                    });
+
+
+                    Toast.makeText(Login.this, "Configurar Lados", Toast.LENGTH_SHORT).show();
+
+                }else{
+                    startActivity(new Intent( getApplicationContext(),ConfigurarLados.class));
+                }
+
+
+            }
+        });
 
         /**
          *  @CONFIGURAR:ImpresoraBluetooth
@@ -70,52 +292,305 @@ public class Login extends AppCompatActivity{
         });
 
         /**
-         *  @OBTENER:Imei
+         * @OBTENER:Imei
          */
+        // imeii.setText("8C7A39E8258F5D34");
         imeii.setText(ObtenerIMEI.getDeviceId(getApplicationContext()));
         GlobalInfo.getterminalImei10 = imeii.getText().toString();
 
         /**
-         *  @INGRESAR:Login
+         * @INGRESAR:Login
          */
+        btniniciar.setEnabled(true);
+        TextWatcher campoVacioWatcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (inputUsuario.hasFocus()) {
+                    alertuser.setError(s.toString().trim().isEmpty() ? "* El campo usuario es obligatorio" : null);
+                } else if (inputContraseña.hasFocus()) {
+                    alertpassword.setError(s.toString().trim().isEmpty() ? "* El campo contraseña es obligatorio" : null);
+                }
+            }
+
+            @Override public void afterTextChanged(Editable s) {}
+        };
+
+        inputUsuario.addTextChangedListener(campoVacioWatcher);
+        inputContraseña.addTextChangedListener(campoVacioWatcher);
+
         btniniciar.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
 
-                usuarioUser    = inputUsuario.getText().toString();
-                contraseñaUser = inputContraseña.getText().toString();
+                try {
 
-                if(usuarioUser.isEmpty()){
-                    alertuser.setError("El campo usuario es obligatorio");
-                    return;
-                }else if(contraseñaUser.isEmpty()){
-                    alertpassword.setError("El campo contraseña es obligatorio");
+                    usuarioUser    = inputUsuario.getText().toString();
+                    contraseñaUser = inputContraseña.getText().toString();
+
+                    if(usuarioUser.isEmpty()){
+                        alertuser.setError("El campo usuario es obligatorio");
+                        return;
+                    }else if(contraseñaUser.isEmpty()){
+                        alertpassword.setError("El campo contraseña es obligatorio");
+                        return;
+                    }
+
+                    alertuser.setError(null);
+                    alertpassword.setError(null);
+                    alertuser.setErrorEnabled(false);
+                    alertpassword.setErrorEnabled(false);
+
+                    GlobalInfo.getuserID10 = "";
+                    GlobalInfo.getuserName10 = "";
+                    GlobalInfo.getuserPass10 = "";
+                    GlobalInfo.getuseridentFID10 = "";
+
+                    findUsers(usuarioUser);
+
+                }catch (Exception ex){
+                    Toast.makeText( getApplicationContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                    btniniciar.setEnabled(false);
+                    btniniciar.setBackgroundColor(getResources().getColor(R.color.colorHumo));
                     return;
                 }
-
-                alertuser.setErrorEnabled(false);
-                alertpassword.setErrorEnabled(false);
-
-                GlobalInfo.getuserID10 = "";
-                GlobalInfo.getuserName10 = "";
-                GlobalInfo.getuserPass10 = "";
-                GlobalInfo.getuseridentFID10 = "";
-
-                findUsers(usuarioUser);
 
             }
         });
 
         /**
-         *  @LISTADO:SpinnerTipoPago
+         * @LISTADO:SpinnerTipoVehiculo
+         */
+        getTipoVehiculo();
+
+        /**
+         * @LISTADO:SpinnerTipoPago
          */
         getTipoPago();
 
         /**
-         *  @OBTENER_APISERVICE:Terminal
+         * @LISTADO:Articulos
          */
-        findTerminal(GlobalInfo.getterminalImei10.toUpperCase());
+        getArticulos();
+
+        /**
+         * @LISTADO:SpinnerMoneda
+         */
+        getMoneda();
+        /**
+         * @LISTADO:SpinnerEgreso
+         */
+        getTEgreso();
+
+        /**
+         * @OBTENER_APISERVICE:Settings
+         */
+
+        GlobalInfo.getterminalCompanyID10 = Integer.valueOf(1);
+
+        findSetting(GlobalInfo.getterminalCompanyID10);
+
+        findCompany(GlobalInfo.getterminalCompanyID10);
+
+    }
+
+    private void validarCampoVacio(EditText campo, TextInputLayout contenedor, String mensajeError) {
+        String texto = campo.getText().toString().trim();
+        if (texto.isEmpty()) {
+            contenedor.setError(mensajeError);
+        } else {
+            contenedor.setError(null);
+            contenedor.setErrorEnabled(false);
+        }
+    }
+
+    /**
+     * @APISERVICE:SpinnerMoneda
+     */
+    private void getMoneda(){
+
+        Call<List<SettingMoneda>> call = mAPIService.getSettingMoneda();
+
+        call.enqueue(new Callback<List<SettingMoneda>>() {
+            @Override
+            public void onResponse(Call<List<SettingMoneda>> call, Response<List<SettingMoneda>> response) {
+                try {
+
+                    if(!response.isSuccessful()){
+                        Toast.makeText(getApplicationContext(), "Codigo de error Moneda: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    GlobalInfo.getmonedaList10 = response.body();
+
+                }catch (Exception ex){
+                    Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<SettingMoneda>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Moneda - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * @APISERVICE:SpinnerTEgreso
+     */
+    private void getTEgreso(){
+
+        Call<List<SettingTEgreso>> call = mAPIService.getSettingTEgreso();
+
+        call.enqueue(new Callback<List<SettingTEgreso>>() {
+            @Override
+            public void onResponse(Call<List<SettingTEgreso>> call, Response<List<SettingTEgreso>> response) {
+                try {
+
+                    if(!response.isSuccessful()){
+                        Toast.makeText(getApplicationContext(), "Codigo de error Egreso: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    GlobalInfo.getegresoList10 = response.body();
+
+                }catch (Exception ex){
+                    Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<SettingTEgreso>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Egreso - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void findUsersEntradaPrecios(String id){
+
+        Call<List<Users>> call = mAPIService.findUsers(id);
+
+        call.enqueue(new Callback<List<Users>>() {
+            @Override
+            public void onResponse(Call<List<Users>> call, Response<List<Users>> response) {
+
+                try {
+
+                    if (!response.isSuccessful()) {
+                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    usersEntradaList = response.body();
+
+                    Users user = usersEntradaList.get(0);
+
+                    GlobalInfo.getuserID10     = user.getUserID();
+                    GlobalInfo.getuserPass10   = user.getPassword();
+                    GlobalInfo.getuserSuper10  = user.getSuper();
+                    GlobalInfo.getuserLocked10 = user.getLocked();
+
+                    String getName = (usuarioUserEntrada != null) ? usuarioUserEntrada.trim() : "";
+                    String getPass = (contraseñaUserEntrada != null) ? PasswordChecker.checkpassword(contraseñaUserEntrada.trim()) : "";
+
+                    if (getName.equals(GlobalInfo.getuserID10) && getPass.equals(GlobalInfo.getuserPass10)) {
+                        if (GlobalInfo.getuserLocked10) {
+                            if (GlobalInfo.getuserSuper10) {
+                                startActivity(new Intent( getApplicationContext(),ConfigurarPrecios.class));
+                                modalForzarEntrada.dismiss();
+                                usuarioEntrada.getText().clear();
+                                contraseñaEntrada.getText().clear();
+                                alertuserEntrada.setErrorEnabled(false);
+                                alertpasswordEntrada.setErrorEnabled(false);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "No tiene permisos para Configurar Lados.", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
+                        }
+                    }else{
+                        Toast.makeText(getApplicationContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
+                    }
+
+                } catch (Exception ex) {
+                    Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Users>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Users - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+
+    private void findUsersLados(String id){
+
+        Call<List<Users>> call = mAPIService.findUsers(id);
+
+        call.enqueue(new Callback<List<Users>>() {
+            @Override
+            public void onResponse(Call<List<Users>> call, Response<List<Users>> response) {
+
+                try {
+
+                    if (!response.isSuccessful()) {
+                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    usersEntradaList = response.body();
+
+                    if (usersEntradaList == null || usersEntradaList.isEmpty()) {
+                        Toast.makeText(getApplicationContext(), "Usuario no encontrado.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    Users user = usersEntradaList.get(0);
+
+                    GlobalInfo.getuserID10     = user.getUserID();
+                    GlobalInfo.getuserPass10   = user.getPassword();
+                    GlobalInfo.getuserSuper10  = user.getSuper();
+                    GlobalInfo.getuserLocked10 = user.getLocked();
+                    GlobalInfo.getuserCancel10 = user.getCancel();
+
+                    String getName = (usuarioUserEntrada != null) ? usuarioUserEntrada.trim() : "";
+                    String getPass = (contraseñaUserEntrada != null) ? PasswordChecker.checkpassword(contraseñaUserEntrada.trim()) : "";
+
+                    if (getName.equals(GlobalInfo.getuserID10) && getPass.equals(GlobalInfo.getuserPass10)) {
+                        if (GlobalInfo.getuserLocked10) {
+                            if (GlobalInfo.getuserCancel10 || GlobalInfo.getuserSuper10) {
+                                startActivity(new Intent( getApplicationContext(),ConfigurarLados.class));
+                                modalForzarEntrada.dismiss();
+                                usuarioEntrada.getText().clear();
+                                contraseñaEntrada.getText().clear();
+                                alertuserEntrada.setErrorEnabled(false);
+                                alertpasswordEntrada.setErrorEnabled(false);
+
+                            } else {
+                                Toast.makeText(getApplicationContext(), "No tiene permisos para Configurar Lados.", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "El usuario se encuentra bloqueado", Toast.LENGTH_SHORT).show();
+                        }
+                    }else{
+                        Toast.makeText(getApplicationContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
+                    }
+
+                } catch (Exception ex) {
+                    Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Users>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Users - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
@@ -133,39 +608,43 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText( getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText( getApplicationContext(), "Codigo de error User: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     usersList = response.body();
 
-                    if (usersList != null && !usersList.isEmpty()) {
+                    if (usersList == null || usersList.isEmpty()) {
+                        Toast.makeText(getApplicationContext(), "Usuario no encontrado.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                        Users user = usersList.get(0);
+                    Users user = usersList.get(0);
 
-                        inputUsuario.setText(user.getUserID());
-                        GlobalInfo.getuserID10     = user.getUserID();
-                        GlobalInfo.getuserName10   = user.getNames();
-                        GlobalInfo.getuserPass10   = user.getPassword();
-                        GlobalInfo.getuserLocked10 = user.getLocked();
+                    inputUsuario.setText(user.getUserID());
+                    GlobalInfo.getuserID10     = user.getUserID();
+                    GlobalInfo.getuserName10   = user.getNames();
+                    GlobalInfo.getuserPass10   = user.getPassword();
+                    GlobalInfo.getuseridentFID10 = user.getIdentFID();
+                    GlobalInfo.getuserLocked10 = user.getLocked();
 
-                        if (GlobalInfo.getuserLocked10 == false) {
-                            Toast.makeText( getApplicationContext(), "El Usuario se encuentra bloqueado.", Toast.LENGTH_SHORT).show();
-                        }else {
+                    String getName = (usuarioUser != null) ? usuarioUser.trim() : "";
+                    String getPass = (contraseñaUser != null) ? PasswordChecker.checkpassword(contraseñaUser.trim()) : "";
 
-                            String getName = usuarioUser.trim();
-                            String getPass = PasswordChecker.checkpassword(contraseñaUser.trim());
-
-                            if(getName.equals(GlobalInfo.getuserID10) && getPass.equals(GlobalInfo.getuserPass10)){
+                    if (getName.equals(GlobalInfo.getuserID10) && getPass.equals(GlobalInfo.getuserPass10)) {
+                        if (GlobalInfo.getuserLocked10) {
+                            if (!GlobalInfo.getsettingByImei10) {
+                                findTerminal(GlobalInfo.getuseridentFID10.toUpperCase());
+                                return;
+                            }
+                            if (validarHoraTerminal()) {
                                 Toast.makeText( getApplicationContext(), "Bienvenido al Sistema SVEN", Toast.LENGTH_SHORT).show();
                                 startActivity(new Intent( getApplicationContext(),Menu.class));
                             }
-                            else {
-                                Toast.makeText( getApplicationContext(), "El usuario o la contraseña son incorrectos", Toast.LENGTH_SHORT).show();
-                            }
-
+                        } else {
+                            Toast.makeText( getApplicationContext(), "El Usuario se encuentra bloqueado.", Toast.LENGTH_SHORT).show();
                         }
-                    } else {
+                    }else{
                         Toast.makeText(getApplicationContext(), "El Usuario o la Contraseña son incorrectos", Toast.LENGTH_SHORT).show();
                     }
 
@@ -182,6 +661,33 @@ public class Login extends AppCompatActivity{
 
     }
 
+    private boolean validarHoraTerminal() {
+        try {
+            String horaTerminal = GlobalInfo.getTerminalValidarFechaHora10;
+            if (horaTerminal == null) {
+                Toast.makeText(getApplicationContext(), "Terminal - IMEI no configurado. Contacte al administrador.", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            Date ahora = Calendar.getInstance(TimeZone.getTimeZone("America/Lima")).getTime();
+            Date horaValida = sdf.parse(horaTerminal);
+
+            long diffMin = Math.abs(ahora.getTime() - horaValida.getTime()) / (1000 * 60);
+            if (diffMin <= 10) {
+                return true;
+            } else {
+                Toast.makeText(getApplicationContext(), "La hora del terminal está desfasada.", Toast.LENGTH_SHORT).show();
+                showAlert();
+                return false;
+            }
+
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "Error al validar la hora del terminal", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
+
     /**
      * @APISERVICE:Terminal
      */
@@ -196,11 +702,13 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText( getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText( getApplicationContext(), "Codigo de error Terminal: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     terminalList = response.body();
+
+                    boolean imeiFound = false;
 
                     for(Terminal terminal: terminalList) {
 
@@ -222,11 +730,26 @@ public class Login extends AppCompatActivity{
                         GlobalInfo.getTerminalImageW10          = terminal.getImageW();
                         GlobalInfo.getTipoPapel10               = terminal.getImpresora();
                         GlobalInfo.getterminalCvariosPrinter10  = terminal.getcVarios_Printer();
+                        GlobalInfo.getTerminaltimerAppVenta10    = String.valueOf(terminal.getTimerAppVenta());
+                        GlobalInfo.getTerminalInicioDiaValidar10 = terminal.getInicio_Dia_Validar();
+                        GlobalInfo.getTerminalValidarFechaHora10 = terminal.getValidar_Fecha_Hora();
+                        GlobalInfo.getterminalNDespacho          = terminal.getNota_Despacho_Default();
+                        GlobalInfo.getterminalFCabecera          = terminal.getFeed_Cabecera();
+                        GlobalInfo.getTerminalSoloPuntos10       = terminal.getSoloPuntos();
+                        GlobalInfo.getTerminalLecturar10         = terminal.getLecturar();
+                        GlobalInfo.getVentasProductosTienda10    = terminal.getCierreX_VProducto_Otros();
+                        GlobalInfo.getConfiguracionSerafin       = terminal.getBloqueoSerafin();
+                        GlobalInfo.getConfiguracionPL            = terminal.getBloqueoConfigLados();
+                        GlobalInfo.getConRfdPuntos               = terminal.getRfidPuntos();
+                        GlobalInfo.getVistaQR                    = terminal.getMostrarQr();
+                        GlobalInfo.getDobleImpresion             = terminal.getImprimirDoble();
+                        GlobalInfo.getReporteEgreso10            = terminal.getCierreX_REgreso();
+                        GlobalInfo.getterminalModalidad          = terminal.getVista_Modalidad();
 
                         /** Mostrar el listado de Datos*/
-                        findCompany(GlobalInfo.getterminalCompanyID10);
+                       /* findCompany(GlobalInfo.getterminalCompanyID10);
 
-                        findSetting(GlobalInfo.getterminalCompanyID10);
+                        findSetting(GlobalInfo.getterminalCompanyID10);*/
 
                         findLados(GlobalInfo.getterminalImei10);
 
@@ -234,16 +757,25 @@ public class Login extends AppCompatActivity{
 
                         getManguerasByTerminal(GlobalInfo.getterminalID10);
 
+                        if (GlobalInfo.getterminalImei10.equals(terminal.getImei())) {
+                            imeiFound = true;
+                            terminalId.setVisibility(View.VISIBLE);
+                            terminalId.setText(GlobalInfo.getterminalID10);
+                            if (!GlobalInfo.getsettingByImei10) {
+                                if (validarHoraTerminal()) {
+                                    Toast.makeText(getApplicationContext(), "Bienvenido al Sistema SVEN", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(getApplicationContext(), Menu.class));
+                                }
+                            }
+                            return;
+                        }
+
                     }
 
-                    if (GlobalInfo.getterminalID10.isEmpty() || GlobalInfo.getterminalID10 == null) {
-
+                    if (!imeiFound) {
+                        terminalId.setVisibility(View.GONE);
                         imeii.setTextColor(getResources().getColor(R.color.colorError));
-
-                        Toast.makeText( getApplicationContext(), "Terminal no configurado, comuniquese con el administrador.", Toast.LENGTH_SHORT).show();
-
-                        return;
-
+                        Toast.makeText( getApplicationContext(), "Terminal - imei no configurado, comuniquese con el administrador.", Toast.LENGTH_SHORT).show();
                     }
 
                 }catch (Exception ex){
@@ -260,6 +792,14 @@ public class Login extends AppCompatActivity{
 
     }
 
+    private void showAlert() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Alerta");
+        builder.setMessage("La fecha no coincide o la diferencia de tiempo es mayor a 10 minutos.");
+        builder.setPositiveButton("OK", null);
+        builder.show();
+    }
+
     /**
      *  @APISERVICE:Empresa
      */
@@ -274,7 +814,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error Company: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -300,7 +840,7 @@ public class Login extends AppCompatActivity{
 
             @Override
             public void onFailure(Call<List<Company>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Company - RED - WIFI", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE - RED - WIFI", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -318,7 +858,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error Lados: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -332,7 +872,7 @@ public class Login extends AppCompatActivity{
 
             @Override
             public void onFailure(Call<List<Lados>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Caras - RED - WIFI", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Cara - RED - WIFI", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -351,7 +891,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error Setting: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -374,9 +914,21 @@ public class Login extends AppCompatActivity{
                         GlobalInfo.getsettingClienteRZ10       = String.valueOf(setting.getClienteRZ());
                         GlobalInfo.getsettingNroPlaca10        = String.valueOf(setting.getNroplaca());
                         GlobalInfo.getsettingDNIMontoMinimo10  = Double.valueOf(setting.getDnI_Monto_Minimo());
-                        GlobalInfo.getsettingtimerAppVenta10   = String.valueOf(setting.getTimerAppVenta());
+                        // GlobalInfo.getsettingtimerAppVenta10   = String.valueOf(setting.getTimerAppVenta());
                         GlobalInfo.getsettingRutaLogo110       = String.valueOf(setting.getRutaLogo1());
                         GlobalInfo.getsettingRutaLogo210       = String.valueOf(setting.getRutaLogo2());
+                        GlobalInfo.getsettingDescuentoRFID10   = setting.getDescuentoRFID();
+                        GlobalInfo.getsettingValorIGV10        = setting.getValorIGV();
+                        GlobalInfo.getsettingDescuentoGll10    = setting.getDescuentoGll();
+                        GlobalInfo.getsettingByImei10          = setting.getByImei();
+
+                        /**
+                         * @OBTENER_APISERVICE:Terminal
+                         */
+                        if(GlobalInfo.getsettingByImei10){
+                            findTerminal(GlobalInfo.getterminalImei10.toUpperCase());
+                        }
+
                     }
 
                 }catch (Exception ex){
@@ -405,7 +957,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error DetalleVenta: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -436,7 +988,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error MTerminal: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -467,7 +1019,7 @@ public class Login extends AppCompatActivity{
                 try {
 
                     if(!response.isSuccessful()){
-                        Toast.makeText(getApplicationContext(), "Codigo de error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Codigo de error Tipo Pago: " + response.code(), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -480,6 +1032,68 @@ public class Login extends AppCompatActivity{
 
             @Override
             public void onFailure(Call<List<TipoPago>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Tipo de Pago - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * @APISERVICE:Articulos
+     */
+    private void getArticulos(){
+
+        Call<List<Articulos>> call = mAPIService.getArticulos();
+
+        call.enqueue(new Callback<List<Articulos>>() {
+            @Override
+            public void onResponse(Call<List<Articulos>> call, Response<List<Articulos>> response) {
+                try {
+
+                    if(!response.isSuccessful()){
+                        Toast.makeText(getApplicationContext(), "Codigo de error Articulos: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    GlobalInfo.getarticulosList10 = response.body();
+
+                }catch (Exception ex){
+                    Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Articulos>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Error de conexión APICORE Articulos - RED - WIFI", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * @APISERVICE:SpinnerTipoVehiculo
+     */
+    private void getTipoVehiculo(){
+
+        Call<List<SettingVehiculo>> call = mAPIService.getSettingVehiculo();
+
+        call.enqueue(new Callback<List<SettingVehiculo>>() {
+            @Override
+            public void onResponse(Call<List<SettingVehiculo>> call, Response<List<SettingVehiculo>> response) {
+                try {
+
+                    if(!response.isSuccessful()){
+                        Toast.makeText(getApplicationContext(), "Codigo de error Tipo Vehiculo: " + response.code(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    GlobalInfo.gettipovehiculoList10 = response.body();
+
+                }catch (Exception ex){
+                    Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<SettingVehiculo>> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), "Error de conexión APICORE Tipo de Pago - RED - WIFI", Toast.LENGTH_SHORT).show();
             }
         });

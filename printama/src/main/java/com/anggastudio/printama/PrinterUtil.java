@@ -287,7 +287,6 @@ class PrinterUtil {
         addNewLine();
         addNewLine();
         addNewLine();
-        addNewLine();
     }
 
     private static class ConnectAsyncTask extends AsyncTask<BluetoothDevice, Void, BluetoothSocket> {

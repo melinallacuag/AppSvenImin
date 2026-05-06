@@ -31,21 +31,122 @@
                 android:textColor="@color/blue"
                 android:textSize="22sp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/alertCCliente"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Seleccionar Cliente de Credito"
-                app:boxBackgroundColor="#E4E4E4"
-                app:boxCornerRadiusBottomEnd="15dp"
-                app:boxCornerRadiusTopEnd="15dp"
-                app:endIconMode="clear_text"
-                android:layout_weight="1"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
-                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
+                android:gravity="center"
+                android:orientation="horizontal">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textNFC"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Detectar la Etiqueta NFC"
+                    app:boxBackgroundColor="#B5D9F8"
+                    android:layout_weight="1"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxCornerRadiusBottomEnd="15dp"
+                    app:boxCornerRadiusTopEnd="15dp"
+                    android:layout_marginBottom="5sp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/input_EtiquetaNFC"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:textSize="16sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textBuscarPutnos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Buscar cliente con punto"
+                    app:boxBackgroundColor="#B5D9F8"
+                    android:layout_weight="1"
+                    android:visibility="gone"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxCornerRadiusBottomEnd="15dp"
+                    app:boxCornerRadiusTopEnd="15dp"
+                    android:layout_marginBottom="5sp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/input_BuscarPutnos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorDark"
+                        android:inputType="number"
+                        android:textSize="16sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <Button
+                    android:id="@+id/buscarListNFC"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:text=" lista de descuentos"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/colorNer"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    android:layout_marginTop="-4sp"
+                    android:layout_marginStart="10sp"
+                    android:layout_marginLeft="10sp"
+                    app:cornerRadius="10sp" />
+
+                <Button
+                    android:id="@+id/buscarListPuntosNFC"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:text="lista de puntos"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/purple_200"
+                    android:textSize="14sp"
+                    android:layout_marginTop="-4sp"
+                    android:layout_marginStart="10sp"
+                    android:layout_marginLeft="10sp"
+                    android:visibility="gone"
+                    app:cornerRadius="10sp" />
+
+                <Button
+                    android:id="@+id/buscarListSinPuntosNFC"
+                    android:layout_width="120sp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:text="buscar"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/purple_200"
+                    android:textSize="14sp"
+                    android:layout_marginTop="-4sp"
+                    android:layout_marginStart="10sp"
+                    android:layout_marginLeft="10sp"
+                    android:visibility="gone"
+                    app:cornerRadius="10sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/alertCCliente"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Seleccionar Cliente de Credito"
+                    app:boxBackgroundColor="#E4E4E4"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxCornerRadiusBottomEnd="15dp"
+                    app:boxCornerRadiusTopEnd="15dp"
+                    app:endIconMode="clear_text"
+                    android:layout_weight="1">
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/inputCCliente"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -54,8 +155,21 @@
                         android:focusable="false"
                         android:textSize="16sp" />
 
-            </com.google.android.material.textfield.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
+                <TextView
+                    android:id="@+id/textNumPuntos"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10sp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:fontFamily="@font/nunito_black"
+                    android:text="0"
+                    android:visibility="gone"
+                    android:textColor="@color/red_200"
+                    android:textSize="16sp" />
+            </LinearLayout>
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/alertCRazSocial"
                 android:layout_width="match_parent"
@@ -65,7 +179,6 @@
                 app:boxCornerRadiusBottomEnd="15dp"
                 app:boxCornerRadiusTopEnd="15dp"
                 app:endIconMode="clear_text"
-                app:counterEnabled="true"
                 android:layout_weight="1"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
@@ -82,6 +195,32 @@
                         android:inputType="textCapCharacters" />
 
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/alertDireccion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Ingresar Dirección"
+                app:boxBackgroundColor="#E4E4E4"
+                app:boxCornerRadiusBottomEnd="15dp"
+                app:boxCornerRadiusTopEnd="15dp"
+                app:endIconMode="clear_text"
+                android:layout_weight="1"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
+                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputCDireccion"
+                    android:fontFamily="@font/nunito_semibold"
+                    android:textSize="16sp"
+                    android:focusable="false"
+                    android:inputType="textCapCharacters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/alertTarjeta"
@@ -130,30 +269,6 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/alertDireccion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Ingresar Dirección"
-                app:boxBackgroundColor="#E4E4E4"
-                app:boxCornerRadiusBottomEnd="15dp"
-                app:boxCornerRadiusTopEnd="15dp"
-                app:endIconMode="clear_text"
-                android:layout_weight="1"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
-                app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
-
-                <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/inputCDireccion"
-                        android:fontFamily="@font/nunito_semibold"
-                        android:textSize="16sp"
-                        android:focusable="false"
-                        android:inputType="textCapCharacters"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/alertKilometraje"
@@ -201,6 +316,29 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
 
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/alertMonto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Ingresar Monto"
+                app:boxBackgroundMode="outline"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxCornerRadiusBottomEnd="15dp"
+                app:boxCornerRadiusTopEnd="15dp"
+                app:endIconMode="clear_text"
+                android:visibility="gone"
+                android:layout_weight="1">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputCMonto"
+                    android:fontFamily="@font/nunito_semibold"
+                    android:textSize="12sp"
+                    android:text="0"
+                    android:inputType="textCapCharacters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <LinearLayout

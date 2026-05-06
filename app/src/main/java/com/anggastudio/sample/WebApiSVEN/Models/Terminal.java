@@ -38,6 +38,21 @@ public class Terminal {
     private Integer imageW;
     private String  impresora;
     private Boolean cVarios_Printer;
+    private Integer timerAppVenta;
+    private Boolean inicio_Dia_Validar;
+    private String  validar_Fecha_Hora;
+    private Boolean nota_Despacho_Default;
+    private Integer feed_Cabecera;
+    private Boolean soloPuntos;
+    private Boolean lecturar;
+    private Boolean cierreX_VProducto_Otros;
+    private Boolean bloqueoSerafin;
+    private Boolean bloqueoConfigLados;
+    private Boolean rfidPuntos;
+    private Boolean mostrarQr;
+    private Boolean imprimirDoble;
+    private Boolean cierreX_REgreso;
+    private Boolean vista_Modalidad;
 
     public String getTerminalID() {
         return terminalID;
@@ -325,5 +340,125 @@ public class Terminal {
 
     public void setcVarios_Printer(Boolean cVarios_Printer) {
         this.cVarios_Printer = cVarios_Printer;
+    }
+
+    public Integer getTimerAppVenta() {
+        return timerAppVenta;
+    }
+
+    public void setTimerAppVenta(Integer timerAppVenta) {
+        this.timerAppVenta = timerAppVenta;
+    }
+
+    public Boolean getInicio_Dia_Validar() {
+        return inicio_Dia_Validar;
+    }
+
+    public void setInicio_Dia_Validar(Boolean inicio_Dia_Validar) {
+        this.inicio_Dia_Validar = inicio_Dia_Validar;
+    }
+
+    public String getValidar_Fecha_Hora() {
+        return validar_Fecha_Hora;
+    }
+
+    public void setValidar_Fecha_Hora(String validar_Fecha_Hora) {
+        this.validar_Fecha_Hora = validar_Fecha_Hora;
+    }
+
+    public Boolean getNota_Despacho_Default() {
+        return nota_Despacho_Default;
+    }
+
+    public void setNota_Despacho_Default(Boolean nota_Despacho_Default) {
+        this.nota_Despacho_Default = nota_Despacho_Default;
+    }
+
+    public Integer getFeed_Cabecera() {
+        return feed_Cabecera;
+    }
+
+    public void setFeed_Cabecera(Integer feed_Cabecera) {
+        this.feed_Cabecera = feed_Cabecera;
+    }
+
+    public Boolean getSoloPuntos() {
+        return soloPuntos;
+    }
+
+    public void setSoloPuntos(Boolean soloPuntos) {
+        this.soloPuntos = soloPuntos;
+    }
+
+    public Boolean getLecturar() {
+        return lecturar;
+    }
+
+    public void setLecturar(Boolean lecturar) {
+        this.lecturar = lecturar;
+    }
+
+    public Boolean getCierreX_VProducto_Otros() {
+        return cierreX_VProducto_Otros;
+    }
+
+    public void setCierreX_VProducto_Otros(Boolean cierreX_VProducto_Otros) {
+        this.cierreX_VProducto_Otros = cierreX_VProducto_Otros;
+    }
+
+    public Boolean getBloqueoSerafin() {
+        return bloqueoSerafin;
+    }
+
+    public void setBloqueoSerafin(Boolean bloqueoSerafin) {
+        this.bloqueoSerafin = bloqueoSerafin;
+    }
+
+    public Boolean getBloqueoConfigLados() {
+        return bloqueoConfigLados;
+    }
+
+    public void setBloqueoConfigLados(Boolean bloqueoConfigLados) {
+        this.bloqueoConfigLados = bloqueoConfigLados;
+    }
+
+    public Boolean getRfidPuntos() {
+        return rfidPuntos;
+    }
+
+    public void setRfidPuntos(Boolean rfidPuntos) {
+        this.rfidPuntos = rfidPuntos;
+    }
+
+    public Boolean getMostrarQr() {
+        return mostrarQr;
+    }
+
+    public void setMostrarQr(Boolean mostrarQr) {
+        this.mostrarQr = mostrarQr;
+    }
+
+    public Boolean getImprimirDoble() {
+        return imprimirDoble;
+    }
+
+    public void setImprimirDoble(Boolean imprimirDoble) {
+        this.imprimirDoble = imprimirDoble;
+    }
+
+    public Boolean getCierreX_REgreso() {
+        return cierreX_REgreso;
+    }
+
+    public void setCierreX_REgreso(Boolean cierreX_REgreso) {
+        this.cierreX_REgreso = cierreX_REgreso;
+    }
+
+    public Boolean getVista_Modalidad() {
+        return vista_Modalidad;
+    }
+
+    public void setVista_Modalidad(Boolean vista_Modalidad) {
+        this.vista_Modalidad = vista_Modalidad;
     }
 }

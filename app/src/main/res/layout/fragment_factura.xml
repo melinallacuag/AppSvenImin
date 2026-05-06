@@ -31,53 +31,6 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/alertPlaca"
-                    android:layout_width="300sp"
-                    android:layout_height="wrap_content"
-                    android:hint="Ingresar N° de Placa"
-                    app:boxBackgroundMode="outline"
-                    app:boxCornerRadiusBottomEnd="15dp"
-                    app:boxCornerRadiusTopEnd="15dp"
-                    app:endIconMode="clear_text"
-                    android:layout_weight="1"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
-                    app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error" >
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/inputPlaca"
-                        android:fontFamily="@font/nunito_semibold"
-                        android:textSize="16sp"
-                        android:text="000-0000"
-                        android:inputType="textCapCharacters"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-
-                </com.google.android.material.textfield.TextInputLayout>
-                <Button
-                    android:id="@+id/buscarPlacaFactura"
-                    android:layout_width="200sp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10sp"
-                    android:text="@string/btn_buscar"
-                    android:textSize="10sp"
-                    android:fontFamily="@font/nunito_extrabold"
-                    android:layout_weight="1"
-                    app:cornerRadius="10sp"
-                    android:textColor="@color/white"
-                    android:backgroundTint="@color/colorSecondary"
-                    android:layout_marginTop="2sp"
-                    android:visibility="gone"
-                    android:layout_marginLeft="10sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="horizontal">
 
@@ -88,35 +41,87 @@
                     android:hint="Detectar la Etiqueta NFC"
                     app:boxBackgroundColor="#B5D9F8"
                     android:layout_weight="1"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     app:boxCornerRadiusBottomEnd="15dp"
                     app:boxCornerRadiusTopEnd="15dp"
-                    android:layout_marginBottom="5sp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
-                    app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
+                    android:layout_marginBottom="5sp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/input_EtiquetaNFC"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:focusable="false"
+                        android:textColor="@color/colorDark"
                         android:textSize="16sp" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textBuscarPutnos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Buscar cliente con punto"
+                    app:boxBackgroundColor="#B5D9F8"
+                    android:layout_weight="1"
+                    android:visibility="gone"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxCornerRadiusBottomEnd="15dp"
+                    app:boxCornerRadiusTopEnd="15dp"
+                    android:layout_marginBottom="5sp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/input_BuscarPutnos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorDark"
+                        android:inputType="number"
+                        android:textSize="16sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+
                 <Button
                     android:id="@+id/buscarListNFC"
-                    android:layout_width="300sp"
-                    android:layout_height="65sp"
-                    android:layout_weight="1"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
                     android:fontFamily="@font/nunito_extrabold"
-                    android:text="AFILIADOS"
+                    android:text=" lista de descuentos"
                     android:textColor="@color/white"
-                    android:backgroundTint="@color/colorSecondary"
+                    android:backgroundTint="@color/colorNer"
                     android:textSize="14sp"
                     android:layout_marginTop="-4sp"
                     android:layout_marginStart="10sp"
                     android:layout_marginLeft="10sp"
+                    app:cornerRadius="10sp" />
+
+                <Button
+                    android:id="@+id/buscarListPuntosNFC"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:text="lista de puntos"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/purple_200"
+                    android:textSize="14sp"
+                    android:layout_marginTop="-4sp"
+                    android:layout_marginStart="10sp"
+                    android:layout_marginLeft="10sp"
+                    android:visibility="gone"
+                    app:cornerRadius="10sp" />
+
+                <Button
+                    android:id="@+id/buscarListSinPuntosNFC"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:text="buscar"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/purple_200"
+                    android:textSize="14sp"
+                    android:layout_marginTop="-4sp"
+                    android:layout_marginStart="10sp"
+                    android:layout_marginLeft="10sp"
+                    android:visibility="gone"
                     app:cornerRadius="10sp" />
 
             </LinearLayout>
@@ -126,43 +131,49 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center">
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/alertRUC"
-                    android:layout_width="400sp"
+                    android:layout_width="300sp"
                     android:layout_height="wrap_content"
                     android:hint="Ingresar RUC"
                     app:boxBackgroundMode="outline"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     app:boxCornerRadiusBottomEnd="15dp"
                     app:boxCornerRadiusTopEnd="15dp"
                     app:endIconMode="clear_text"
                     app:counterEnabled="true"
                     app:counterMaxLength="11"
-                    android:layout_weight="1"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    app:hintTextAppearance="@style/AppTheme.TextInputLayout.Hint"
-                    app:counterTextAppearance="@style/AppTheme.TextInputLayout.Counter"
-                    app:errorTextAppearance="@style/AppTheme.TextInputLayout.Error">
-
-                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_weight="1">
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/inputRUC"
                         android:fontFamily="@font/nunito_semibold"
                         android:textSize="16sp"
+                        android:textColor="@color/colorDark"
                         android:inputType="number"
                         android:maxLength="11"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
-
                 </com.google.android.material.textfield.TextInputLayout>
-
+                <Button
+                    android:id="@+id/buscarRUCConsultaFac"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5sp"
+                    android:text="BUSCAR  SUNAT"
+                    android:textSize="14sp"
+                    app:cornerRadius="10sp"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/colorCest"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:layout_marginTop="-8sp"
+                    android:layout_marginLeft="5sp" />
                 <Button
                     android:id="@+id/buscarRUCFactura"
-                    android:layout_width="200sp"
-                    android:layout_height="65sp"
-                    android:layout_marginStart="10sp"
-                    android:text="@string/btn_sunat"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5sp"
+                    android:text="BUSCAR APPSVEN"
                     android:textSize="14sp"
-                    android:layout_weight="1"
                     app:cornerRadius="10sp"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/colorSecondary"
@@ -191,6 +202,7 @@
                     android:id="@+id/inputRazSocial"
                     android:fontFamily="@font/nunito_semibold"
                     android:textSize="16sp"
+                    android:textColor="@color/colorDark"
                     android:inputType="textCapCharacters"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
@@ -222,6 +234,63 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/alertPlaca"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ingresar N° de Placa"
+                    app:boxBackgroundMode="outline"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxCornerRadiusBottomEnd="15dp"
+                    app:boxCornerRadiusTopEnd="15dp"
+                    app:endIconMode="clear_text"
+                    android:layout_weight="1">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputPlaca"
+                        android:fontFamily="@font/nunito_semibold"
+                        android:textSize="16sp"
+                        android:text="000-0000"
+                        android:inputType="textCapCharacters"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                </com.google.android.material.textfield.TextInputLayout>
+                <Button
+                    android:id="@+id/buscarPlacaFactura"
+                    android:layout_width="200sp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10sp"
+                    android:text="@string/btn_buscar"
+                    android:textSize="10sp"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:layout_weight="1"
+                    app:cornerRadius="10sp"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/colorSecondary"
+                    android:layout_marginTop="2sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/textNumPuntos"
+                    android:layout_width="150sp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10sp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:fontFamily="@font/nunito_black"
+                    android:text="0"
+                    android:textColor="@color/red_200"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/alertObservacion"
                 android:layout_width="match_parent"
@@ -246,6 +315,24 @@
                     android:layout_height="wrap_content"/>
 
             </com.google.android.material.textfield.TextInputLayout>
+            <CheckBox android:id="@+id/checkIGV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:text="IGV" />
+        </LinearLayout>
+            <TextView
+                android:id="@+id/textDiasCredito"
+                android:layout_width="120sp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10sp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:fontFamily="@font/nunito_black"
+                android:text="0"
+                android:visibility="gone"
+                android:textColor="@color/red_200"
+                android:textSize="16sp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -293,26 +380,54 @@
                     android:fontFamily="@font/nunito_extrabold"
                     android:textColor="@color/gris"
                     android:textSize="16sp" />
+                <RadioButton
+                    android:id="@+id/radioCanje"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="false"
+                    android:text="Canje"
+                    android:visibility="gone"
+                    android:fontFamily="@font/nunito_extrabold"
+                    android:textColor="@color/gris"
+                    android:textSize="12sp" />
             </RadioGroup>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/inputSelectTPago"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:gravity="center"
-                android:background="@drawable/cardlogin"
-                android:backgroundTint="#AFB1B1"
-                android:layout_gravity="center"
-                android:visibility="gone"
                 android:layout_height="wrap_content">
-                <Spinner
-                    android:id="@+id/SpinnerTPago"
-                    android:layout_marginTop="-22sp"
-                    android:gravity="center"
-                    android:layout_gravity="center"
-                    android:layout_width="match_parent"
-                    android:layout_height="50sp"/>
-            </com.google.android.material.textfield.TextInputLayout>
 
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/inputSelectTPago"
+                    android:layout_width="match_parent"
+                    android:gravity="center"
+                    android:background="@drawable/cardlogin"
+                    android:backgroundTint="#AFB1B1"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:layout_marginRight="10sp"
+                    android:visibility="gone"
+                    android:layout_height="wrap_content">
+                    <Spinner
+                        android:id="@+id/SpinnerTPago"
+                        android:layout_marginTop="-22sp"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="50sp"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageButton
+                    android:id="@+id/btnCalcular"
+                    android:layout_width="55sp"
+                    android:layout_height="50sp"
+                    android:visibility="gone"
+                    android:backgroundTint="@color/colorNer"
+                    android:background="@drawable/input_border"
+                    android:src="@drawable/icons_calculator"
+                    android:text="calcular"/>
+
+            </LinearLayout>
             <TextView
                 android:id="@+id/textMensajePEfectivo"
                 android:layout_width="match_parent"
@@ -325,8 +440,23 @@
                 android:text="Se realizara el modo de Pago en Efectivo"
                 android:textAlignment="center"
                 android:textColor="#fff"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/textMensajeCanje"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_gravity="center"
+                android:background="@drawable/cardlogin"
+                android:backgroundTint="@color/colorNer"
+                android:fontFamily="@font/nunito_semibold"
+                android:text="Se realizara el modo de Canje"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="15sp"
                 android:visibility="gone"/>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -355,6 +485,30 @@
                     android:layout_height="wrap_content" />
 
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/alertDiasCredito"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Ingresar Días de Credito"
+                app:boxBackgroundMode="outline"
+                android:visibility="gone"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxCornerRadiusBottomEnd="15dp"
+                app:boxCornerRadiusTopEnd="15dp"
+                app:endIconMode="clear_text"
+                android:layout_weight="1">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputDiasCredito"
+                    android:fontFamily="@font/nunito_semibold"
+                    android:textSize="12sp"
+                    android:inputType="number"
+                    android:text="1"
+                    android:maxLength="2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/alertPEfectivo"
